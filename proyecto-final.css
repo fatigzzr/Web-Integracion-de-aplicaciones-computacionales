@@ -50,19 +50,19 @@
 
 /* Colores para proyecto final */
 .menu-card[href="segundo-avance-proyecto-final.html"] {
-    border-color: #b19cd9;
+    border-color: #b19cd9 !important;
 }
 
 .menu-card[href="segundo-avance-proyecto-final.html"] h3 {
-    color: #b19cd9;
+    color: #b19cd9 !important;
 }
 
 .menu-card[href="segundo-avance-proyecto-final.html"] .arrow {
-    color: #b19cd9;
+    color: #b19cd9 !important;
 }
 
 .menu-card[href="segundo-avance-proyecto-final.html"]:hover {
-    box-shadow: 0 8px 25px rgba(177, 156, 217, 0.3);
+    box-shadow: 0 8px 25px rgba(177, 156, 217, 0.3) !important;
 }
 
 /* Estilos para controlar el tamaño de las imágenes */
