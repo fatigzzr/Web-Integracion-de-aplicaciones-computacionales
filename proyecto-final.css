@@ -49,19 +49,23 @@
 }
 
 /* Colores para proyecto final */
-.menu-card[href="segundo-avance-proyecto-final.html"] {
+.menu-card[href="segundo-avance-proyecto-final.html"],
+.project-section .menu-card[href="segundo-avance-proyecto-final.html"] {
     border-color: #b19cd9 !important;
 }
 
-.menu-card[href="segundo-avance-proyecto-final.html"] h3 {
+.menu-card[href="segundo-avance-proyecto-final.html"] h3,
+.project-section .menu-card[href="segundo-avance-proyecto-final.html"] h3 {
     color: #b19cd9 !important;
 }
 
-.menu-card[href="segundo-avance-proyecto-final.html"] .arrow {
+.menu-card[href="segundo-avance-proyecto-final.html"] .arrow,
+.project-section .menu-card[href="segundo-avance-proyecto-final.html"] .arrow {
     color: #b19cd9 !important;
 }
 
-.menu-card[href="segundo-avance-proyecto-final.html"]:hover {
+.menu-card[href="segundo-avance-proyecto-final.html"]:hover,
+.project-section .menu-card[href="segundo-avance-proyecto-final.html"]:hover {
     box-shadow: 0 8px 25px rgba(177, 156, 217, 0.3) !important;
 }
 

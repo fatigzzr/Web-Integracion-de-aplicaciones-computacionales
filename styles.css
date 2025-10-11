@@ -215,19 +215,23 @@ li {
     box-shadow: 0 8px 25px rgba(255, 221, 145, 0.3);
 }
 
-.menu-card[href="ejercicio5.html"] {
+.menu-card[href="ejercicio5.html"],
+.exercises-section .menu-card[href="ejercicio5.html"] {
     border-color: #ff9a8b !important;
 }
 
-.menu-card[href="ejercicio5.html"] h3 {
+.menu-card[href="ejercicio5.html"] h3,
+.exercises-section .menu-card[href="ejercicio5.html"] h3 {
     color: #ff9a8b !important;
 }
 
-.menu-card[href="ejercicio5.html"] .arrow {
+.menu-card[href="ejercicio5.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio5.html"] .arrow {
     color: #ff9a8b !important;
 }
 
-.menu-card[href="ejercicio5.html"]:hover {
+.menu-card[href="ejercicio5.html"]:hover,
+.exercises-section .menu-card[href="ejercicio5.html"]:hover {
     box-shadow: 0 8px 25px rgba(255, 154, 139, 0.3) !important;
 }
 
