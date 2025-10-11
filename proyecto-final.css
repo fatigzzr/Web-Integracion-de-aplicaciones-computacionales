@@ -61,10 +61,6 @@
     color: #b19cd9;
 }
 
-.menu-card[href="primer-avance-proyecto-final.html"]:hover {
-    box-shadow: 0 8px 25px rgba(167, 139, 181, 0.3);
-}
-
 .menu-card[href="segundo-avance-proyecto-final.html"]:hover {
     box-shadow: 0 8px 25px rgba(177, 156, 217, 0.3);
 }
