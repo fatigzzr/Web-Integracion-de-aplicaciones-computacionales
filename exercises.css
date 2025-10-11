@@ -937,30 +937,30 @@
     background: #333 !important;
 }
 
-/* Estilos específicos para segundo-avance (#8b5a9f) */
+/* Estilos específicos para segundo-avance (#b19cd9) */
 .segundo-avance .header h1 {
-    color: #8b5a9f;
+    color: #b19cd9;
 }
 
 .segundo-avance .exercise-info h3,
 .segundo-avance .screenshots-section h3,
 .segundo-avance .reflection-section h3,
 .segundo-avance .code-section h3 {
-    border-bottom: 2px solid #8b5a9f;
+    border-bottom: 2px solid #b19cd9;
     text-align: left;
 }
 
 .segundo-avance .image-modal-close:hover {
-    color: #8b5a9f;
+    color: #b19cd9;
 }
 
 .segundo-avance a {
-    color: #8b5a9f;
+    color: #b19cd9;
     text-decoration: underline;
 }
 
 .segundo-avance a:hover {
-    color: #7a4a8f;
+    color: #9d8bc7;
     text-decoration: underline;
 }
 

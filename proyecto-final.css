@@ -50,15 +50,15 @@
 
 /* Colores para proyecto final */
 .menu-card[href="segundo-avance-proyecto-final.html"] {
-    border-color: #8b5a9f;
+    border-color: #b19cd9;
 }
 
 .menu-card[href="segundo-avance-proyecto-final.html"] h3 {
-    color: #8b5a9f;
+    color: #b19cd9;
 }
 
 .menu-card[href="segundo-avance-proyecto-final.html"] .arrow {
-    color: #8b5a9f;
+    color: #b19cd9;
 }
 
 .menu-card[href="primer-avance-proyecto-final.html"]:hover {
@@ -66,7 +66,7 @@
 }
 
 .menu-card[href="segundo-avance-proyecto-final.html"]:hover {
-    box-shadow: 0 8px 25px rgba(139, 90, 159, 0.3);
+    box-shadow: 0 8px 25px rgba(177, 156, 217, 0.3);
 }
 
 /* Estilos para controlar el tamaño de las imágenes */
@@ -118,69 +118,4 @@
     margin-top: 1rem;
     font-weight: 500;
     color: #666;
-}
-
-/* Estilos específicos para secciones del proyecto final */
-.project-section {
-    margin-top: 5rem;
-}
-
-.project-section .menu-grid {
-    padding: 2rem 2rem 0 2rem;
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.project-section-header {
-    background: #e8d5f2;
-    padding: 2rem;
-    text-align: center;
-}
-
-.project-section h2 {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    color: #333;
-    text-align: center;
-}
-
-.project-section p {
-    font-size: 1.1rem;
-    color: #666;
-    text-align: center;
-    margin-bottom: 0;
-}
-
-/* Colores para proyecto final */
-.menu-card[href="primer-avance-proyecto-final.html"] {
-    border-color: #a78bb5;
-}
-
-.menu-card[href="primer-avance-proyecto-final.html"] h3 {
-    color: #a78bb5;
-}
-
-.menu-card[href="primer-avance-proyecto-final.html"] .arrow {
-    color: #a78bb5;
-}
-
-.menu-card[href="primer-avance-proyecto-final.html"]:hover {
-    box-shadow: 0 8px 25px rgba(167, 139, 181, 0.3);
-}
-
-/* Colores para proyecto final */
-.menu-card[href="segundo-avance-proyecto-final.html"] {
-    border-color: #8b5a9f;
-}
-
-.menu-card[href="segundo-avance-proyecto-final.html"] h3 {
-    color: #8b5a9f;
-}
-
-.menu-card[href="segundo-avance-proyecto-final.html"] .arrow {
-    color: #8b5a9f;
-}
-
-.menu-card[href="segundo-avance-proyecto-final.html"]:hover {
-    box-shadow: 0 8px 25px rgba(139, 90, 159, 0.3);
 }
