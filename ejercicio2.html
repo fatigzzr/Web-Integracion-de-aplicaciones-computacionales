@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 2: Docker y Ollama - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio2">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 2: Docker y Ollama</h1>
+            <p>API Local de Modelos de Lenguaje</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivos</h3>
+                <ul>
+                    <li>Implementar y consumir una API local de modelos de lenguaje (LLM) utilizando Docker y Ollama.</li>
+                    <li>Desarrollar una aplicación web sencilla que interactúe con la API de Ollama.</li>
+                    <li>Comprender el proceso de despliegue tanto en un entorno local (Windows 11) como en la nube (Google Cloud Platform – Compute Engine).</li>
+                    <li>Evidenciar el funcionamiento del sistema en ambos entornos.</li>
+                </ul>
+
+                <br>
+                <p>En nuestra aplicación web interactúa con el modelo LLM (Ollama) a través de una API. Comprender cómo se diseñan e implementan diferentes arquitecturas de API es fundamental para integrar modelos de IA, servicios de datos y microservicios en aplicaciones modernas.</p>
+                <ul>
+                    <li>La API de Ollama es un ejemplo de API REST. Haremos peticiones HTTP POST al endpoint /api/chat para obtener respuestas del modelo de lenguaje. Nuestro backend Flask también expone una API RESTful para que el frontend envíe preguntas.</li>
+                    <li>Si tuviéramos una aplicación que requiere datos complejos (por ejemplo, pedir resultados de diferentes modelos IA y combinarlos), podrías usar GraphQL para optimizar y estructurar esas consultas.</li>
+                    <li>No se utiliza SOAP en el ejercicio, pero es importante conocerlo si en algún momento necesitas integrar tu aplicación con sistemas empresariales antiguos o servicios financieros que lo utilicen.</li>
+                    <li>Si decidimos escalar nuestra arquitectura y nuestro backend se dividiera en microservicios (por ejemplo, procesamiento de texto, análisis de sentimientos, logging, etc.), podrías usar gRPC para una comunicación eficiente entre ellos.</li>
+                    <li>Nuestra aplicación usa REST (pregunta-respuesta), pero si quisiéramos hacer un chat en tiempo real o streaming de respuestas del modelo LLM (como hace ChatGPT), podríamos implementar WebSockets para que la respuesta se muestre conforme el modelo va generando el texto.</li>
+                </ul>
+            </div>
+
+            <!-- Herramientas y Recursos -->
+            <div class="exercise-info">
+                <h3>Herramientas y Recursos</h3>
+                <ol>
+                    <li>Windows 11 (con permisos de instalación de software).</li>
+                    <li>Cuenta en Google Cloud Platform con acceso a Compute Engine y facturación habilitada.</li>
+                    <li>Google Cloud SDK instalado en tu máquina.</li>
+                    <li>Docker Desktop para Windows.</li>
+                    <li>Python 3 (preferentemente 3.8+).</li>
+                    <li>Editor de código (Cursor).</li>
+                    <li>Navegador web actualizado.</li>
+                    <li>Ollama - Documentación oficial</li>
+                    <li>GCP SDK CLI</li>
+                </ol>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Despliegue y prueba de herramientas (ambiente de desarrollo Onprem)</h3>
+                <p>Un despliegue en desarrollo de software e infraestructura de TI se refiere al proceso de
+                    poner en funcionamiento un sistema, aplicación, servicio o actualización en un
+                    entorno donde será utilizado por los usuarios finales o por otros sistemas. Es decir, es el
+                    paso de llevar el software desde un estado de desarrollo o pruebas hasta su entorno
+                    productivo o de operación real.</p>
+
+                <ol>
+                    <li>Instala Docker Desktop para Windows 11
+                        <ul>
+                            <li>Descarga desde <a href="https://www.docker.com/products/docker-desktop/" target="_blank">https://www.docker.com/products/docker-desktop/</a></li>
+                            <li>Instala y verifica que Docker esté funcionando con: <code>docker --version</code></li>
+                        </ul>
+                    </li>
+                    <li>Instala Python 3 y pip
+                        <ul>
+                            <li>Descarga desde <a href="https://www.python.org/downloads/" target="_blank">https://www.python.org/downloads/</a></li>
+                            <li>Verifica instalación con: <code>python --version</code> y <code>pip --version</code></li>
+                        </ul>
+                    </li>
+                    <li>Instala Flask y Requests con: <code>pip install flask requests</code></li>
+                </ol>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Despliegue de Ollama en un contenedor</h3>
+
+                <p>Ollama es una plataforma/open-source que permite correr modelos de lenguaje
+                    de gran tamaño (Large Language Models - LLMs) de manera local y exponerlos
+                    mediante una API. Es similar a cómo funciona OpenAI o DeepSeek, pero
+                    puedemos ejecutar el modelo en nuestra propia infraestructura.
+                    Recordemos, un contenedor (por ejemplo, usando Docker o Podman) es una
+                    unidad ligera, portátil y autosuficiente para ejecutar software y sus dependencias de
+                    manera aislada del sistema operativo anfitrión. Los contenedores aseguran que la
+                    aplicación funcionará igual, sin importar el entorno donde se ejecute.</p>
+
+                <ol>
+                    <li>Corremos el contenedor de Ollama:
+                        <ul>
+                            <li><code>docker run -d -p 11434:11434 --name ollama ollama/ollama</code></li>
+                            <li>Explicación del comando:
+                                <ul>
+                                    <li>docker run: Inicia un nuevo contenedor a partir de una imagen de Docker.</li>
+                                    <li>-d: Ejecuta el contenedor en modo "detached" (en segundo plano), es decir, no muestra la salida en la consola y el contenedor sigue corriendo.</li>
+                                    <li>-p 11434:11434: Publica el puerto 11434 del contenedor en el puerto 11434 de la máquina host. Formato: host:contenedor. Esto permite acceder a la API/servicio que corre dentro del contenedor desde fuera de él (por ejemplo, localhost:11434 en nuestra máquina).</li>
+                                    <li>--name ollama: Le asigna el nombre ollama al contenedor, para poder referenciarlo fácilmente más adelante (en vez de usar el ID).</li>
+                                    <li>ollama/ollama: Especifica la imagen de Docker que se va a usar, en este caso, la oficial de Ollama. (Se descarga automáticamente si no existe localmente).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Descargamos el modelo Deepseek-Coder dentro del contenedor:
+                        <ul>
+                            <li><code>docker exec -it ollama ollama pull deepseek-coder</code></li>
+                            <li>Explicación del comando:
+                                <ul>
+                                    <li>docker exec: Ejecuta un comando dentro de un contenedor que ya está corriendo.</li>
+                                    <li>-it: Son dos opciones combinadas:
+                                        <ul>
+                                            <li>-i: Modo interactivo (mantiene la entrada estándar abierta).</li>
+                                            <li>-t: Asigna una pseudo-terminal (para poder interactuar con el comando).</li>
+                                        </ul>
+                                    </li>
+                                    <li>ollama: Es el nombre del contenedor donde se va a ejecutar el comando (en este caso, el que lanzamos antes).</li>
+                                    <li>ollama pull deepseek-coder: Es el comando que se ejecuta dentro del contenedor:
+                                        <ul>
+                                            <li>ollama: Llama al ejecutable Ollama dentro del contenedor.</li>
+                                            <li>pull deepseek-coder: Descarga el modelo llamado deepseek-coder para que puedas usarlo en Ollama.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Verificamos el funcionamiento de la API de Ollama:
+                        <ul>
+                            <li><code>curl http://localhost:11434/api/chat -d "{\"model\":\"deepseek-coder\",\"messages\":[{\"role\":\"user\",\"content\":\"¿Qué es Ollama?\"}]}"</code></li>
+                        </ul>
+                    </li>
+                    <li>Ejecutamos el modelo:
+                        <ul>
+                            <li><code>ollama run llama3</code></li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="exercise-info">
+                    <h3>Implementando otros modelos</h3>
+                    <p>Supongamos que queremos descargar los modelos llama3 y phi3, podemos usar el mismo comando cambiando el nombre del modelo:</p>
+                    
+                    <ul>
+                        <li><code>docker exec -it ollama ollama pull llama3</code></li>
+                        <li><code>docker exec -it ollama ollama pull phi3</code></li>
+                    </ul>
+                    
+                    <p>Podemos repetir esto para cualquier modelo disponible en <a href="https://ollama.com/library" target="_blank">Ollama models</a></p>
+                    
+                    <p>Para ver qué modelos ya tienes en nuestro contenedor:</p>
+                    <ul>
+                        <li><code>docker exec -it ollama ollama list</code></li>
+                    </ul>
+                    
+                    <p>Podemos interactuar con cualquier modelo descargado, con:</p>
+                    <ul>
+                        <li><code>docker exec -it ollama ollama run llama3</code></li>
+                    </ul>
+                </div>
+
+                <div class="exercise-info">
+                    <h3>Probamos el API de ollama</h3>
+                    <p>Para probar el API de Ollama, podemos usar curl con el endpoint de generación:</p>
+                    
+                    <pre><code>curl http://localhost:11434/api/generate -d '{"model": "llama3", "prompt": "Como conseguir pareja en el 2025."}'</code></pre>
+                </div>
+                
+                <div class="exercise-info">
+                    <h3>Desarrollo de la Aplicación Web</h3>
+                    <ol>
+                        <li>Usando la IA, Crea un programa en Flask con request que use el API del modelo deseado utilizando el contenedor Docker.</li>
+                        <li>En tu sitio web personal de ubiquitous, agrega en la sección de reportes este ejercicio práctico.
+                            <ul>
+                                <li>Anexar el código del proyecto generado compactado</li>
+                                <li>Screenshots de las evidencias de funcionamiento</li>
+                                <li>Imagen docker</li>
+                                <li>Una reflexión de 500 palabras sobre los conceptos y temas abordados durante la actividad, muestra las actividades realizadas y uso en la vida profesional del ITC. No olvides incluir tus conclusiones sin IA</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="code-section">
+                    <h3>Código</h3>
+                    
+                    <h4>API Flask con Ollama</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">Python</div>
+                        </div>
+                        <pre class="code-display"><code># app.py (Flask Backend)
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+import requests
+import json
+
+app = Flask(__name__)
+CORS(app)  # Esto permite peticiones CORS desde cualquier origen
+
+# API Endpoint
+@app.route('/api/respuesta', methods=['POST'])
+def respuesta():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No se recibieron datos JSON"}), 400
+        
+        prompt = data.get('prompt', '')
+        if not prompt:
+            return jsonify({"error": "El campo 'prompt' es requerido"}), 400
+        
+        ollama_url = 'http://localhost:11434/api/generate'
+        payload = {
+            "model": "deepseek-coder",
+            "prompt": prompt
+        }
+        
+        # Verificar si Ollama está corriendo
+        try:
+            response = requests.post(ollama_url, json=payload, stream=True, timeout=30)
+            response.raise_for_status()  # Esto lanzará una excepción si hay error HTTP
+        except requests.exceptions.ConnectionError:
+            return jsonify({"error": "No se puede conectar a Ollama. Asegúrate de que esté corriendo en http://localhost:11434"}), 503
+        except requests.exceptions.Timeout:
+            return jsonify({"error": "Timeout al conectar con Ollama"}), 504
+        except requests.exceptions.RequestException as e:
+            return jsonify({"error": f"Error al conectar con Ollama: {str(e)}"}), 500
+        
+        result = ""
+        for line in response.iter_lines():
+            if line:
+                try:
+                    obj = json.loads(line)
+                    if 'response' in obj and obj['response']:
+                        result += obj['response']
+                except json.JSONDecodeError:
+                    continue
+        
+        if not result:
+            return jsonify({"error": "No se recibió respuesta de Ollama"}), 500
+            
+        return jsonify({"respuesta": result})
+        
+    except Exception as e:
+        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
+
+# Página principal en la misma ruta base
+@app.route('/')
+def home():
+    return send_file('index.html')  # Asegúrate que index.html está en el mismo folder que app.py
+
+# Define que si llama mi app va a correr main
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)</code></pre>
+                    </div>
+
+                    <h4>Interfaz Web Frontend</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">HTML</div>
+                        </div>
+                        <pre class="code-display"><code># index.html (Frontend)
+&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Chat con DeepSeek Coder (Ollama)&lt;/title&gt;
+  &lt;style&gt;
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #2d3748;
+      margin-top: 40px;
+    }
+    #chat-container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 600px;
+      padding: 24px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #response {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 16px;
+      min-height: 80px;
+      white-space: pre-wrap;
+      color: #222;
+    }
+    form {
+      display: flex;
+      gap: 8px;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+    input {
+      flex: 1;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Chat con DeepSeek Coder (Ollama)&lt;/h1&gt;
+  &lt;div id="chat-container"&gt;
+    &lt;form id="prompt-form"&gt;
+      &lt;input type="text" id="prompt" placeholder="Escribe tu pregunta o código..." required autocomplete="off" /&gt;
+      &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;div id="response"&gt;La respuesta aparecerá aquí.&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    const form = document.getElementById('prompt-form');
+    const promptInput = document.getElementById('prompt');
+    const responseDiv = document.getElementById('response');
+
+    form.addEventListener('submit', async (e) =&gt; {
+      e.preventDefault();
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+      
+      responseDiv.textContent = 'Pensando...';
+      promptInput.disabled = true;
+      
+      try {
+        const res = await fetch('/api/respuesta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
+        }
+        
+        responseDiv.textContent = data.respuesta;
+      } catch (err) {
+        responseDiv.textContent = 'Error: ' + err.message;
+        console.error('Error completo:', err);
+      } finally {
+        promptInput.disabled = false;
+      }
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/DockerContainers.png" alt="Docker Containers" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/DockerImages.png" alt="Docker Images" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/Ollama1.png" alt="Ollama 1" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/Ollama2.png" alt="Ollama 2" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/Ollama3.png" alt="Ollama 3" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/Ollama4.png" alt="Ollama 4" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/Ollama5.png" alt="Ollama 5" onclick="openImageModal(this.src)">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado02/Ollama6.png" alt="Ollama 6" onclick="openImageModal(this.src)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="reflection-section">
+                <h3>CORS</h3>
+                <p>CORS (Cross-Origin Resource Sharing) es una medida de seguridad que permite a los navegadores restringir las peticiones HTTP que se realizan desde un origen (dominio) a otro. Esto es importante para prevenir ataques de seguridad como el Cross-Site Request Forgery (CSRF) y el Cross-Site Scripting (XSS).</p>
+                <p>En el contexto de la actividad, CORS se utiliza para permitir que el frontend (la aplicación web) realice peticiones HTTP al backend (el servidor Flask) que corre en un contenedor Docker. Esto es necesario porque el frontend y el backend están en diferentes dominios (localhost:5000 para el frontend y localhost:11434 para el backend).</p>
+                <p>Para habilitar CORS en el backend, se utiliza el decorador CORS(app) en el archivo app.py. Esto permite que el frontend realice peticiones HTTP al backend sin restricciones.</p>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>Este ejercicio me permitió comprender la importancia de la containerización con Docker y el uso de APIs locales para modelos de lenguaje. Los puntos clave aprendidos incluyen:</p>
+                    <ol>
+                        <li><strong>Docker y Containerización:</strong>
+                            <ul>
+                                <li>Entendimiento de contenedores y su utilidad para el despliegue consistente.</li>
+                                <li>Manejo de imágenes Docker y su gestión.</li>
+                                <li>Ventajas de la containerización para el desarrollo y producción.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Ollama y APIs Locales:</strong>
+                            <ul>
+                                <li>Configuración y uso de Ollama para modelos de lenguaje locales.</li>
+                                <li>Consumo de APIs REST para interacción con modelos LLM.</li>
+                                <li>Ventajas de tener modelos locales vs. servicios en la nube.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Despliegue en Múltiples Entornos:</strong>
+                            <ul>
+                                <li>Configuración local en Windows 11.</li>
+                                <li>Despliegue en Google Cloud Platform Compute Engine.</li>
+                                <li>Consideraciones de seguridad y configuración para cada entorno.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Este ejercicio demuestra la versatilidad de las tecnologías modernas para crear soluciones robustas y escalables.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+        </div>
+    </div>
+</body>
+</html>

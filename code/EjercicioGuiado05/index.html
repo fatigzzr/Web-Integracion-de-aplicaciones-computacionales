@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Authentication Frontend</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🔐 JWT Authentication System</h1>
+            <div class="config-section">
+                <button id="configBtn" class="config-btn">⚙️ Configurar Servicio</button>
+                <button id="logoutBtn" class="logout-btn">🚪 Cerrar Sesión</button>
+                <div id="status" class="status">❌ No Logueado</div>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <main class="main-grid">
+            <!-- Register Section -->
+            <section class="grid-item register-section">
+                <h2>📝 Registrar Usuario</h2>
+                <div id="registerMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="regUsername">Usuario:</label>
+                            <input type="text" id="regUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail">Email:</label>
+                            <input type="email" id="regEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">Contraseña:</label>
+                            <input type="password" id="regPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Registrar</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Login Section -->
+            <section class="grid-item login-section">
+                <h2>🔐 Iniciar Sesión</h2>
+                <div id="loginMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginUsername">Usuario/Email:</label>
+                            <input type="text" id="loginUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Contraseña:</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Refresh Token Section -->
+            <section class="grid-item refresh-section">
+                <h2>🔄 Refrescar Token</h2>
+                <div id="refreshMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <button id="refreshTokenBtn" class="btn btn-warning">🔄 Refrescar Token</button>
+                    <div id="tokenInfo" class="token-info">
+                        <p><strong>Access Token:</strong> <span id="accessTokenDisplay">No disponible</span></p>
+                        <p><strong>Refresh Token:</strong> <span id="refreshTokenDisplay">No disponible</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section class="grid-item profile-section">
+                <h2>👤 Perfil de Usuario</h2>
+                <div id="profileMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <button id="getProfileBtn" class="btn btn-info">📋 Obtener Perfil</button>
+                    <div id="profileResult" class="result-container">
+                        <h4>Información del Perfil:</h4>
+                        <div id="profileData">Haz clic en "Obtener Perfil" para ver la información</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Items Section -->
+            <section class="grid-item items-section">
+                <h2>📝 Gestión de Items</h2>
+                <div id="itemsMessages" class="grid-messages"></div>
+                
+                <!-- Create Item -->
+                <div class="form-container">
+                    <h3>Crear Item</h3>
+                    <form id="createItemForm">
+                        <div class="form-group">
+                            <label for="itemTitle">Título:</label>
+                            <input type="text" id="itemTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemDescription">Descripción:</label>
+                            <textarea id="itemDescription" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear Item</button>
+                    </form>
+                </div>
+
+                <!-- List Items -->
+                <div class="form-container">
+                    <h3>Listar Items</h3>
+                    <button id="listItemsBtn" class="btn btn-info">📋 Listar Items</button>
+                    <div id="itemsResult" class="result-container">
+                        <h4>Items del Usuario:</h4>
+                        <div id="itemsList">Haz clic en "Listar Items" para ver los items</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ Configuración del Servicio</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Mensajes del modal -->
+                <div id="modalMessages" class="modal-messages"></div>
+                
+                <form id="configForm">
+                    <div class="form-group">
+                        <label for="serviceIP">IP del Servicio:</label>
+                        <input type="text" id="serviceIP" value="34.27.138.169" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="servicePort">Puerto:</label>
+                        <input type="number" id="servicePort" value="5003" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceProtocol">Protocolo:</label>
+                        <select id="serviceProtocol">
+                            <option value="http">HTTP</option>
+                            <option value="https">HTTPS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Endpoints Disponibles:</label>
+                        <div class="endpoints-list">
+                            <code>GET /api/health</code>
+                            <code>POST /api/auth/register</code>
+                            <code>POST /api/auth/login</code>
+                            <code>POST /api/auth/refresh</code>
+                            <code>POST /api/auth/logout</code>
+                            <code>GET /api/profile</code>
+                            <code>GET /api/items</code>
+                            <code>POST /api/items</code>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">💾 Guardar Configuración</button>
+                        <button type="button" id="testConnectionBtn" class="btn btn-info">🔍 Probar Conexión</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

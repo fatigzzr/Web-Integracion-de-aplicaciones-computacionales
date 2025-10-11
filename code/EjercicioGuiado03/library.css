@@ -1,0 +1,76 @@
+/* Estilizar el contenedor principal (library) */
+library {
+    width: 100%;
+    padding: 20px;
+    background-color: #f0f0f0;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+/* Estilizar la caja que contiene todos los libros (books) */
+books {
+    width: 100%;
+    background-color: #cccccc;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Estilizar cada libro individual (book) */
+book {
+    width: 100%;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Estilizar los elementos dentro de cada libro */
+
+/* Título (title) */
+title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Autor (author) */
+author {
+    font-style: italic;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Año de publicación (publication_year) */
+publication_year {
+    margin-bottom: 3px;
+    display: block;
+}
+
+/* Género (genre) */
+genre {
+    margin-bottom: 3px;
+    display: block;
+    color: #666;
+}
+
+/* Precio (price) */
+price {
+    margin-bottom: 3px;
+    display: block;
+    color: #009900;
+}
+
+/* Stock (stock) */
+stock {
+    margin-bottom: 3px;
+    display: block;
+    color: #ff0000;
+}
+
+/* Formato (format) */
+format {
+    margin-bottom: 3px;
+    display: block;
+    color: #0000ff;
+}

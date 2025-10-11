@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código - Tarea 5: XML + XSL - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="codigo_tarea5.css">
+    <script src="script.js"></script>
+    <script src="codigo_tarea5.js"></script>
+</head>
+<body>
+    <div class="container tarea5">
+        <div class="header">
+            <a href="tarea5.html" class="back-btn">← Volver a Tarea 5</a>
+            <h1>Tarea 5: XML + XSL</h1>
+            <p>Código: Catálogo de Música</p>
+        </div>
+        
+        <div class="content">
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+            
+                <!-- XSLT 1: Transformación de la lista de álbumes -->
+                <button class="collapsible">1. Transformación de la lista de álbumes</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: musica1.xsl</h4>
+                    <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XSLT</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Catálogo de Música - Álbumes por Artista&lt;/title&gt;
+                &lt;link rel="stylesheet" href="musica.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Catálogo de Música - Álbumes por Artista&lt;/h1&gt;
+                    
+                    &lt;!-- Agrupar álbumes por artista --&gt;
+                    &lt;xsl:for-each select="catalogo_musica/artistas/artista"&gt;
+                        &lt;xsl:sort select="nombre"/&gt;
+                        &lt;xsl:variable name="artista-id" select="@id"/&gt;
+                        &lt;xsl:variable name="artista-nombre" select="nombre"/&gt;
+                        &lt;xsl:variable name="artista-pais" select="pais_origen"/&gt;
+                        
+                        &lt;!-- Verificar si el artista tiene álbumes --&gt;
+                        &lt;xsl:if test="count(//album[id_artista = $artista-id]) &gt; 0"&gt;
+                            &lt;div class="artist-section"&gt;
+                                &lt;!-- Encabezado del artista --&gt;
+                                &lt;div class="artist-header"&gt;
+                                    &lt;xsl:value-of select="$artista-nombre"/&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;!-- Información del artista --&gt;
+                                &lt;div class="artist-info"&gt;
+                                    País de origen: &lt;xsl:value-of select="$artista-pais"/&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;!-- Lista de álbumes del artista --&gt;
+                                &lt;div class="albums-container"&gt;
+                                    &lt;xsl:for-each select="//album[id_artista = $artista-id]"&gt;
+                                        &lt;xsl:sort select="año_lanzamiento"/&gt;
+                                        &lt;xsl:variable name="genero-id" select="id_genero"/&gt;
+                                        &lt;xsl:variable name="genero-nombre" select="//genero[@id = $genero-id]/nombre"/&gt;
+                                        
+                                        &lt;div class="album-card"&gt;
+                                            &lt;div class="album-title"&gt;
+                                                &lt;xsl:value-of select="titulo"/&gt;
+                                            &lt;/div&gt;
+                                            &lt;div class="album-year"&gt;
+                                                &lt;xsl:value-of select="año_lanzamiento"/&gt;
+                                            &lt;/div&gt;
+                                            &lt;div class="album-genre"&gt;
+                                                &lt;xsl:value-of select="$genero-nombre"/&gt;
+                                            &lt;/div&gt;
+                                        &lt;/div&gt;
+                                    &lt;/xsl:for-each&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:if&gt;
+                    &lt;/xsl:for-each&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: musica1.css</h4>
+                    <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.artist-section {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.artist-section:hover {
+    transform: translateY(-5px);
+}
+
+.artist-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    font-size: 1.8em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.artist-info {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    color: #666;
+    font-style: italic;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.albums-container {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.album-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.album-card:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.album-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.album-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.album-year {
+    color: #666;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+.album-genre {
+    background: #667eea;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .albums-container {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+    
+    .album-card {
+        padding: 15px;
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+            <!-- XSLT 2: Generación de una lista de canciones con duración total -->
+                <button class="collapsible">2. Generación de una lista de canciones con duración total</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: musica2.xsl</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XSLT</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Catálogo de Música - Canciones por Álbum&lt;/title&gt;
+                &lt;link rel="stylesheet" href="musica2.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Catálogo de Música - Canciones por Álbum&lt;/h1&gt;
+                    
+                    &lt;!-- Iterar sobre cada álbum --&gt;
+                    &lt;xsl:for-each select="catalogo_musica/albumes/album"&gt;
+                        &lt;xsl:sort select="titulo"/&gt;
+                        &lt;xsl:variable name="album-id" select="@id"/&gt;
+                        &lt;xsl:variable name="album-titulo" select="titulo"/&gt;
+                        &lt;xsl:variable name="album-año" select="año_lanzamiento"/&gt;
+                        &lt;xsl:variable name="artista-id" select="id_artista"/&gt;
+                        &lt;xsl:variable name="genero-id" select="id_genero"/&gt;
+                        
+                        &lt;div class="album-section"&gt;
+                            &lt;!-- Encabezado del álbum --&gt;
+                            &lt;div class="album-header"&gt;
+                                &lt;h2&gt;&lt;xsl:value-of select="$album-titulo"/&gt;&lt;/h2&gt;
+                                &lt;div class="album-info"&gt;
+                                    &lt;span class="year"&gt;Año: &lt;xsl:value-of select="$album-año"/&gt;&lt;/span&gt;
+                                    &lt;span class="artist"&gt;Artista: &lt;xsl:value-of select="//artista[@id = $artista-id]/nombre"/&gt;&lt;/span&gt;
+                                    &lt;span class="genre"&gt;Género: &lt;xsl:value-of select="//genero[@id = $genero-id]/nombre"/&gt;&lt;/span&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                            
+                            &lt;!-- Tabla de canciones --&gt;
+                            &lt;div class="songs-container"&gt;
+                                &lt;table class="songs-table"&gt;
+                                    &lt;thead&gt;
+                                        &lt;tr&gt;
+                                            &lt;th&gt;#&lt;/th&gt;
+                                            &lt;th&gt;Título de la Canción&lt;/th&gt;
+                                            &lt;th&gt;Duración&lt;/th&gt;
+                                            &lt;th&gt;Sencillo&lt;/th&gt;
+                                        &lt;/tr&gt;
+                                    &lt;/thead&gt;
+                                    &lt;tbody&gt;
+                                        &lt;!-- Mostrar canciones del álbum --&gt;
+                                        &lt;xsl:for-each select="//cancion[id_album = $album-id]"&gt;
+                                            &lt;xsl:sort select="@id"/&gt;
+                                            &lt;tr&gt;
+                                                &lt;td class="track-number"&gt;&lt;xsl:value-of select="position()"/&gt;&lt;/td&gt;
+                                                &lt;td class="song-title"&gt;&lt;xsl:value-of select="titulo"/&gt;&lt;/td&gt;
+                                                &lt;td class="duration"&gt;&lt;xsl:value-of select="duracion"/&gt;&lt;/td&gt;
+                                                &lt;td class="single"&gt;
+                                                    &lt;xsl:choose&gt;
+                                                        &lt;xsl:when test="es_sencillo = 'true'"&gt;
+                                                            &lt;span class="single-yes"&gt;Sí&lt;/span&gt;
+                                                        &lt;/xsl:when&gt;
+                                                        &lt;xsl:otherwise&gt;
+                                                            &lt;span class="single-no"&gt;No&lt;/span&gt;
+                                                        &lt;/xsl:otherwise&gt;
+                                                    &lt;/xsl:choose&gt;
+                                                &lt;/td&gt;
+                                            &lt;/tr&gt;
+                                        &lt;/xsl:for-each&gt;
+                                        
+                                        &lt;!-- Fila de total --&gt;
+                                        &lt;tr class="total-row"&gt;
+                                            &lt;td colspan="3" class="total-label"&gt;Duración Total del Álbum:&lt;/td&gt;
+                                            &lt;td class="total-duration"&gt;
+                                                &lt;xsl:call-template name="sum-durations"&gt;
+                                                    &lt;xsl:with-param name="songs" select="//cancion[id_album = $album-id]"/&gt;
+                                                &lt;/xsl:call-template&gt;
+                                            &lt;/td&gt;
+                                        &lt;/tr&gt;
+                                    &lt;/tbody&gt;
+                                &lt;/table&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/xsl:for-each&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+    
+    &lt;!-- Template para sumar duraciones --&gt;
+    &lt;xsl:template name="sum-durations"&gt;
+        &lt;xsl:param name="songs"/&gt;
+        &lt;xsl:param name="total-minutes" select="0"/&gt;
+        &lt;xsl:param name="total-seconds" select="0"/&gt;
+        
+        &lt;xsl:choose&gt;
+            &lt;xsl:when test="count($songs) = 0"&gt;
+                &lt;!-- Convertir segundos a minutos si es necesario --&gt;
+                &lt;xsl:variable name="final-minutes" select="$total-minutes + floor($total-seconds div 60)"/&gt;
+                &lt;xsl:variable name="final-seconds" select="$total-seconds mod 60"/&gt;
+                &lt;xsl:value-of select="concat($final-minutes, ':', format-number($final-seconds, '00'))"/&gt;
+            &lt;/xsl:when&gt;
+            &lt;xsl:otherwise&gt;
+                &lt;!-- Procesar la primera canción --&gt;
+                &lt;xsl:variable name="duration" select="$songs[1]/duracion"/&gt;
+                &lt;xsl:variable name="minutes" select="substring-before($duration, ':')"/&gt;
+                &lt;xsl:variable name="seconds" select="substring-after($duration, ':')"/&gt;
+                
+                &lt;!-- Llamar recursivamente con el resto de canciones --&gt;
+                &lt;xsl:call-template name="sum-durations"&gt;
+                    &lt;xsl:with-param name="songs" select="$songs[position() &gt; 1]"/&gt;
+                    &lt;xsl:with-param name="total-minutes" select="$total-minutes + number($minutes)"/&gt;
+                    &lt;xsl:with-param name="total-seconds" select="$total-seconds + number($seconds)"/&gt;
+                &lt;/xsl:call-template&gt;
+            &lt;/xsl:otherwise&gt;
+        &lt;/xsl:choose&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: musica2.css</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    border-bottom: 3px solid #898AC4;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+.album-section {
+    margin-bottom: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.album-header {
+    background: linear-gradient(135deg, #898AC4, #6d6ea0);
+    color: white;
+    padding: 20px;
+}
+
+.album-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.album-info {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.album-info span {
+    background-color: rgba(255,255,255,0.2);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+}
+
+.year {
+    font-weight: bold;
+}
+
+.artist {
+    font-style: italic;
+}
+
+.genre {
+    color: #ffeb3b;
+    font-weight: bold;
+}
+
+.songs-container {
+    padding: 20px;
+}
+
+.songs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.songs-table th {
+    background-color: #898AC4;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.songs-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.songs-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.songs-table tr:hover {
+    background-color: #f0f0f0;
+}
+
+.track-number {
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+    width: 50px;
+}
+
+.song-title {
+    font-weight: 500;
+}
+
+.duration {
+    text-align: center;
+    font-family: monospace;
+    color: #666;
+}
+
+.single-yes {
+    background-color: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.single-no {
+    background-color: #6c757d;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.total-row {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+}
+
+.total-label {
+    text-align: right;
+    color: #495057;
+}
+
+.total-duration {
+    text-align: center;
+    color: #28a745;
+    font-size: 16px;
+    font-family: monospace;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .album-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .songs-table {
+        font-size: 14px;
+    }
+    
+    .songs-table th,
+    .songs-table td {
+        padding: 8px 6px;
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+            <!-- XSLT 3: Filtrado de canciones que son sencillos -->
+                <button class="collapsible">3. Filtrado de canciones que son sencillos</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: musica3.xsl</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XSLT</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Catálogo de Música - Sencillos por Álbum&lt;/title&gt;
+                &lt;link rel="stylesheet" href="musica3.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Catálogo de Música - Sencillos por Álbum&lt;/h1&gt;
+                    &lt;p class="description"&gt;Esta página muestra únicamente las canciones que son sencillos (singles) de cada álbum.&lt;/p&gt;
+                    
+                    &lt;!-- Iterar sobre cada álbum --&gt;
+                    &lt;xsl:for-each select="catalogo_musica/albumes/album"&gt;
+                        &lt;xsl:sort select="titulo"/&gt;
+                        &lt;xsl:variable name="album-id" select="@id"/&gt;
+                        &lt;xsl:variable name="album-titulo" select="titulo"/&gt;
+                        &lt;xsl:variable name="album-año" select="año_lanzamiento"/&gt;
+                        &lt;xsl:variable name="artista-id" select="id_artista"/&gt;
+                        &lt;xsl:variable name="genero-id" select="id_genero"/&gt;
+                        
+                        &lt;!-- Verificar si el álbum tiene sencillos --&gt;
+                        &lt;xsl:if test="count(//cancion[id_album = $album-id and es_sencillo = 'true']) &gt; 0"&gt;
+                            &lt;div class="album-section"&gt;
+                                &lt;!-- Encabezado del álbum --&gt;
+                                &lt;div class="album-header"&gt;
+                                    &lt;h2&gt;&lt;xsl:value-of select="$album-titulo"/&gt;&lt;/h2&gt;
+                                    &lt;div class="album-info"&gt;
+                                        &lt;span class="year"&gt;Año: &lt;xsl:value-of select="$album-año"/&gt;&lt;/span&gt;
+                                        &lt;span class="artist"&gt;Artista: &lt;xsl:value-of select="//artista[@id = $artista-id]/nombre"/&gt;&lt;/span&gt;
+                                        &lt;span class="genre"&gt;Género: &lt;xsl:value-of select="//genero[@id = $genero-id]/nombre"/&gt;&lt;/span&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;!-- Lista de sencillos --&gt;
+                                &lt;div class="singles-container"&gt;
+                                    &lt;h3 class="singles-title"&gt;
+                                        &lt;span class="single-icon"&gt;🎵&lt;/span&gt;
+                                        Sencillos del Álbum
+                                        &lt;span class="count"&gt;(&lt;xsl:value-of select="count(//cancion[id_album = $album-id and es_sencillo = 'true'])"/&gt; sencillo&lt;xsl:if test="count(//cancion[id_album = $album-id and es_sencillo = 'true']) != 1"&gt;s&lt;/xsl:if&gt;)&lt;/span&gt;
+                                    &lt;/h3&gt;
+                                    
+                                    &lt;div class="singles-list"&gt;
+                                        &lt;!-- Mostrar solo los sencillos del álbum --&gt;
+                                        &lt;xsl:for-each select="//cancion[id_album = $album-id]"&gt;
+                                            &lt;xsl:sort select="@id"/&gt;
+                                            &lt;!-- Condición: Solo mostrar si es sencillo --&gt;
+                                            &lt;xsl:if test="es_sencillo = 'true'"&gt;
+                                                &lt;div class="single-item"&gt;
+                                                    &lt;div class="single-number"&gt;
+                                                        &lt;xsl:value-of select="position()"/&gt;
+                                                    &lt;/div&gt;
+                                                    &lt;div class="single-details"&gt;
+                                                        &lt;div class="single-title"&gt;
+                                                            &lt;xsl:value-of select="titulo"/&gt;
+                                                        &lt;/div&gt;
+                                                        &lt;div class="single-duration"&gt;
+                                                            &lt;span class="duration-icon"&gt;⏱️&lt;/span&gt;
+                                                            &lt;xsl:value-of select="duracion"/&gt;
+                                                        &lt;/div&gt;
+                                                    &lt;/div&gt;
+                                                    &lt;div class="single-badge"&gt;
+                                                        &lt;span class="badge"&gt;SINGLE&lt;/span&gt;
+                                                    &lt;/div&gt;
+                                                &lt;/div&gt;
+                                            &lt;/xsl:if&gt;
+                                        &lt;/xsl:for-each&gt;
+                                    &lt;/div&gt;
+                                    
+                                    &lt;!-- Resumen de duración total de sencillos --&gt;
+                                    &lt;div class="singles-summary"&gt;
+                                        &lt;div class="summary-item"&gt;
+                                            &lt;span class="summary-label"&gt;Duración total de sencillos:&lt;/span&gt;
+                                            &lt;span class="summary-value"&gt;
+                                                &lt;xsl:call-template name="sum-singles-durations"&gt;
+                                                    &lt;xsl:with-param name="songs" select="//cancion[id_album = $album-id and es_sencillo = 'true']"/&gt;
+                                                &lt;/xsl:call-template&gt;
+                                            &lt;/span&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:if&gt;
+                    &lt;/xsl:for-each&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+    
+    &lt;!-- Template para sumar duraciones de sencillos --&gt;
+    &lt;xsl:template name="sum-singles-durations"&gt;
+        &lt;xsl:param name="songs"/&gt;
+        &lt;xsl:param name="total-minutes" select="0"/&gt;
+        &lt;xsl:param name="total-seconds" select="0"/&gt;
+        
+        &lt;xsl:choose&gt;
+            &lt;xsl:when test="count($songs) = 0"&gt;
+                &lt;!-- Convertir segundos a minutos si es necesario --&gt;
+                &lt;xsl:variable name="final-minutes" select="$total-minutes + floor($total-seconds div 60)"/&gt;
+                &lt;xsl:variable name="final-seconds" select="$total-seconds mod 60"/&gt;
+                &lt;xsl:value-of select="concat($final-minutes, ':', format-number($final-seconds, '00'))"/&gt;
+            &lt;/xsl:when&gt;
+            &lt;xsl:otherwise&gt;
+                &lt;!-- Procesar la primera canción --&gt;
+                &lt;xsl:variable name="duration" select="$songs[1]/duracion"/&gt;
+                &lt;xsl:variable name="minutes" select="substring-before($duration, ':')"/&gt;
+                &lt;xsl:variable name="seconds" select="substring-after($duration, ':')"/&gt;
+                
+                &lt;!-- Llamar recursivamente con el resto de canciones --&gt;
+                &lt;xsl:call-template name="sum-singles-durations"&gt;
+                    &lt;xsl:with-param name="songs" select="$songs[position() &gt; 1]"/&gt;
+                    &lt;xsl:with-param name="total-minutes" select="$total-minutes + number($minutes)"/&gt;
+                    &lt;xsl:with-param name="total-seconds" select="$total-seconds + number($seconds)"/&gt;
+                &lt;/xsl:call-template&gt;
+            &lt;/xsl:otherwise&gt;
+        &lt;/xsl:choose&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: musica3.css</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.description {
+    text-align: center;
+    color: white;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.album-section {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.album-section:hover {
+    transform: translateY(-5px);
+}
+
+.album-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+}
+
+.album-header h2 {
+    margin: 0 0 15px 0;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.album-info {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.album-info span {
+    background: rgba(255,255,255,0.2);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    backdrop-filter: blur(10px);
+}
+
+.year {
+    font-weight: bold;
+}
+
+.artist {
+    font-style: italic;
+}
+
+.genre {
+    color: #ffeb3b;
+    font-weight: bold;
+}
+
+.singles-container {
+    padding: 25px;
+}
+
+.singles-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.4em;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.single-icon {
+    font-size: 1.2em;
+}
+
+.count {
+    background: #667eea;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+
+.singles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.single-item {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.single-item:hover {
+    border-color: #667eea;
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.single-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.single-number {
+    background: #667eea;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.single-details {
+    flex: 1;
+}
+
+.single-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.single-duration {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.duration-icon {
+    font-size: 0.8em;
+}
+
+.single-badge {
+    margin-left: 15px;
+}
+
+.badge {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.singles-summary {
+    background: linear-gradient(135deg, #e9ecef, #f8f9fa);
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 4px solid #28a745;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 1.1em;
+}
+
+.summary-value {
+    background: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .description {
+        font-size: 1em;
+        padding: 12px;
+    }
+    
+    .album-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .singles-container {
+        padding: 20px;
+    }
+    
+    .single-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .single-number {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .single-badge {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+    
+    .summary-item {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+            <!-- XSLT 4: Creación de un índice de artistas y sus álbumes -->
+                <button class="collapsible">4. Creación de un índice de artistas y sus álbumes</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: musica4.xsl</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XSLT</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Catálogo de Música - Índice Alfabético de Artistas&lt;/title&gt;
+                &lt;link rel="stylesheet" href="musica4.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Catálogo de Música - Índice Alfabético de Artistas&lt;/h1&gt;
+                    &lt;p class="description"&gt;Índice alfabético de artistas con sus álbumes ordenados por año de lanzamiento.&lt;/p&gt;
+                    
+                    &lt;!-- Navegación alfabética --&gt;
+                    &lt;div class="alphabet-nav"&gt;
+                        &lt;h3&gt;Navegación Rápida&lt;/h3&gt;
+                        &lt;div class="alphabet-links"&gt;
+                            &lt;xsl:for-each select="catalogo_musica/artistas/artista"&gt;
+                                &lt;xsl:sort select="nombre"/&gt;
+                                &lt;xsl:variable name="first-letter" select="substring(nombre, 1, 1)"/&gt;
+                                &lt;xsl:if test="not(preceding-sibling::artista[substring(nombre, 1, 1) = $first-letter])"&gt;
+                                    &lt;a href="#letter-{$first-letter}" class="alphabet-link"&gt;
+                                        &lt;xsl:value-of select="$first-letter"/&gt;
+                                    &lt;/a&gt;
+                                &lt;/xsl:if&gt;
+                            &lt;/xsl:for-each&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;!-- Índice alfabético de artistas --&gt;
+                    &lt;div class="artists-index"&gt;
+                        &lt;xsl:for-each select="catalogo_musica/artistas/artista"&gt;
+                            &lt;xsl:sort select="nombre"/&gt;
+                            &lt;xsl:variable name="artista-id" select="@id"/&gt;
+                            &lt;xsl:variable name="artista-nombre" select="nombre"/&gt;
+                            &lt;xsl:variable name="artista-pais" select="pais_origen"/&gt;
+                            &lt;xsl:variable name="first-letter" select="substring(nombre, 1, 1)"/&gt;
+                            
+                            &lt;!-- Verificar si el artista tiene álbumes --&gt;
+                            &lt;xsl:if test="count(//album[id_artista = $artista-id]) &gt; 0"&gt;
+                                &lt;div class="artist-entry"&gt;
+                                    &lt;!-- Letra del alfabeto (solo si es la primera vez que aparece) --&gt;
+                                    &lt;xsl:if test="not(preceding-sibling::artista[substring(nombre, 1, 1) = $first-letter])"&gt;
+                                        &lt;div class="alphabet-section" id="letter-{$first-letter}"&gt;
+                                            &lt;h2 class="alphabet-header"&gt;
+                                                &lt;span class="alphabet-letter"&gt;&lt;xsl:value-of select="$first-letter"/&gt;&lt;/span&gt;
+                                            &lt;/h2&gt;
+                                        &lt;/div&gt;
+                                    &lt;/xsl:if&gt;
+                                    
+                                    &lt;!-- Información del artista --&gt;
+                                    &lt;div class="artist-info"&gt;
+                                        &lt;h3 class="artist-name"&gt;
+                                            &lt;span class="artist-icon"&gt;🎤&lt;/span&gt;
+                                            &lt;xsl:value-of select="$artista-nombre"/&gt;
+                                        &lt;/h3&gt;
+                                        &lt;div class="artist-details"&gt;
+                                            &lt;span class="country"&gt;
+                                                &lt;span class="flag-icon"&gt;🌍&lt;/span&gt;
+                                                &lt;xsl:value-of select="$artista-pais"/&gt;
+                                            &lt;/span&gt;
+                                            &lt;span class="album-count"&gt;
+                                                &lt;xsl:value-of select="count(//album[id_artista = $artista-id])"/&gt;
+                                                &lt;xsl:choose&gt;
+                                                    &lt;xsl:when test="count(//album[id_artista = $artista-id]) = 1"&gt; álbum&lt;/xsl:when&gt;
+                                                    &lt;xsl:otherwise&gt; álbumes&lt;/xsl:otherwise&gt;
+                                                &lt;/xsl:choose&gt;
+                                            &lt;/span&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                    
+                                    &lt;!-- Lista de álbumes ordenados por año --&gt;
+                                    &lt;div class="albums-list"&gt;
+                                        &lt;xsl:for-each select="//album[id_artista = $artista-id]"&gt;
+                                            &lt;xsl:sort select="año_lanzamiento" data-type="number"/&gt;
+                                            &lt;xsl:variable name="album-id" select="@id"/&gt;
+                                            &lt;xsl:variable name="genero-id" select="id_genero"/&gt;
+                                            
+                                            &lt;div class="album-item"&gt;
+                                                &lt;div class="album-year"&gt;
+                                                    &lt;span class="year-badge"&gt;&lt;xsl:value-of select="año_lanzamiento"/&gt;&lt;/span&gt;
+                                                &lt;/div&gt;
+                                                &lt;div class="album-details"&gt;
+                                                    &lt;div class="album-title"&gt;
+                                                        &lt;xsl:value-of select="titulo"/&gt;
+                                                    &lt;/div&gt;
+                                                    &lt;div class="album-genre"&gt;
+                                                        &lt;xsl:value-of select="//genero[@id = $genero-id]/nombre"/&gt;
+                                                    &lt;/div&gt;
+                                                &lt;/div&gt;
+                                            &lt;/div&gt;
+                                        &lt;/xsl:for-each&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/xsl:if&gt;
+                        &lt;/xsl:for-each&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: musica4.css</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.description {
+    text-align: center;
+    color: white;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.alphabet-nav {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.alphabet-nav h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+.alphabet-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.alphabet-link {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.alphabet-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.artists-index {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.alphabet-section {
+    margin: 30px 0 20px 0;
+}
+
+.alphabet-header {
+    text-align: center;
+    margin: 0;
+}
+
+.alphabet-letter {
+    display: inline-block;
+    background: white;
+    color: #667eea;
+    font-size: 3em;
+    font-weight: bold;
+    padding: 20px 40px;
+    border-radius: 50%;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border: 4px solid #667eea;
+}
+
+.artist-entry {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.artist-entry:hover {
+    transform: translateY(-5px);
+}
+
+.artist-info {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.artist-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+.artist-icon {
+    font-size: 1.2em;
+}
+
+.artist-details {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.country, .album-count {
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.flag-icon {
+    font-size: 0.9em;
+}
+
+.albums-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.album-item {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.album-item:hover {
+    border-color: #667eea;
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.album-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.album-year {
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.year-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+    min-width: 60px;
+    text-align: center;
+    display: inline-block;
+}
+
+.album-details {
+    flex: 1;
+}
+
+.album-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.album-genre {
+    background: #28a745;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    display: inline-block;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .description {
+        font-size: 1em;
+        padding: 12px;
+    }
+    
+    .alphabet-nav {
+        padding: 20px;
+    }
+    
+    .alphabet-links {
+        gap: 8px;
+    }
+    
+    .alphabet-link {
+        padding: 10px 12px;
+        font-size: 1em;
+        min-width: 35px;
+    }
+    
+    .alphabet-letter {
+        font-size: 2.5em;
+        padding: 15px 30px;
+    }
+    
+    .artist-entry {
+        padding: 20px;
+    }
+    
+    .artist-name {
+        font-size: 1.4em;
+    }
+    
+    .artist-details {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .album-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .album-year {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+            <!-- XSLT 5: Aplicación de un filtro por género musical -->
+                <button class="collapsible">5. Aplicación de un filtro por género musical</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: musica5.xsl</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XSLT + JavaScript</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Catálogo de Música - Filtro por Género&lt;/title&gt;
+                &lt;link rel="stylesheet" href="musica5.css"/&gt;
+                &lt;script&gt;
+                    function filtrarPorGenero(genero) {
+                        const albumCards = document.querySelectorAll('.album-card');
+                        albumCards.forEach(card =&gt; card.style.display = 'none');
+                        
+                        const generoId = getGeneroId(genero);
+                        const albumesGenero = document.querySelectorAll(`[data-genero-id="${generoId}"]`);
+                        albumesGenero.forEach(card =&gt; card.style.display = 'block');
+                        
+                        actualizarInfoGenero(genero);
+                        actualizarBotonesActivos(genero);
+                    }
+                    
+                    function getGeneroId(genero) {
+                        const generos = {
+                            'Pop': '1',
+                            'Rock': '2', 
+                            'Hard Rock': '3',
+                            'Progressive Rock': '4',
+                            'Pop Rock': '5',
+                            'Grunge': '6',
+                            'Alternative Rock': '7'
+                        };
+                        return generos[genero] || '2';
+                    }
+                    
+                    function actualizarInfoGenero(genero) {
+                        const generoInfo = {
+                            'Pop': { descripcion: 'Música popular comercial' },
+                            'Rock': { descripcion: 'Música rock clásica' },
+                            'Hard Rock': { descripcion: 'Rock pesado y agresivo' },
+                            'Progressive Rock': { descripcion: 'Rock progresivo experimental' },
+                            'Pop Rock': { descripcion: 'Fusión de pop y rock' },
+                            'Grunge': { descripcion: 'Rock alternativo de los 90s' },
+                            'Alternative Rock': { descripcion: 'Rock alternativo independiente' }
+                        };
+                        
+                        const info = generoInfo[genero] || { descripcion: 'Género musical' };
+                        document.getElementById('current-genre-description').textContent = info.descripcion;
+                        document.getElementById('current-genre-title').innerHTML = `🎵 ${genero}`;
+                        
+                        const generoId = getGeneroId(genero);
+                        const count = document.querySelectorAll(`[data-genero-id="${generoId}"]`).length;
+                        const countText = count === 1 ? '1 álbum encontrado' : `${count} álbumes encontrados`;
+                        document.getElementById('album-count').textContent = countText;
+                    }
+                    
+                    function actualizarBotonesActivos(genero) {
+                        const botones = document.querySelectorAll('.genre-button');
+                        botones.forEach(boton =&gt; {
+                            boton.classList.remove('active');
+                            const nombreGenero = boton.querySelector('.genre-name').textContent.trim();
+                            if (nombreGenero === genero) {
+                                boton.classList.add('active');
+                            }
+                        });
+                    }
+                    
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const albumCards = document.querySelectorAll('.album-card');
+                        albumCards.forEach(card =&gt; card.style.display = 'none');
+                        document.getElementById('album-count').textContent = 'Selecciona un género para ver los álbumes';
+                    });
+                &lt;/script&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Catálogo de Música - Filtro por Género&lt;/h1&gt;
+                    
+                    &lt;div class="genre-nav"&gt;
+                        &lt;h3&gt;Filtrar por Género&lt;/h3&gt;
+                        &lt;div class="genre-buttons"&gt;
+                            &lt;xsl:for-each select="catalogo_musica/generos/genero"&gt;
+                                &lt;xsl:sort select="nombre"/&gt;
+                                &lt;xsl:variable name="genero-nombre" select="nombre"/&gt;
+                                &lt;xsl:variable name="genero-id" select="@id"/&gt;
+                                &lt;xsl:variable name="album-count" select="count(//album[id_genero = $genero-id])"/&gt;
+                                
+                                &lt;xsl:if test="$album-count &gt; 0"&gt;
+                                    &lt;button onclick="filtrarPorGenero('{$genero-nombre}')" class="genre-button"&gt;
+                                        &lt;span class="genre-name"&gt;&lt;xsl:value-of select="$genero-nombre"/&gt;&lt;/span&gt;
+                                        &lt;span class="genre-count"&gt;(&lt;xsl:value-of select="$album-count"/&gt;)&lt;/span&gt;
+                                    &lt;/button&gt;
+                                &lt;/xsl:if&gt;
+                            &lt;/xsl:for-each&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class="current-genre"&gt;
+                        &lt;h2 id="current-genre-title"&gt;
+                            &lt;span class="genre-icon"&gt;🎵&lt;/span&gt;
+                            Selecciona un género
+                        &lt;/h2&gt;
+                        &lt;p class="genre-description" id="current-genre-description"&gt;
+                            Haz clic en un género de arriba para ver sus álbumes
+                        &lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class="albums-section"&gt;
+                        &lt;div class="albums-header"&gt;
+                            &lt;h3 id="album-count"&gt;Álbumes encontrados&lt;/h3&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="albums-grid"&gt;
+                            &lt;xsl:for-each select="catalogo_musica/albumes/album"&gt;
+                                &lt;xsl:sort select="año_lanzamiento" data-type="number"/&gt;
+                                &lt;xsl:variable name="album-id" select="@id"/&gt;
+                                &lt;xsl:variable name="artista-id" select="id_artista"/&gt;
+                                &lt;xsl:variable name="genero-id" select="id_genero"/&gt;
+                                
+                                &lt;div class="album-card" data-genero-id="{$genero-id}"&gt;
+                                    &lt;div class="album-header"&gt;
+                                        &lt;h4 class="album-title"&gt;
+                                            &lt;xsl:value-of select="titulo"/&gt;
+                                        &lt;/h4&gt;
+                                        &lt;div class="album-year"&gt;
+                                            &lt;xsl:value-of select="año_lanzamiento"/&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                    
+                                    &lt;div class="album-info"&gt;
+                                        &lt;div class="artist-info"&gt;
+                                            &lt;span class="artist-icon"&gt;🎤&lt;/span&gt;
+                                            &lt;span class="artist-name"&gt;
+                                                &lt;xsl:value-of select="//artista[@id = $artista-id]/nombre"/&gt;
+                                            &lt;/span&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class="country-info"&gt;
+                                            &lt;span class="flag-icon"&gt;🌍&lt;/span&gt;
+                                            &lt;span class="country"&gt;
+                                                &lt;xsl:value-of select="//artista[@id = $artista-id]/pais_origen"/&gt;
+                                            &lt;/span&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                    
+                                    &lt;div class="album-stats"&gt;
+                                        &lt;div class="stat-item"&gt;
+                                            &lt;span class="stat-label"&gt;Canciones:&lt;/span&gt;
+                                            &lt;span class="stat-value"&gt;
+                                                &lt;xsl:value-of select="count(//cancion[id_album = $album-id])"/&gt;
+                                            &lt;/span&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class="stat-item"&gt;
+                                            &lt;span class="stat-label"&gt;Sencillos:&lt;/span&gt;
+                                            &lt;span class="stat-value"&gt;
+                                                &lt;xsl:value-of select="count(//cancion[id_album = $album-id and es_sencillo = 'true'])"/&gt;
+                                            &lt;/span&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                    
+                                    &lt;div class="album-actions"&gt;
+                                        &lt;button class="view-album-btn"&gt;Ver Detalles&lt;/button&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/xsl:for-each&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: musica5.css</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.genre-nav {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.genre-nav h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+.genre-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.genre-button {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid #dee2e6;
+    color: #495057;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.genre-button:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    border-color: #667eea;
+}
+
+.genre-button.active {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-color: #28a745;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.genre-name {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.genre-count {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.current-genre {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.current-genre h2 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.genre-icon {
+    font-size: 1.2em;
+}
+
+.genre-description {
+    color: #666;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.albums-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.albums-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.albums-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.4em;
+}
+
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.album-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.album-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.album-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.album-header {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.album-title {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.album-year {
+    background: #667eea;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.album-info {
+    margin-bottom: 15px;
+}
+
+.artist-info, .country-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.artist-icon, .flag-icon {
+    font-size: 0.9em;
+}
+
+.artist-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.album-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 10px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+}
+
+.album-actions {
+    text-align: center;
+}
+
+.view-album-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.view-album-btn:hover {
+    background: linear-gradient(135deg, #20c997, #28a745);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .genre-nav, .current-genre, .albums-section {
+        padding: 20px;
+    }
+    
+    .genre-buttons {
+        gap: 10px;
+    }
+    
+    .genre-button {
+        min-width: 100px;
+        padding: 10px 15px;
+    }
+    
+    .albums-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .album-card {
+        padding: 15px;
+    }
+    
+    .album-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    content.classList.remove("active");
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    content.classList.add("active");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

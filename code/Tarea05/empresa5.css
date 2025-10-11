@@ -1,0 +1,305 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: white;
+    line-height: 1.6;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 15px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-info {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border-left: 5px solid #3498db;
+}
+
+.header-info h2 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+}
+
+.header-info p {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.hierarchy-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    position: relative;
+    width: 100%;
+}
+
+.department-section {
+    background: transparent;
+    position: relative;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.department-header {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-top: 4px solid #3498db;
+    border-radius: 8px;
+    padding: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.department-header::before {
+    content: 'NIVEL 1';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #3498db;
+    color: white;
+    font-size: 0.6em;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+}
+
+.department-header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 20px;
+    background: #3498db;
+}
+
+.department-info {
+    width: 100%;
+}
+
+.department-name {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.department-location {
+    color: #3498db;
+    margin: 0 0 8px 0;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.department-stats {
+    margin-top: 8px;
+}
+
+.employee-count {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.7em;
+    display: inline-block;
+}
+
+.employees-list {
+    padding: 0;
+    position: relative;
+    background: transparent;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 0;
+    width: 100%;
+}
+
+.employee-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-top: 4px solid #28a745;
+    border-radius: 8px;
+    padding: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    flex: 0 0 calc(20% - 12px);
+    min-width: 180px;
+    max-width: 220px;
+}
+
+.employee-item::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 20px;
+    background: #28a745;
+}
+
+.employee-item:hover {
+    background: #e3f2fd;
+    border-top-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.employee-main-info {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.employee-name {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.employee-position {
+    color: #3498db;
+    font-weight: 500;
+    font-size: 0.85em;
+}
+
+.employee-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.contract-type {
+    margin-bottom: 6px;
+}
+
+.full-time-badge {
+    background: #d5f4e6;
+    color: #27ae60;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.part-time-badge {
+    background: #fdf2e9;
+    color: #e67e22;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.additional-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.75em;
+}
+
+.salary-info {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.hire-date-info {
+    color: #7f8c8d;
+    font-family: monospace;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .employee-item {
+        flex: 0 0 calc(25% - 12px);
+    }
+}
+
+@media (max-width: 900px) {
+    .employee-item {
+        flex: 0 0 calc(33.333% - 12px);
+    }
+}
+
+@media (max-width: 768px) {
+    .department-header {
+        width: 200px;
+    }
+    
+    .employees-list {
+        padding: 15px;
+        flex-direction: column;
+    }
+    
+    .employee-item {
+        flex: 1;
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .employee-item::before {
+        top: -20px;
+        height: 20px;
+    }
+    
+    .additional-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .salary-info, .hire-date-info {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .header-info {
+        padding: 20px;
+    }
+    
+    .department-header {
+        padding: 20px;
+    }
+    
+    .department-name {
+        font-size: 1.4em;
+    }
+}

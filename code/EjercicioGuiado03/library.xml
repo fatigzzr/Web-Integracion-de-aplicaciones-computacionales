@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="library.css"?>
+<library>
+    <book isbn="978-0-7475-3269-9">
+        <title>Harry Potter and the Philosopher's Stone</title>
+        <author>J.K. Rowling</author>
+        <publication_year>1997</publication_year>
+        <genre>Fantasy</genre>
+        <price>24.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-7475-3274-3">
+        <title>Harry Potter and the Chamber of Secrets</title>
+        <author>J.K. Rowling</author>
+        <publication_year>1998</publication_year>
+        <genre>Fantasy</genre>
+        <price>26.50</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-7475-4624-5">
+        <title>The Hobbit</title>
+        <author>J.R.R. Tolkien</author>
+        <publication_year>1937</publication_year>
+        <genre>Fantasy</genre>
+        <price>18.75</price>
+        <stock>false</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-618-34614-4">
+        <title>The Lord of the Rings</title>
+        <author>J.R.R. Tolkien</author>
+        <publication_year>1954</publication_year>
+        <genre>Fantasy</genre>
+        <price>45.00</price>
+        <stock>true</stock>
+        <format>Box Set</format>
+    </book>
+    
+    <book isbn="978-0-7432-4722-1">
+        <title>The Great Gatsby</title>
+        <author>F. Scott Fitzgerald</author>
+        <publication_year>1925</publication_year>
+        <genre>Classic</genre>
+        <price>12.99</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-14-028333-4">
+        <title>1984</title>
+        <author>George Orwell</author>
+        <publication_year>1949</publication_year>
+        <genre>Dystopian</genre>
+        <price>14.25</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-679-72369-5">
+        <title>To Kill a Mockingbird</title>
+        <author>Harper Lee</author>
+        <publication_year>1960</publication_year>
+        <genre>Classic</genre>
+        <price>15.99</price>
+        <stock>false</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76948-0">
+        <title>The Fault in Our Stars</title>
+        <author>John Green</author>
+        <publication_year>2012</publication_year>
+        <genre>Young Adult</genre>
+        <price>16.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76949-7">
+        <title>Looking for Alaska</title>
+        <author>John Green</author>
+        <publication_year>2005</publication_year>
+        <genre>Young Adult</genre>
+        <price>14.50</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-316-76950-3">
+        <title>Paper Towns</title>
+        <author>John Green</author>
+        <publication_year>2008</publication_year>
+        <genre>Young Adult</genre>
+        <price>15.25</price>
+        <stock>false</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-316-76951-0">
+        <title>An Abundance of Katherines</title>
+        <author>John Green</author>
+        <publication_year>2006</publication_year>
+        <genre>Young Adult</genre>
+        <price>13.99</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-316-76952-7">
+        <title>Turtles All the Way Down</title>
+        <author>John Green</author>
+        <publication_year>2017</publication_year>
+        <genre>Young Adult</genre>
+        <price>17.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76953-4">
+        <title>The Anthropocene Reviewed</title>
+        <author>John Green</author>
+        <publication_year>2021</publication_year>
+        <genre>Non-fiction</genre>
+        <price>22.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76954-1">
+        <title>Will Grayson, Will Grayson</title>
+        <author>John Green, David Levithan</author>
+        <publication_year>2010</publication_year>
+        <genre>Young Adult</genre>
+        <price>16.50</price>
+        <stock>false</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-316-76955-8">
+        <title>Let It Snow</title>
+        <author>John Green, Maureen Johnson, Lauren Myracle</author>
+        <publication_year>2008</publication_year>
+        <genre>Young Adult</genre>
+        <price>14.99</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+    
+    <book isbn="978-0-316-76956-5">
+        <title>The Hunger Games</title>
+        <author>Suzanne Collins</author>
+        <publication_year>2008</publication_year>
+        <genre>Young Adult</genre>
+        <price>18.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76957-2">
+        <title>Catching Fire</title>
+        <author>Suzanne Collins</author>
+        <publication_year>2009</publication_year>
+        <genre>Young Adult</genre>
+        <price>19.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76958-9">
+        <title>Mockingjay</title>
+        <author>Suzanne Collins</author>
+        <publication_year>2010</publication_year>
+        <genre>Young Adult</genre>
+        <price>20.99</price>
+        <stock>false</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76959-6">
+        <title>The Ballad of Songbirds and Snakes</title>
+        <author>Suzanne Collins</author>
+        <publication_year>2020</publication_year>
+        <genre>Young Adult</genre>
+        <price>24.99</price>
+        <stock>true</stock>
+        <format>Hardcover</format>
+    </book>
+    
+    <book isbn="978-0-316-76960-2">
+        <title>Twilight</title>
+        <author>Stephenie Meyer</author>
+        <publication_year>2005</publication_year>
+        <genre>Young Adult</genre>
+        <price>17.99</price>
+        <stock>true</stock>
+        <format>Paperback</format>
+    </book>
+</library>

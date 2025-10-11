@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea 1: Mapa Conceptual - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container tarea1">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Tarea 1: Mapa Conceptual Comparativo</h1>
+            <p>Capas de la Nube</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información de la Tarea -->
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <ul>
+                    <li>Usa Miro o Lucidchart para crear un mapa mental que contraste los modelos IaaS, PaaS, SaaS y FaaS con ejemplos reales de proveedores de nube.</li>
+                    <li>Crea su página web y anexala al sitio web provisto por el profesor.</li>
+                </ul>
+            </div>
+
+            <!-- Mapa Conceptual -->
+            <div class="screenshots-section">
+                <h3>Mapa Conceptual</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <iframe src="files/Tarea1/Capas de la nube.pdf" class="pdf-iframe" type="application/pdf"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

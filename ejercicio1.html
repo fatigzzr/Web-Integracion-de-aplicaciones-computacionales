@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 1: Cursor - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <style>
+        /* Estilos para el código */
+        
+        #completeCode {
+            max-height: 600px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        #completeCode code {
+            background: transparent;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 0;
+            border: none;
+        }
+    </style>
+    <script src="script.js"></script>
+    <script>
+        // Código completo del clasificador
+        const completeCode = `import re
+import argparse
+import json
+import sys
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
+
+@dataclass
+class HardwareSpecs:
+    """Especificaciones de hardware para clasificación detallada."""
+    processor_cores: Optional[int] = None
+    processor_speed_ghz: Optional[float] = None
+    memory_gb: Optional[int] = None
+    storage_gb: Optional[int] = None
+    storage_type: Optional[str] = None  # 'ssd', 'hdd', 'nvme'
+    
+    def __post_init__(self):
+        """Validar las especificaciones de hardware."""
+        if self.processor_cores is not None and self.processor_cores <= 0:
+            raise ValueError("El número de núcleos del procesador debe ser mayor a 0")
+        if self.processor_speed_ghz is not None and self.processor_speed_ghz <= 0:
+            raise ValueError("La velocidad del procesador debe ser mayor a 0")
+        if self.memory_gb is not None and self.memory_gb <= 0:
+            raise ValueError("La memoria debe ser mayor a 0 GB")
+        if self.storage_gb is not None and self.storage_gb <= 0:
+            raise ValueError("El almacenamiento debe ser mayor a 0 GB")
+        if self.storage_type is not None and self.storage_type not in ['ssd', 'hdd', 'nvme']:
+            raise ValueError("El tipo de almacenamiento debe ser 'ssd', 'hdd' o 'nvme'")
+
+class CloudServiceClassifier:
+    """
+    Clasificador de servicios en la nube que categoriza texto en IaaS, PaaS, SaaS o FaaS
+    basándose en palabras clave y patrones específicos, incluyendo especificaciones de hardware.
+    """
+    
+    def __init__(self):
+        # Definir palabras clave para cada categoría
+        self.keywords = {
+            'IaaS': [
+                'infrastructure as a service', 'infraestructura como servicio',
+                'virtual machine', 'máquina virtual', 'vm', 'ec2', 'compute engine',
+                'storage', 'almacenamiento', 'network', 'red', 'load balancer',
+                'firewall', 'cortafuegos', 'server', 'servidor', 'hardware',
+                'cpu', 'ram', 'memory', 'memoria', 'disk', 'disco', 'block storage',
+                'object storage', 'file storage', 'vpc', 'subnet', 'ip address',
+                'elastic ip', 'auto scaling', 'auto scaling group', 'processor',
+                'procesador', 'core', 'núcleo', 'ghz', 'gigahertz', 'ssd', 'hdd',
+                'nvme', 'gigabyte', 'gb', 'terabyte', 'tb'
+            ],
+            'PaaS': [
+                'platform as a service', 'plataforma como servicio',
+                'app engine', 'elastic beanstalk', 'heroku', 'openshift',
+                'deployment', 'despliegue', 'runtime', 'entorno de ejecución',
+                'framework', 'marco de trabajo', 'middleware', 'software intermedio',
+                'database service', 'servicio de base de datos', 'rds', 'cloud sql',
+                'cache', 'caché', 'message queue', 'cola de mensajes', 'sqs',
+                'api gateway', 'puerta de enlace api', 'container', 'contenedor',
+                'kubernetes', 'docker', 'orchestration', 'orquestación'
+            ],
+            'SaaS': [
+                'software as a service', 'software como servicio',
+                'application', 'aplicación', 'web app', 'aplicación web',
+                'crm', 'erp', 'email', 'correo electrónico', 'office 365',
+                'google workspace', 'salesforce', 'dropbox', 'box', 'slack',
+                'zoom', 'teams', 'collaboration', 'colaboración', 'productivity',
+                'productividad', 'business software', 'software empresarial',
+                'subscription', 'suscripción', 'license', 'licencia', 'user',
+                'usuario', 'dashboard', 'panel de control', 'analytics', 'análisis'
+            ],
+            'FaaS': [
+                'function as a service', 'función como servicio',
+                'serverless', 'sin servidor', 'lambda', 'cloud functions',
+                'azure functions', 'google cloud functions', 'openwhisk',
+                'function', 'función', 'event-driven', 'dirigido por eventos',
+                'trigger', 'disparador', 'webhook', 'api endpoint', 'endpoint api',
+                'microservice', 'microservicio', 'stateless', 'sin estado',
+                'cold start', 'inicio en frío', 'timeout', 'tiempo de espera',
+                'execution time', 'tiempo de ejecución', 'invocation', 'invocación'
+            ]
+        }
+        
+        # Patrones regex para cada categoría
+        self.patterns = {
+            'IaaS': [
+                r'\\b(ec2|compute engine|virtual machine|vm)\\b',
+                r'\\b(storage|block storage|object storage)\\b',
+                r'\\b(network|vpc|subnet|load balancer)\\b',
+                r'\\b(server|hardware|cpu|ram|memory)\\b',
+                r'\\b(\\d+)\\s*(core|núcleo|cores|núcleos)\\b',
+                r'\\b(\\d+(?:\\.\\d+)?)\\s*(ghz|gigahertz)\\b',
+                r'\\b(\\d+)\\s*(gb|gigabyte|gigabytes)\\b',
+                r'\\b(\\d+)\\s*(tb|terabyte|terabytes)\\b',
+                r'\\b(ssd|hdd|nvme)\\b'
+            ],
+            'PaaS': [
+                r'\\b(app engine|elastic beanstalk|heroku|openshift)\\b',
+                r'\\b(database|rds|cloud sql|cache)\\b',
+                r'\\b(container|kubernetes|docker|orchestration)\\b',
+                r'\\b(api gateway|middleware|framework)\\b'
+            ],
+            'SaaS': [
+                r'\\b(crm|erp|office 365|google workspace)\\b',
+                r'\\b(salesforce|dropbox|slack|zoom|teams)\\b',
+                r'\\b(web app|application|subscription|license)\\b',
+                r'\\b(collaboration|productivity|business software)\\b'
+            ],
+            'FaaS': [
+                r'\\b(lambda|cloud functions|azure functions)\\b',
+                r'\\b(serverless|function as a service)\\b',
+                r'\\b(event-driven|trigger|webhook)\\b',
+                r'\\b(microservice|stateless|cold start)\\b'
+            ]
+        }
+        
+        # Configuración de hardware por defecto
+        self.default_hardware_specs = HardwareSpecs()
+
+    # ... (resto de métodos de la clase)
+    
+    def classify_text(self, text: str, hardware_specs: Optional[HardwareSpecs] = None) -> Dict[str, float]:
+        """Clasifica el texto de entrada y retorna las probabilidades para cada categoría."""
+        # Validar entrada
+        validation = self.validate_input(text)
+        if not validation['is_valid']:
+            raise ValueError(f"Error de validación: {'; '.join(validation['errors'])}")
+        
+        # Preprocesar texto
+        text_processed = self.preprocess_text(text)
+        
+        # Extraer información de hardware del texto
+        extracted_specs = self.extract_hardware_info(text_processed)
+        final_specs = hardware_specs if hardware_specs else extracted_specs
+        
+        # Contar coincidencias de palabras clave
+        keyword_scores = {}
+        for category, keywords in self.keywords.items():
+            score = 0
+            for keyword in keywords:
+                if keyword in text_processed:
+                    score += 1
+            keyword_scores[category] = score
+        
+        # Contar coincidencias de patrones regex
+        pattern_scores = {}
+        for category, patterns in self.patterns.items():
+            score = 0
+            for pattern in patterns:
+                matches = len(re.findall(pattern, text_processed))
+                score += matches
+            pattern_scores[category] = score
+        
+        # Combinar puntuaciones de texto
+        text_scores = {}
+        for category in self.keywords.keys():
+            text_scores[category] = keyword_scores[category] + pattern_scores[category]
+        
+        # Obtener puntuaciones de hardware
+        hardware_scores = self.classify_by_hardware(final_specs)
+        
+        # Combinar puntuaciones (70% texto, 30% hardware)
+        total_scores = {}
+        for category in self.keywords.keys():
+            text_weight = 0.7
+            hardware_weight = 0.3
+            total_scores[category] = (text_scores[category] * text_weight + 
+                                    hardware_scores[category] * hardware_weight)
+        
+        # Calcular probabilidades
+        total = sum(total_scores.values())
+        if total == 0:
+            return {category: 0.25 for category in self.keywords.keys()}
+        
+        probabilities = {}
+        for category, score in total_scores.items():
+            probabilities[category] = score / total
+        
+        return probabilities
+
+def main():
+    """Función principal que maneja la línea de comando."""
+    parser = argparse.ArgumentParser(description='Clasificador de servicios en la nube')
+    parser.add_argument('description', help='Descripción del servicio cloud a clasificar')
+    args = parser.parse_args()
+    
+    classifier = CloudServiceClassifier()
+    result = classifier.classify_text(args.description)
+    primary_category = max(result, key=result.get)
+    
+    print(f"Descripción: {args.description}")
+    print(f"Clasificación: {primary_category} ({result[primary_category]:.2%})")
+
+if __name__ == "__main__":
+    main()`;
+
+        
+        // Cargar código completo sin syntax highlighting
+        function loadCompleteCode() {
+            const codeElement = document.getElementById('pythonCode');
+            // Solo mostrar el código como texto plano, sin highlighting
+            codeElement.textContent = completeCode;
+        }
+        
+        // Cargar código automáticamente cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Cargando código...');
+            loadCompleteCode();
+            console.log('Código cargado');
+        });
+    </script>
+</head>
+<body>
+    <div class="container ejercicio1">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 1: Cursor</h1>
+            <p>Clasificador de Modelos de Servicios Cloud</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Crear una aplicación CLI con Python que reciba la descripción de un servicio cloud y prediga el modelo al que pertenece (IaaS, PaaS, SaaS, FaaS).</p>
+                
+                <h3>Instrucciones</h3>
+                <ol>
+                    <li>Abre Cursor y crea un proyecto llamado <b>cloud_models_classifier</b>.</li>
+                    <li>Usa el prompt: <i>"Genera un código en Python que reciba un texto y clasifique si corresponde a IaaS, PaaS, SaaS o FaaS usando reglas básicas."</i></li>
+                    <li>Mejora el código con ayuda del asistente de IA:
+                        <ul>
+                            <li>Añade validación de entrada.</li>
+                            <li>Usa una función para cada clasificación.</li>
+                            <li>Prueba con al menos 5 ejemplos distintos.</li>
+                        </ul>
+                    </li>
+                    <li>Integra argparse para ejecutar el clasificador por línea de comandos.</li>
+                    <li>Desarrolla un sitio web personal que tenga una sección de reportes para los ejercicios guiados:
+                        <ul>
+                            <li>Anexar el código generado, screenshots del funcionamiento de este ejercicio y una reflexión de 300 palabras sobre el uso de la IA para crear la arquitectura y tu impresión como ITC al hacer esto.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>Clasificador de Modelos Cloud</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre id="completeCode" class="code-display"><code id="pythonCode"></code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado01/cursor1.png" alt="Screenshot 1" onclick="openImageModal(this.src)">
+                        <p>Screenshot 1</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado01/cursor2.png" alt="Screenshot 2" onclick="openImageModal(this.src)">
+                        <p>Screenshot 2</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado01/cursor3.png" alt="Screenshot 3" onclick="openImageModal(this.src)">
+                        <p>Screenshot 3</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado01/cursor4.png" alt="Screenshot 4" onclick="openImageModal(this.src)">
+                        <p>Screenshot 4</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado01/cursor5.png" alt="Screenshot 5" onclick="openImageModal(this.src)">
+                        <p>Screenshot 5</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado01/cursor6.png" alt="Screenshot 6" onclick="openImageModal(this.src)">
+                        <p>Screenshot 6</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    Considero que la IA puede ayudar mucho a agilizar las actividades o tareas en el área académica, como la escuela o el trabajo, especialmente cuando se trata de realizar código, debido a que los modelos han sido entrenados para lograr un buen resultado. 
+                    <br><br>
+                    Sin embargo, considero que no se debería usar cuando no se conoce cómo se podría realizar la tarea. Por ejemplo, en esta clase sentí que muchas cosas no sabía qué sucedía específicamente detrás del código, o bien, que no tuvimos tiempo de validar el código ofrecido a profundidad. 
+                    <br><br>
+                    Considero que se debería usar la IA, pero siempre se deben validar y revisar las líneas de código para saber si es la opción correcta, ya sea porque no tiene sentido o porque utiliza prácticas o librerías antiguas. Si solo se acepta lo que genera la IA, cuando toque debuggear por algún error será más difícil, al tener que estudiar de nuevo qué es lo que está sucediendo y qué es lo que podría estar fallando. 
+                    <br><br>
+                    Asimismo, como en la actividad, se deben tener otras consideraciones, como agregar las validaciones al programa, ya que no es algo que la IA haga por sí misma. Esto también puede aplicar a temas de seguridad.
+                    <br><br> 
+                    Sin embargo, como ITC, puede ayudarnos mucho en tareas repetitivas, como generar ejemplos para validar el código, que pueden ser cansadas y tediosas por nuestra cuenta, y el tiempo que ocuparíamos en esta tarea se podría enfocar en algo de mayor importancia o aprendizaje. 
+                    <br><br>
+                    En cuanto a crear arquitectura con IA, considero que la arquitectura es algo más complejo, en lo que se necesita de un ser humano para supervisar o tomar decisiones. Si bien la IA puede ayudar a construirla, no debería diseñarla. Muchas veces la decisión sobre qué arquitectura utilizar depende de información del negocio que se obtiene en reuniones con el cliente, o de información subconsciente del contexto de la empresa, como políticas, importancia de la imagen, etc.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: white;
+    line-height: 1.6;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 15px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-info {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border-left: 5px solid #3498db;
+}
+
+.header-info h2 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+}
+
+.header-info p {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.employees-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.employee-card {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.employee-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.employee-name {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.full-time-badge {
+    background: #27ae60;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.employee-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.label {
+    font-weight: bold;
+    color: #7f8c8d;
+    font-size: 0.9em;
+    min-width: 120px;
+}
+
+.value {
+    color: #2c3e50;
+    font-weight: 500;
+    text-align: right;
+    flex: 1;
+}
+
+.value.position {
+    color: #3498db;
+    font-weight: bold;
+}
+
+.value.salary {
+    color: #27ae60;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.value.department {
+    color: #8e44ad;
+    font-weight: bold;
+}
+
+.value.date {
+    color: #e67e22;
+    font-family: monospace;
+}
+
+.filter-summary {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    border-left: 5px solid #e74c3c;
+}
+
+.filter-summary h3 {
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+    font-size: 1.4em;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-label {
+    display: block;
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-value.full-time-count {
+    color: #27ae60;
+}
+
+.stat-value.part-time-count {
+    color: #e74c3c;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .employees-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .employee-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .value {
+        text-align: left;
+    }
+    
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,54 @@
+/* Estilos para los menús desplegables de codigo_tarea5.html */
+
+.collapsible {
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+    border-left: 4px solid #898AC4;
+}
+
+.collapsible:hover {
+    background-color: #e9ecef;
+}
+
+.collapsible.active {
+    background-color: #898AC4;
+    color: white;
+}
+
+.collapsible:after {
+    content: '\002B';
+    color: #333;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.collapsible.active:after {
+    content: '\2212';
+    color: white;
+}
+
+.collapsible-content {
+    padding: 0 18px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    background-color: #f1f1f1;
+    border-radius: 0 0 8px 8px;
+}
+
+.collapsible-content.active {
+    padding: 18px;
+    max-height: 10000px;
+}

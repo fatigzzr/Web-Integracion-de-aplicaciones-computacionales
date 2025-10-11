@@ -1,0 +1,47 @@
+/* Estilos específicos para tarea5.html */
+
+/* Colores temáticos para las tarjetas de tarea 5 */
+.menu-card {
+    border-color: #898AC4;
+    text-decoration: none !important;
+}
+
+.menu-card,
+.menu-card:link,
+.menu-card:visited,
+.menu-card:active {
+    text-decoration: none !important;
+}
+
+.menu-card h3 {
+    color: #898AC4;
+    text-decoration: none !important;
+}
+
+.menu-card p {
+    text-decoration: none !important;
+}
+
+.menu-card .arrow {
+    color: #898AC4;
+    text-decoration: none !important;
+}
+
+.menu-card:hover {
+    box-shadow: 0 8px 25px rgba(137, 138, 196, 0.3);
+    text-decoration: none !important;
+}
+
+.menu-card:hover h3 {
+    color: #898AC4;
+    text-decoration: none !important;
+}
+
+.menu-card:hover p {
+    text-decoration: none !important;
+}
+
+.menu-card:hover .arrow {
+    color: #898AC4;
+    text-decoration: none !important;
+}

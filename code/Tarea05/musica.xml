@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="musica5.xsl"?>
+<catalogo_musica>
+    <!-- Sección de Artistas -->
+    <artistas>
+        <artista id="1">
+            <nombre>Michael Jackson</nombre>
+            <pais_origen>Estados Unidos</pais_origen>
+        </artista>
+        <artista id="2">
+            <nombre>The Beatles</nombre>
+            <pais_origen>Reino Unido</pais_origen>
+        </artista>
+        <artista id="3">
+            <nombre>AC/DC</nombre>
+            <pais_origen>Australia</pais_origen>
+        </artista>
+        <artista id="4">
+            <nombre>Pink Floyd</nombre>
+            <pais_origen>Reino Unido</pais_origen>
+        </artista>
+        <artista id="5">
+            <nombre>Eagles</nombre>
+            <pais_origen>Estados Unidos</pais_origen>
+        </artista>
+        <artista id="6">
+            <nombre>Bruce Springsteen</nombre>
+            <pais_origen>Estados Unidos</pais_origen>
+        </artista>
+        <artista id="7">
+            <nombre>Prince</nombre>
+            <pais_origen>Estados Unidos</pais_origen>
+        </artista>
+        <artista id="8">
+            <nombre>Madonna</nombre>
+            <pais_origen>Estados Unidos</pais_origen>
+        </artista>
+        <artista id="9">
+            <nombre>Nirvana</nombre>
+            <pais_origen>Estados Unidos</pais_origen>
+        </artista>
+        <artista id="10">
+            <nombre>Radiohead</nombre>
+            <pais_origen>Reino Unido</pais_origen>
+        </artista>
+    </artistas>
+
+    <!-- Sección de Géneros -->
+    <generos>
+        <genero id="1">
+            <nombre>Pop</nombre>
+            <descripcion>Música popular comercial</descripcion>
+        </genero>
+        <genero id="2">
+            <nombre>Rock</nombre>
+            <descripcion>Música rock clásica</descripcion>
+        </genero>
+        <genero id="3">
+            <nombre>Hard Rock</nombre>
+            <descripcion>Rock pesado y agresivo</descripcion>
+        </genero>
+        <genero id="4">
+            <nombre>Progressive Rock</nombre>
+            <descripcion>Rock progresivo experimental</descripcion>
+        </genero>
+        <genero id="5">
+            <nombre>Pop Rock</nombre>
+            <descripcion>Fusión de pop y rock</descripcion>
+        </genero>
+        <genero id="6">
+            <nombre>Grunge</nombre>
+            <descripcion>Rock alternativo de los 90s</descripcion>
+        </genero>
+        <genero id="7">
+            <nombre>Alternative Rock</nombre>
+            <descripcion>Rock alternativo independiente</descripcion>
+        </genero>
+    </generos>
+
+    <!-- Sección de Álbumes -->
+    <albumes>
+        <album id="1">
+            <titulo>Thriller</titulo>
+            <año_lanzamiento>1982</año_lanzamiento>
+            <id_artista>1</id_artista>
+            <id_genero>1</id_genero>
+        </album>
+        <album id="2">
+            <titulo>Abbey Road</titulo>
+            <año_lanzamiento>1969</año_lanzamiento>
+            <id_artista>2</id_artista>
+            <id_genero>2</id_genero>
+        </album>
+        <album id="3">
+            <titulo>Back in Black</titulo>
+            <año_lanzamiento>1980</año_lanzamiento>
+            <id_artista>3</id_artista>
+            <id_genero>3</id_genero>
+        </album>
+        <album id="4">
+            <titulo>The Dark Side of the Moon</titulo>
+            <año_lanzamiento>1973</año_lanzamiento>
+            <id_artista>4</id_artista>
+            <id_genero>4</id_genero>
+        </album>
+        <album id="5">
+            <titulo>Hotel California</titulo>
+            <año_lanzamiento>1976</año_lanzamiento>
+            <id_artista>5</id_artista>
+            <id_genero>2</id_genero>
+        </album>
+        <album id="6">
+            <titulo>Born in the U.S.A.</titulo>
+            <año_lanzamiento>1984</año_lanzamiento>
+            <id_artista>6</id_artista>
+            <id_genero>2</id_genero>
+        </album>
+        <album id="7">
+            <titulo>Purple Rain</titulo>
+            <año_lanzamiento>1984</año_lanzamiento>
+            <id_artista>7</id_artista>
+            <id_genero>5</id_genero>
+        </album>
+        <album id="8">
+            <titulo>Like a Virgin</titulo>
+            <año_lanzamiento>1984</año_lanzamiento>
+            <id_artista>8</id_artista>
+            <id_genero>1</id_genero>
+        </album>
+        <album id="9">
+            <titulo>Nevermind</titulo>
+            <año_lanzamiento>1991</año_lanzamiento>
+            <id_artista>9</id_artista>
+            <id_genero>6</id_genero>
+        </album>
+        <album id="10">
+            <titulo>OK Computer</titulo>
+            <año_lanzamiento>1997</año_lanzamiento>
+            <id_artista>10</id_artista>
+            <id_genero>7</id_genero>
+        </album>
+        <album id="11">
+            <titulo>Bad</titulo>
+            <año_lanzamiento>1987</año_lanzamiento>
+            <id_artista>1</id_artista>
+            <id_genero>1</id_genero>
+        </album>
+    </albumes>
+
+    <!-- Sección de Canciones -->
+    <canciones>
+        <cancion id="1">
+            <titulo>Wanna Be Startin' Somethin'</titulo>
+            <duracion>6:03</duracion>
+            <es_sencillo>false</es_sencillo>
+            <id_album>1</id_album>
+        </cancion>
+        <cancion id="2">
+            <titulo>Thriller</titulo>
+            <duracion>5:57</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>1</id_album>
+        </cancion>
+        <cancion id="3">
+            <titulo>Beat It</titulo>
+            <duracion>4:18</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>1</id_album>
+        </cancion>
+        <cancion id="4">
+            <titulo>Come Together</titulo>
+            <duracion>4:20</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>2</id_album>
+        </cancion>
+        <cancion id="5">
+            <titulo>Something</titulo>
+            <duracion>3:02</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>2</id_album>
+        </cancion>
+        <cancion id="6">
+            <titulo>Here Comes the Sun</titulo>
+            <duracion>3:05</duracion>
+            <es_sencillo>false</es_sencillo>
+            <id_album>2</id_album>
+        </cancion>
+        <cancion id="7">
+            <titulo>Hells Bells</titulo>
+            <duracion>5:12</duracion>
+            <es_sencillo>false</es_sencillo>
+            <id_album>3</id_album>
+        </cancion>
+        <cancion id="8">
+            <titulo>Back in Black</titulo>
+            <duracion>4:15</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>3</id_album>
+        </cancion>
+        <cancion id="9">
+            <titulo>You Shook Me All Night Long</titulo>
+            <duracion>3:30</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>3</id_album>
+        </cancion>
+        <cancion id="10">
+            <titulo>Speak to Me</titulo>
+            <duracion>1:30</duracion>
+            <es_sencillo>false</es_sencillo>
+            <id_album>4</id_album>
+        </cancion>
+        <cancion id="11">
+            <titulo>Breathe</titulo>
+            <duracion>2:43</duracion>
+            <es_sencillo>false</es_sencillo>
+            <id_album>4</id_album>
+        </cancion>
+        <cancion id="12">
+            <titulo>Money</titulo>
+            <duracion>6:22</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>4</id_album>
+        </cancion>
+        <cancion id="13">
+            <titulo>Hotel California</titulo>
+            <duracion>6:30</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>5</id_album>
+        </cancion>
+        <cancion id="14">
+            <titulo>New Kid in Town</titulo>
+            <duracion>5:04</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>5</id_album>
+        </cancion>
+        <cancion id="15">
+            <titulo>Life in the Fast Lane</titulo>
+            <duracion>4:46</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>5</id_album>
+        </cancion>
+        <cancion id="16">
+            <titulo>Born in the U.S.A.</titulo>
+            <duracion>4:38</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>6</id_album>
+        </cancion>
+        <cancion id="17">
+            <titulo>Dancing in the Dark</titulo>
+            <duracion>4:01</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>6</id_album>
+        </cancion>
+        <cancion id="18">
+            <titulo>Let's Go Crazy</titulo>
+            <duracion>4:40</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>7</id_album>
+        </cancion>
+        <cancion id="19">
+            <titulo>Purple Rain</titulo>
+            <duracion>8:41</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>7</id_album>
+        </cancion>
+        <cancion id="20">
+            <titulo>Like a Virgin</titulo>
+            <duracion>3:38</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>8</id_album>
+        </cancion>
+        <cancion id="21">
+            <titulo>Bad</titulo>
+            <duracion>4:07</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>11</id_album>
+        </cancion>
+        <cancion id="22">
+            <titulo>The Way You Make Me Feel</titulo>
+            <duracion>4:58</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>11</id_album>
+        </cancion>
+        <cancion id="23">
+            <titulo>Man in the Mirror</titulo>
+            <duracion>5:19</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>11</id_album>
+        </cancion>
+        <cancion id="24">
+            <titulo>Dirty Diana</titulo>
+            <duracion>4:40</duracion>
+            <es_sencillo>true</es_sencillo>
+            <id_album>11</id_album>
+        </cancion>
+    </canciones>
+</catalogo_musica>

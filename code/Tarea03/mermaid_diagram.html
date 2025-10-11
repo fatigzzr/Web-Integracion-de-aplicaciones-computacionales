@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura Cloud Híbrida - Banca Móvil</title>
+    
+    <!-- Mermaid CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .diagram-container {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .info-section {
+            padding: 30px;
+            background: white;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-card h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .info-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .info-card li {
+            margin: 5px 0;
+        }
+        
+        .mermaid {
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .author-info {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .author-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Arquitectura Cloud Híbrida</h1>
+            <p>Banca Móvil con Funciones Serverless</p>
+        </div>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+graph TB
+    %% Cliente Móvil
+    subgraph "Cliente Móvil"
+        MA[Mobile App<br/>iOS/Android]
+    end
+    
+    %% Nube Pública
+    subgraph "Nube Pública (AWS/Azure/GCP)"
+        subgraph "API Layer"
+            AG[API Gateway<br/>Rate Limiting<br/>Authentication]
+            LB[Load Balancer<br/>SSL Termination]
+        end
+        
+        subgraph "Serverless Functions"
+            AUTH[Authentication<br/>Lambda/Azure Function<br/>JWT Generation]
+            ACC[Account Management<br/>Lambda/Azure Function<br/>Balance Queries]
+            TXN[Transaction Processing<br/>Lambda/Azure Function<br/>Payment Processing]
+            NOT[Notifications<br/>Lambda/Azure Function<br/>SMS/Email/Push]
+        end
+        
+        subgraph "Data Layer"
+            DB[(DynamoDB/CosmosDB<br/>User Data<br/>Account Info)]
+            CACHE[(Redis/ElastiCache<br/>Session Cache<br/>Rate Limiting)]
+            S3[S3/Blob Storage<br/>Documents<br/>Audit Logs]
+        end
+        
+        subgraph "Messaging & Events"
+            SQS[SQS/Service Bus<br/>Transaction Queue]
+            SNS[SNS/Notification Hub<br/>Event Broadcasting]
+            EB[EventBridge<br/>Event Routing]
+        end
+        
+        subgraph "Security & Monitoring"
+            KMS[KMS/Key Vault<br/>Encryption Keys]
+            CW[CloudWatch/Azure Monitor<br/>Logging & Metrics]
+            WAF[WAF<br/>DDoS Protection]
+        end
+    end
+    
+    %% Nube Privada/On-Premises
+    subgraph "Nube Privada/On-Premises"
+        subgraph "Core Banking"
+            CBS[Core Banking System<br/>Mainframe/Legacy]
+            TPS[Transaction Processing<br/>Real-time Processing]
+        end
+        
+        subgraph "Compliance & Audit"
+            AUDIT[Audit System<br/>Compliance Logs]
+            KYC[KYC System<br/>Identity Verification]
+        end
+        
+        subgraph "Private Data"
+            PDB[(Customer Database<br/>Sensitive Data<br/>PII)]
+            COMP[(Compliance Database<br/>Regulatory Data)]
+        end
+    end
+    
+    %% Conexiones Cliente
+    MA -->|HTTPS/TLS 1.3| AG
+    MA -->|Push Notifications| SNS
+    
+    %% Conexiones API Gateway
+    AG -->|Route| AUTH
+    AG -->|Route| ACC
+    AG -->|Route| TXN
+    AG -->|Route| NOT
+    
+    %% Conexiones Serverless
+    AUTH -->|Store Tokens| CACHE
+    AUTH -->|User Data| DB
+    
+    ACC -->|Account Data| DB
+    ACC -->|Cache| CACHE
+    ACC -->|Query| CBS
+    
+    TXN -->|Queue| SQS
+    TXN -->|Process| TPS
+    TXN -->|Update| DB
+    TXN -->|Notify| SNS
+    
+    NOT -->|Send| SNS
+    NOT -->|Log| S3
+    
+    %% Conexiones Data
+    DB -->|Encrypt| KMS
+    CACHE -->|Encrypt| KMS
+    S3 -->|Encrypt| KMS
+    
+    %% Conexiones Privadas
+    CBS -->|Sync| PDB
+    TPS -->|Audit| AUDIT
+    KYC -->|Verify| PDB
+    
+    %% Conexiones Seguras
+    AG -->|VPN/Tunnel| CBS
+    TXN -->|Secure API| TPS
+    ACC -->|Encrypted| PDB
+    
+    %% Monitoreo
+    CW -->|Monitor| AUTH
+    CW -->|Monitor| ACC
+    CW -->|Monitor| TXN
+    CW -->|Monitor| NOT
+    CW -->|Monitor| CBS
+    
+    %% Seguridad
+    WAF -->|Protect| AG
+    
+    %% Estilos
+    classDef publicCloud fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef privateCloud fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef serverless fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef data fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef security fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class AG,LB,AUTH,ACC,TXN,NOT,DB,CACHE,S3,SQS,SNS,EB,KMS,CW,WAF publicCloud
+    class CBS,TPS,AUDIT,KYC,PDB,COMP privateCloud
+    class AUTH,ACC,TXN,NOT serverless
+    class DB,CACHE,S3,PDB,COMP data
+    class KMS,CW,WAF,AUDIT security
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>📋 Descripción de la Arquitectura</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🌐 Nube Pública</h3>
+                    <ul>
+                        <li>API Gateway + Load Balancer</li>
+                        <li>Funciones Serverless (Lambda/Azure Functions)</li>
+                        <li>Bases de Datos NoSQL (DynamoDB/CosmosDB)</li>
+                        <li>Cache Redis/ElastiCache</li>
+                        <li>Almacenamiento S3/Blob Storage</li>
+                        <li>Colas de Mensajes (SQS/Service Bus)</li>
+                        <li>Notificaciones (SNS/Notification Hubs)</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🏢 Nube Privada</h3>
+                    <ul>
+                        <li>Sistema Core Banking (Mainframe)</li>
+                        <li>Procesamiento de Transacciones</li>
+                        <li>Base de Datos de Clientes (PII)</li>
+                        <li>Sistema de Cumplimiento (KYC)</li>
+                        <li>Auditoría y Logs de Compliance</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🔧 Funciones Serverless</h3>
+                    <ul>
+                        <li>Authentication Service (JWT + OAuth 2.0)</li>
+                        <li>Account Management Service</li>
+                        <li>Transaction Processing Service</li>
+                        <li>Notification Service (SMS/Email/Push)</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🔒 Seguridad</h3>
+                    <ul>
+                        <li>Encriptación TLS 1.3 en tránsito</li>
+                        <li>Encriptación AES-256 en reposo</li>
+                        <li>Gestión de claves con KMS/Key Vault</li>
+                        <li>Autenticación multifactor (MFA)</li>
+                        <li>WAF para protección DDoS</li>
+                        <li>Cumplimiento PCI DSS, SOX, GDPR</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configurar Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

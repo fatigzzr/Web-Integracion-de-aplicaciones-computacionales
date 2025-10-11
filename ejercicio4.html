@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 4: XML + CSS + XSL - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio4">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 4: XML + CSS + XSL</h1>
+            <p>Sistema de gestión de una librería</p>
+        </div>
+
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivos</h3>
+
+                <p>Utilizar XSL para el pre-procesamiento de XML</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <p>Eres el responsable del sistema de gestión de una librería en línea que ofrece libros en
+                    diferentes formatos (digitales y físicos). Para facilitar el intercambio, almacenamiento y
+                    procesamiento de la información, se requiere diseñar un archivo XML bien formado que
+                    represente el catálogo de libros disponible.</p><br>
+                
+                <h4>Estructura del Elemento &lt;book&gt;</h4>
+                <p>Utilizando la IA genera un documento llamado libros.xml con 20 registros.</p>
+                <ul>
+                    <li>ISBN del libro (atributo isbn en el elemento &lt;book&gt;)</li>
+                    <li>Título del libro (&lt;title&gt;)</li>
+                    <li>Autor o autores (&lt;author&gt;)</li>
+                    <li>Año de publicación (&lt;year&gt;)</li>
+                    <li>Género (&lt;genre&gt;)</li>
+                    <li>Precio (&lt;price&gt;)</li>
+                    <li>Disponibilidad en stock (&lt;stock&gt;)</li>
+                    <li>Formato (&lt;format&gt;)</li>
+                </ul><br>
+                
+                <p>Para mejorar la presentación de estos datos y hacerlos accesibles en una página web,
+                    debes realizar las siguientes tareas:</p>
+                
+                <h4>Crea una copia de tu archivo XML (libros3.xml):</h4>
+                <ul>
+                    <li>Incluye la directiva &lt;?xml-stylesheet?&gt; para vincular el archivo XSLT que se encargará de transformar los datos XML en
+                        un formato HTML para su visualización.</li>
+                    <li>&lt;?xml-stylesheet type="text/xsl" href="libros.xsl"?&gt;</li>
+                </ul>
+                
+                <h4>Crea un archivo XSLT (libros3.xsl):</h4>
+                <ul>
+                    <li>El archivo XSLT se encargará de transformar el contenido del archivo XML en una página HTML bien estructurada.</li>
+                    <li>Debes incluir la directiva &lt;?xml-stylesheet?&gt; dentro del XSLT para enlazar un archivo CSS que estilizará la presentación
+                        de los datos.</li>
+                    <li>En el proceso de transformación, calcula y muestra la suma total de los precios de los libros. Además, aplica un descuento
+                        del 10% a cada libro y muestra el precio con descuento.</li>
+                    <li>Estructura el HTML generado para que cada libro se muestre dentro de una caja con su correspondiente información como
+                        ISBN, título, autor, género, precio, y formato.</li>
+                </ul>
+                
+                <h4>Crear un archivo CSS (libros3.css):</h4>
+                <ul>
+                    <li>Este archivo CSS se encargará de estilizar la página HTML generada por el XSLT.</li>
+                    <li>Define estilos generales para la presentación de la librería, asegurándote de que cada libro tenga una presentación clara y
+                        organizada, con elementos como el título, autor, y precio destacados.</li>
+                    <li>Asegura que la suma total de los precios y los precios con descuento se destaquen visualmente.</li>
+                </ul>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Código</h3>
+                
+                <h4>Catálogo de Libros (libros3.xml)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XML</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;?xml-stylesheet type="text/xsl" href="libros3.xsl"?&gt;
+&lt;library&gt;
+    &lt;book isbn="978-0-7475-3269-9"&gt;
+        &lt;title&gt;Harry Potter and the Philosopher's Stone&lt;/title&gt;
+        &lt;author&gt;J.K. Rowling&lt;/author&gt;
+        &lt;publication_year&gt;1997&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;24.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-7475-3274-3"&gt;
+        &lt;title&gt;Harry Potter and the Chamber of Secrets&lt;/title&gt;
+        &lt;author&gt;J.K. Rowling&lt;/author&gt;
+        &lt;publication_year&gt;1998&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;26.50&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-7475-4624-5"&gt;
+        &lt;title&gt;The Hobbit&lt;/title&gt;
+        &lt;author&gt;J.R.R. Tolkien&lt;/author&gt;
+        &lt;publication_year&gt;1937&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;18.75&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-618-34614-4"&gt;
+        &lt;title&gt;The Lord of the Rings&lt;/title&gt;
+        &lt;author&gt;J.R.R. Tolkien&lt;/author&gt;
+        &lt;publication_year&gt;1954&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;45.00&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Box Set&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-7432-4722-1"&gt;
+        &lt;title&gt;The Great Gatsby&lt;/title&gt;
+        &lt;author&gt;F. Scott Fitzgerald&lt;/author&gt;
+        &lt;publication_year&gt;1925&lt;/publication_year&gt;
+        &lt;genre&gt;Classic&lt;/genre&gt;
+        &lt;price&gt;12.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-14-028333-4"&gt;
+        &lt;title&gt;1984&lt;/title&gt;
+        &lt;author&gt;George Orwell&lt;/author&gt;
+        &lt;publication_year&gt;1949&lt;/publication_year&gt;
+        &lt;genre&gt;Dystopian&lt;/genre&gt;
+        &lt;price&gt;14.25&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-679-72369-5"&gt;
+        &lt;title&gt;To Kill a Mockingbird&lt;/title&gt;
+        &lt;author&gt;Harper Lee&lt;/author&gt;
+        &lt;publication_year&gt;1960&lt;/publication_year&gt;
+        &lt;genre&gt;Classic&lt;/genre&gt;
+        &lt;price&gt;15.99&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76948-0"&gt;
+        &lt;title&gt;The Fault in Our Stars&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2012&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;16.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76949-7"&gt;
+        &lt;title&gt;Looking for Alaska&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2005&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;14.50&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76950-3"&gt;
+        &lt;title&gt;Paper Towns&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2008&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;15.25&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76951-0"&gt;
+        &lt;title&gt;An Abundance of Katherines&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2006&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;13.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76952-7"&gt;
+        &lt;title&gt;Turtles All the Way Down&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2017&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;17.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76953-4"&gt;
+        &lt;title&gt;The Anthropocene Reviewed&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2021&lt;/publication_year&gt;
+        &lt;genre&gt;Non-fiction&lt;/genre&gt;
+        &lt;price&gt;22.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76954-1"&gt;
+        &lt;title&gt;Will Grayson, Will Grayson&lt;/title&gt;
+        &lt;author&gt;John Green, David Levithan&lt;/author&gt;
+        &lt;publication_year&gt;2010&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;16.50&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76955-8"&gt;
+        &lt;title&gt;Let It Snow&lt;/title&gt;
+        &lt;author&gt;John Green, Maureen Johnson, Lauren Myracle&lt;/author&gt;
+        &lt;publication_year&gt;2008&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;14.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76956-5"&gt;
+        &lt;title&gt;The Hunger Games&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2008&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;18.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76957-2"&gt;
+        &lt;title&gt;Catching Fire&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2009&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;19.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76958-9"&gt;
+        &lt;title&gt;Mockingjay&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2010&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;20.99&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76959-6"&gt;
+        &lt;title&gt;The Ballad of Songbirds and Snakes&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2020&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;24.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76960-2"&gt;
+        &lt;title&gt;Twilight&lt;/title&gt;
+        &lt;author&gt;Stephenie Meyer&lt;/author&gt;
+        &lt;publication_year&gt;2005&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;17.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+&lt;/library&gt;</code></pre>
+                </div>
+
+                <h4>Transformación XML a HTML (libros3.xsl)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XSLT</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;?xml-stylesheet type="text/css" href="libros3.css"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html&gt;
+            &lt;head&gt;
+                &lt;title&gt;Catálogo de Libros - Librería Digital&lt;/title&gt;
+                &lt;link rel="stylesheet" type="text/css" href="libros3.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="library"&gt;
+                    &lt;h1&gt;Catálogo de Libros - Librería Digital&lt;/h1&gt;
+                    
+                    &lt;div class="books"&gt;
+                        &lt;xsl:for-each select="library/book"&gt;
+                            &lt;div class="book"&gt;
+                                &lt;div class="book-info"&gt;
+                                    &lt;div class="isbn"&gt;ISBN: &lt;xsl:value-of select="@isbn"/&gt;&lt;/div&gt;
+                                    &lt;div class="title"&gt;&lt;xsl:value-of select="title"/&gt;&lt;/div&gt;
+                                    &lt;div class="author"&gt;&lt;xsl:value-of select="author"/&gt;&lt;/div&gt;
+                                    &lt;div class="year"&gt;Año: &lt;xsl:value-of select="publication_year"/&gt;&lt;/div&gt;
+                                    &lt;div class="genre"&gt;Género: &lt;xsl:value-of select="genre"/&gt;&lt;/div&gt;
+                                    &lt;div class="format"&gt;Formato: &lt;xsl:value-of select="format"/&gt;&lt;/div&gt;
+                                    &lt;div class="stock"&gt;Stock: &lt;xsl:value-of select="stock"/&gt;&lt;/div&gt;
+                                    
+                                    &lt;div class="prices"&gt;
+                                        &lt;div class="original-price"&gt;Precio Original: $&lt;xsl:value-of select="price"/&gt;&lt;/div&gt;
+                                        &lt;div class="discounted-price"&gt;Precio con Descuento (10%): $&lt;xsl:value-of select="format-number(price * 0.9, '0.00')"/&gt;&lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:for-each&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class="summary"&gt;
+                        &lt;h2&gt;Resumen de Precios&lt;/h2&gt;
+                        &lt;div class="total-original"&gt;Total Precios Originales: $&lt;xsl:value-of select="format-number(sum(library/book/price), '0.00')"/&gt;&lt;/div&gt;
+                        &lt;div class="total-discounted"&gt;Total con Descuento (10%): $&lt;xsl:value-of select="format-number(sum(library/book/price) * 0.9, '0.00')"/&gt;&lt;/div&gt;
+                        &lt;div class="savings"&gt;Ahorro Total: $&lt;xsl:value-of select="format-number(sum(library/book/price) * 0.1, '0.00')"/&gt;&lt;/div&gt;
+                        &lt;div class="book-count"&gt;Total de Libros: &lt;xsl:value-of select="count(library/book)"/&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+    
+&lt;/xsl:stylesheet&gt;</code></pre>
+                </div>
+
+                <h4>Estilos para HTML Generado (libros3.css)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>/* Estilos generales */
+body {
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+/* Estilizar el contenedor principal (library) */
+.library {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+.library h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilizar la caja que contiene todos los libros (books) */
+.books {
+    width: 100%;
+    background-color: #cccccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilizar cada libro individual (book) */
+.book {
+    width: 100%;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.book-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Estilizar los elementos dentro de cada libro */
+.isbn {
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 5px;
+    grid-column: 1 / -1;
+}
+
+.title {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    grid-column: 1 / -1;
+    border-bottom: 2px solid #999;
+    padding-bottom: 5px;
+}
+
+.author {
+    font-style: italic;
+    margin-bottom: 5px;
+    color: #555;
+    grid-column: 1 / -1;
+}
+
+.year, .genre, .format, .stock {
+    margin-bottom: 3px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Estilos para precios */
+.prices {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border-left: 4px solid #009900;
+}
+
+.original-price {
+    color: #666;
+    text-decoration: line-through;
+    margin-bottom: 3px;
+}
+
+.discounted-price {
+    color: #009900;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Estilos para el resumen */
+.summary {
+    background-color: #e8f4fd;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.summary h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.total-original, .total-discounted, .savings, .book-count {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.total-original {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.total-discounted {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+    font-size: 1.2em;
+}
+
+.savings {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+    font-size: 1.1em;
+}
+
+.book-count {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .book-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .library {
+        padding: 10px;
+    }
+    
+    .library h1 {
+        font-size: 2em;
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado04/Libros3Inicio.png" alt="Screenshot 1" onclick="openImageModal(this.src)">
+                        <p>Screenshot 1</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado04/Libros3Resumen.png" alt="Screenshot 2" onclick="openImageModal(this.src)">
+                        <p>Screenshot 2</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+
+                <p>Si bien en la clase vimos cómo utilizar el XSLT para realizar búsquedas de los libros, ahora con el ejercicio guiado de generar el precio dado el descuento de los libros tengo mucho más presente el hecho de que XSLT te ayuda a “transformar” los datos. Esta transformación no se limita únicamente a mostrar información distinta, sino que puede tomar diversas formas: búsqueda de información específica, filtrado de datos según una condición determinada, o incluso el cálculo de nuevos valores a partir de la información ya existente. El ejemplo del cálculo del precio con descuento me pareció muy ilustrativo, porque demuestra que no solo se pueden presentar datos estáticos, sino también procesarlos y modificarlos según la lógica que se establezca en la hoja de estilo.</p>
+                <p>Al trabajar con XML, CSS y XSL, me doy cuenta de que ya es posible tener una especie de visualización o frontend de una base de datos, sin necesidad de apoyarse directamente en HTML. Esto me hizo reflexionar que, aunque HTML sea lo más común en el desarrollo web, no es estrictamente necesario para mostrar datos de manera organizada y atractiva. En este sentido, también me ayudó a comprender mejor el proyecto final del curso, ya que al principio no entendía cómo podríamos visualizar el backend sin construir una aplicación web o móvil desde cero. Ahora me queda más claro que con estas herramientas de transformación y estilización, se puede obtener una representación visual bastante práctica de la información.</p>
+                <p>Considero que es esencial conocer esta información, porque su uso tiene un enfoque muy práctico y puede resultar útil al trabajar en proyectos tanto en empresas como de manera individual. Muchas veces no se necesita construir una aplicación completa para verificar si el backend funciona correctamente o si los datos que se están procesando son los esperados. Con XML y XSLT ya se puede crear una capa intermedia de verificación y visualización sin un esfuerzo de programación tan grande.</p>
+                <p>En cuanto al uso de la Inteligencia Artificial en este ejercicio, me pareció una experiencia más positiva en comparación con otros casos anteriores. Creo que esto se debe a que las tareas que le pedimos fueron más concretas, como generar registros sintéticos o estructurar datos, en lugar de pedirle que tomara decisiones complejas, como diseñar toda una arquitectura con un único prompt. De esta manera entendí mejor cuál puede ser el rol de los ingenieros de software en el futuro: en lugar de dedicar tiempo a tareas repetitivas y mecánicas, podremos usar las herramientas que tenemos a nuestro alcance para automatizar esas partes y concentrarnos en actividades más valiosas, como diseñar arquitecturas, modelar bases de datos o tomar decisiones estratégicas en el desarrollo de software.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

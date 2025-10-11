@@ -1,0 +1,174 @@
+/* Estilos generales */
+body {
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+/* Estilizar el contenedor principal (library) */
+.library {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+.library h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilizar la caja que contiene todos los libros (books) */
+.books {
+    width: 100%;
+    background-color: #cccccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilizar cada libro individual (book) */
+.book {
+    width: 100%;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.book-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Estilizar los elementos dentro de cada libro */
+.isbn {
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 5px;
+    grid-column: 1 / -1;
+}
+
+.title {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    grid-column: 1 / -1;
+    border-bottom: 2px solid #999;
+    padding-bottom: 5px;
+}
+
+.author {
+    font-style: italic;
+    margin-bottom: 5px;
+    color: #555;
+    grid-column: 1 / -1;
+}
+
+.year, .genre, .format, .stock {
+    margin-bottom: 3px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Estilos para precios */
+.prices {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border-left: 4px solid #009900;
+}
+
+.original-price {
+    color: #666;
+    text-decoration: line-through;
+    margin-bottom: 3px;
+}
+
+.discounted-price {
+    color: #009900;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Estilos para el resumen */
+.summary {
+    background-color: #e8f4fd;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.summary h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.total-original, .total-discounted, .savings, .book-count {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.total-original {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.total-discounted {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+    font-size: 1.2em;
+}
+
+.savings {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+    font-size: 1.1em;
+}
+
+.book-count {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+/* Responsive design */
+@media (max-width: 768px) {
+    .book-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .library {
+        padding: 10px;
+    }
+    
+    .library h1 {
+        font-size: 2em;
+    }
+}
+

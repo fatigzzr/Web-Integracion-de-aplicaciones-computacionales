@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segundo Avance - Proyecto Final - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="proyecto-final.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio1 segundo-avance">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Segundo Avance - Proyecto Final</h1>
+            <p>Módulo 1: Backend</p>   
+        </div>
+        
+        <div class="content">
+            <!-- Información -->
+            <div class="exercise-info">
+                <h3>Objetivo del Módulo 1 (Back End CMS)</h3>
+                <p>El objetivo del módulo 1 es desarrollar un backend completamente funcional para administrar contenido, usuarios y datos del sistema de forma centralizada.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Funcionalidades implementadas</h3>
+                <p>El backend de nuestro proyecto está desarrollado con Flask de Python, utilizando PostgreSQL para la base de datos, con autenticación mediante JWT y la configuración de CORS.</p>
+                
+                <ol>
+                    <li><strong>Login con sistema de Autenticación y Autorización</strong>
+                        <p>Utilizamos el endpoint /api/login para que los usuarios puedan iniciar sesión. El login cuenta con autenticación del usuario, si es administrador o no, verificando las credenciales con la base de datos. Para tener la seguridad implementada, realizamos un hash de contraseñas, un registro de IP de acceso, los Tokens de JWT con expiración configurada.</p>
+                    </li>
+                    
+                    <li><strong>Gestión de Usuarios</strong>
+                        <p>Utilizamos el endpoint /api/me para obtener la información que está guardada de un usuario autenticado. Se accede a su ID, email, y rol. El endpoint implementa autenticación JWT validando el token Bearer y consulta la base de datos usando sp_get_user_data() para obtener datos actualizados del usuario. Es un checkpoint de autenticación que se ejecuta cada vez que el usuario abre la aplicación para asegurarse que sigue estando autenticado.</p>
+                    </li>
+                    
+                    <li><strong>CRUD</strong>
+                        <p>Utilizamos diferentes endpoints para permitir a los administradores y analistas interactuar directamente con las tablas de la base de datos a través de la interfaz web. Utilizamos el api/entidades para listar todas las tablas dentro de nuestra base de datos, y en caso de querer obtener los datos dentro de la tabla, utilizando el método GET se utiliza el endpoint api/entidades/&lt;nombre_entidad&gt;. Si se utiliza endpoint api/entidades/&lt;nombre_entidad&gt; con el método POST, podemos insertar registros a la tabla deseada, y para actualizar los registros dentro de la tabla utilizamos el método PUT/PATCH con el endpoint /api/entidades/&lt;entidad_name&gt;/&lt;pk_value&gt;. Por último para eliminar registros usamos el endpoint /api/entidades/&lt;entidad_name&gt;/&lt;pk_value&gt; con el método DELETE. Con estos 5 endpoints cubrimos las operaciones CRUD básicas, y cada uno cuenta con protección contra autodestrucción, Validación de nombres de tabla para prevenir inyección SQL y soporte para claves primarias compuestas con parámetros de query.</p>
+                    </li>
+                    
+                    <li><strong>Generación de Reportes</strong>
+                        <p>Nuestro sistema es capaz de generar reportes que pueden ser exportados en formato pdf o csv utilizando las librerías jsPDF y Papa Parse. Utilizamos funciones como exportToPDF() que convierte elementos HTML a imágenes usando html2canvas y las integra en documentos PDF multipágina con formato A4, y exportToCSV() que procesa datos médicos complejos (arrays de arrays) y los convierte a objetos estructurados con nombres de columnas descriptivos específicos para cada tipo de reporte</p>
+                    </li>
+                    
+                    <li><strong>Validación de Datos</strong>
+                        <p>El sistema valida los datos de todos los formularios, en distintas capas. Inicialmente se asegura que ningún formulario pueda tener espacios en blanco con HTML en el front. Así como también tenemos validaciones para las claves de las operaciones CRUD que podemos realizar para prevenir SQL injection. Realizamos validación de JWT con manejo de errores para asegurarnos que los usuarios estén siempre autenticados de manera correcta. Nos aseguramos de agregar mensajes de error claros para guiar al usuario, y de mantener la integridad y seguridad de todos los datos.</p>
+                    </li>
+                    
+                    <li><strong>Conexión directa con la base de datos</strong>
+                        <p>El proyecto implementa conexión directa entre el backend y la base de datos sin intermediarios, utilizando psycopg2 como driver nativo de PostgreSQL que establece conexión directa desde Flask a PostgreSQL.</p>
+                    </li>
+                    
+                    <li><strong>Indicadores clave (KPI's)</strong>
+                        <ul>
+                            <li><u>KPIs Principales</u>
+                                <ul>
+                                    <li>Documentos Subidos</li>
+                                    <li>Predicciones Generadas</li>
+                                    <li>Registros Médicos</li>
+                                    <li>Signos Vitales Registrados</li>
+                                    <li>Respuestas de Estilo de Vida</li>
+                                    <li>Total Usuarios</li>
+                                    <li>Usuarios Activos (30 días)</li>
+                                    <li>Usuarios Activos (7 días)</li>
+                                    <li>Usuarios Nuevos (30 días)</li>
+                                    <li>Documentos Esta Semana</li>
+                                    <li>Predicciones Esta Semana</li>
+                                    <li>Registros Médicos Esta Semana</li>
+                                    <li>Última Actualización</li>
+                                </ul>
+                            </li>
+                            <li><u>Usuarios por Rol</u>
+                                <ul>
+                                    <li>Distribución Porcentual por Rol</li>
+                                    <li>Cantidad de Usuarios por Rol</li>
+                                    <li>Porcentaje por Rol</li>
+                                </ul>
+                            </li>
+                            <li><u>Frecuencia Diaria</u>
+                                <ul>
+                                    <li>Tendencia de Actividad Diaria</li>
+                                    <li>Total de Documentos Diarios</li>
+                                    <li>Total de Predicciones Diarias</li>
+                                    <li>Total de Registros Médicos Diarios</li>
+                                    <li>Días con Actividad</li>
+                                </ul>
+                            </li>
+                            <li><u>Crecimiento Semanal</u>
+                                <ul>
+                                    <li>Crecimiento de Documentos Semanales</li>
+                                    <li>Crecimiento de Predicciones Semanales</li>
+                                    <li>Total por Tipo de Contenido</li>
+                                    <li>Semanas con Actividad</li>
+                                    <li>Promedio Semanal</li>
+                                </ul>
+                            </li>
+                            <li><u>Actividad de Usuarios</u>
+                                <ul>
+                                    <li>Usuarios Activos Diarios</li>
+                                    <li>Usuarios Nuevos Diarios</li>
+                                    <li>Total de Actividad</li>
+                                    <li>Promedio Diario de Usuarios Activos</li>
+                                    <li>Pico de Actividad</li>
+                                </ul>
+                            </li>
+                            <li><u>Resumen Ejecutivo</u></li>
+                                <ul>
+                                    <li>Total de Usuarios</li>
+                                    <li>Total de Predicciones</li>
+                                    <li>Total de Registros Médicos</li>
+                                    <li>Total de Documentos</li>
+                                    <li>Usuarios Activos Semana</li>
+                                    <li>Predicciones Esta Semana</li>
+                                    <li>Documentos Esta Semana</li>
+                                    <li>Crecimiento de Usuarios Porcentaje</li>
+                                    <li>Crecimiento de Documentos Porcentaje</li>
+                                    <li>Fecha de Última Actualización</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>Gráficas en el Dashboards</strong>
+                        <ul>
+                            <li>Predicciones por Mes (Gráfico de Líneas)</li>
+                            <li>Distribución de Enfermedades (Gráfico de Pie)</li>
+                            <li>Estado de Documentos (Gráfico de Barras)</li>
+                            <li>Distribución Demográfica (Gráfico de Barras Horizontales)</li>
+                            <li>Crecimiento de Usuarios (Gráfico de Líneas)</li>
+                            <li>Top Usuarios Activos (Gráfico de Barras)</li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>Salud y Monitoreo</strong>
+                        <p>Utilizando el endpoint /api/health podemos verificar que el servidor esté funcionando correctamente, en el caso de que todo esté correcto nos regresa una respuesta de Status Ok.</p>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Queries SQL y Stored Procedures</h3>
+                
+                <h4>Stored Procedures de Autenticación y Usuarios</h4>
+                <ul>
+                    <li>sp_login_staff - Auténtica que el usuario esté autorizado (Administradores y Analistas)
+                        <p>Utilizando la tabla Usuario valida las credenciales, verifica el rol del usuario, registra su IP, y regresa la información del usuario autenticado.</p>
+                    </li>
+                    <li>sp_get_user_data - Obtiene los datos completos de un usuario autenticado
+                        <p>Primeramente valida que el usuario exista, y regresa su email, rol, nombre del rol e información para su token JWT.</p>
+                    </li>
+                </ul>
+                
+                <h4>Stored procedures de Gestión de Entidades</h4>
+                <ul>
+                    <li>sp_get_entidades - Lista todas las tablas de la base de datos.
+                        <p>Consulta la tabla Entidad, y regresa el nombre y ID de cada tabla.</p>
+                    </li>
+                    <li>sp_get_entidad_data_with_columns - Obtiene datos y metadatos de una entidad específica.
+                        <p>Regresa todos los registros de una tabla especifica, metadatos de las columnas, y puede utilizarse para tablas con nombres dentro de comillas.</p>
+                    </li>
+                    <li>sp_get_table_columns - Obtiene columnas de una tabla.
+                        <p>Consulta el esquema information_schema.columns y regresa los nombres de las columnas ordenadas por posición. La utilizamos para validación en campos en las operaciones CRUD.</p>
+                    </li>
+                </ul>
+                
+                <h4>Stored Procedures de Operaciones CRUD</h4>
+                <ul>
+                    <li>sp_insert_record - Inserción genérica de registros en cualquier tabla.
+                        <p>Valida que la columna si exista, crea un INSERT y después regresa el ID del registro insertado. Además tiene manejo de errores con rollback.</p>
+                    </li>
+                    <li>sp_update_by_pk - Actualización de la tabla por clave primaria
+                        <p>Construye un UPDATE que filtra por clave primaria y solo actualiza los campos especificados. Regresa el número de registros actualizados.</p>
+                    </li>
+                    <li>sp_update_by_pk_multi - Actualización por clave primaria compuesta
+                        <p>Maneja claves primarias múltiples, construye un WHERE con múltiples condiciones, y está diseñado para soportar tablas con Primary Keys compuestas.</p>
+                    </li>
+                    <li>sp_delete_by_pk - Elimina registros por la clave primaria
+                        <p>Filtra por clave primaria, construye un delete y regresa el número de registros eliminados.</p>
+                    </li>
+                    <li>sp_delete_by_pk_multi - Elimina registros por clave primaria compuesta
+                        <p>Maneja múltiples claves primarias, construye un WHERE con múltiples condiciones, y esta diseñada para soportar tablas con Primary Keys compuestas.</p>
+                    </li>
+                </ul>
+                
+                <h4>Stored Procedures de Dashboards</h4>
+                <ul>
+                    <li>sp_dashboard_kpis - Regresa indicadores clave de rendimiento del sistema
+                        <p>Regresa información sobre total de usuarios, documentos, predicciones, usuarios activos por periodo y crecimiento semanal.</p>
+                    </li>
+                    <li>sp_dashboard_monitoreo_pa - Regresa datos de monitoreo de presión arterial
+                        <p>Regresa información sobre valores sistólicos y diastólicos, promedios, mínimos y máximos, y análisis de tendencias.</p>
+                    </li>
+                    <li>sp_dashboards_signos_vitales - Consolida los signos vitales
+                        <p>Regresa información de la frecuencia cardíaca, saturación de oxígeno, análisis de variabilidad y promedios por periodo.</p>
+                    </li>
+                    <li>sp_dashboard_lab - Regresa información sobre los resultados de laboratorios
+                        <p>Regresa información sobre análisis clínicos, valores de referencia, tendencias temporales y alertas por valores anómalos.</p>
+                    </li>
+                    <li>sp_dashboard_estilo_de_vida - Recupera las respuestas de cuestionarios de estilo de vida.
+                        <p>Regresa información con respuestas de si/no, valores numéricos y escalas, promedios por preguntas y análisis de patrones.</p>
+                    </li>
+                    <li>sp_dashboard_predicciones - Regresa información de predicciones de IA
+                        <p>Regresa información sobre la probabilidad de enfermedades, nivel de confianza de las predicciones, tendencias y análisis de riesgo cardiovascular.</p>
+                    </li>
+                </ul>
+                
+                <h4>Stored Procedures de Gráficos Especializados</h4>
+                <ul>
+                    <li>sp_dashboard_predicciones_por_mes - Regresa información sobre las predicciones agrupadas
+                        <p>Regresa información sobre el total de predicciones por mes, probabilidad promedio, predicciones positivas/negativas, y tendencias temporales.</p>
+                    </li>
+                    <li>sp_dashboard_distribucion_enfermedades - Regresa información sobre la distribución de enfermedades detectadas
+                        <p>Regresa información sobre el conteo por tipo de enfermedad, porcentajes de distribución, análisis demográfico y tendencias epidemiológicas.</p>
+                    </li>
+                    <li>sp_dashboard_estado_documentos - Regresa información sobre el estado de procesamiento de documentos
+                        <p>Regresa información sobre documentos pendientes, documentos procesados, documentos con errores, y tiempo de procesamiento.</p>
+                    </li>
+                    <li>sp_dashboard_distribucion_demografica - Regresa información sobre la distribución demográfica de usuarios
+                        <p>Regresa información sobre los usuarios en agrupaciones de sexo y edad, análisis de cohortes, tendencias demográficas y segmentación de usuarios.</p>
+                    </li>
+                    <li>sp_dashboard_crecimiento_acumulado_usuarios - Regresa información sobre el crecimiento acumulado de usuarios
+                        <p>Regresa información sobre los usuarios nuevos por mes, usuarios acumulados, tasa de crecimiento y análisis de retención.</p>
+                    </li>
+                    <li>sp_dashboard_top_usuarios_activos - Regresa información sobre top usuarios más activos
+                        <p>Regresa información sobre el ranking de actividad, métricas de engagement, análisis de comportamiento e identifica power users.</p>
+                    </li>
+                </ul>
+                
+                <h4>Stored Procedures de Auditoría</h4>
+                <ul>
+                    <li>sp_insert_audit_record - Registra acciones de auditoría
+                        <p>Regresa el log de todas las operaciones, timestamp automático y trazabilidad completa.</p>
+                    </li>
+                    <li>sp_get_audit_records - Realiza análisis de registros de auditoría
+                        <p>Regresa las estadísticas por período, usuario más activo, entidad más accedida y análisis de patrones de uso.</p>
+                    </li>
+                </ul>
+                
+                <h4>Stored Procedures de Utilidades</h4>
+                <ul>
+                    <li>sp_table_exists - Verifica la existencia de una tabla
+                        <p>Valida el nombre de la tabla, y nos ayuda a prevenir errores.</p>
+                    </li>
+                    <li>sp_get_primary_key_column - Obtiene columna de una clave primaria
+                        <p>Detecta automáticamente una Primary Key, funciona con PK simples y nos ayuda con la validación de integridad.</p>
+                    </li>
+                    <li>sp_get_primary_key_columns - Obtiene columnas de claves primarias compuestas
+                        <p>Detecta automáticamente primary keys compuestas, y también nos ayuda con la validación de integridad.</p>
+                    </li>
+                    <li>sp_get_entity_id_by_name - Obtener ID de la tabla por nombre
+                        <p>Mapea nombres a IDs, ayuda con la auditoría y con la validación de tablas.</p>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="exercise-info">
+                <h3>KPIs, Métricas y Gráficas</h3>
+                <h4><strong>KPIs principales del sistema</strong></h4>
+                
+                <p><u>Métricas de Usuarios</u></p>
+                <ul>
+                    <li>Total de Usuarios: Número total de usuarios registrados en el sistema</li>
+                    <li>Usuarios Activos (30 días): Usuarios que han interactuado con el sistema en el último mes</li>
+                    <li>Usuarios Activos (7 días): Usuarios que han interactuado con el sistema en la última semana</li>
+                    <li>Usuarios Nuevos (30 días): Nuevos registros en el último mes</li>
+                </ul>
+                
+                <p><u>Métricas de Contenido</u></p>
+                <ul>
+                    <li>Documentos Subidos: Total de documentos médicos procesados</li>
+                    <li>Predicciones Generadas: Número de predicciones de IA realizadas</li>
+                    <li>Registros Médicos: Total de registros de historial médico</li>
+                    <li>Respuestas de Estilo de Vida: Cuestionarios completados por usuarios</li>
+                    <li>Signos Vitales Registrados: Mediciones de signos vitales capturadas</li>
+                </ul>
+                
+                <p><u>Métricas de Actividad</u></p>
+                <ul>
+                    <li>Documentos Esta Semana: Documentos subidos en los últimos 7 días</li>
+                    <li>Predicciones Esta Semana: Predicciones generadas en los últimos 7 días</li>
+                    <li>Registros Médicos Esta Semana: Registros médicos creados en los últimos 7 días</li>
+                    <li>Frecuencia Diaria: Número de actualizaciones por día</li>
+                    <li>Crecimiento Semanal: Incremento semanal de usuarios y contenido</li>
+                    <li>Actividad de Usuarios: Patrones de uso diarios y semanales</li>
+                </ul>
+                
+                <p><u>Métricas de Calidad</u></p>
+                <ul>
+                    <li>Tasa de Procesamiento Exitoso: Porcentaje de documentos procesados correctamente</li>
+                    <li>Precisión de Predicciones: Exactitud de las predicciones de IA</li>
+                    <li>Tiempo de Respuesta: Velocidad de procesamiento de solicitudes</li>
+                </ul>
+                
+                <p><u>Métricas de Seguridad</u></p>
+                <ul>
+                    <li>Registros de Auditoría: Número de acciones registradas</li>
+                    <li>Accesos por Usuario: Frecuencia de acceso por usuario</li>
+                    <li>Entidades Más Accedidas: Tablas más consultadas en el sistema</li>
+                </ul>
+                
+                <br>
+                <h4><strong>Gráficas Especializadas</strong></h4>
+                
+                <p><u>Gráfica 1: Predicciones por Mes (de Líneas)</u></p>
+                <p>Utiliza el endpoint: /api/dashboard/graficos/predicciones-por-mes, y muestra el total de predicciones, predicciones positivas y negativas para identificar patrones estacionales, picos de actividad y la efectividad del sistema de IA.</p>
+                
+                <p><u>Gráfica 2: Distribución de Enfermedades (de Pastel)</u></p>
+                <p>Utiliza el endpoint /api/dashboard/graficos/distribucion-enfermedades, y muestra el total de usuarios que tiene diabetes o hipertensión. Esto con la finalidad de ayudar a los doctores a entender a la población que está siendo atendida.</p>
+                
+                <p><u>Gráfica 3: Estado de Documentos (de Barras Apiladas)</u></p>
+                <p>Utiliza el endpoint /api/dashboard/graficos/estado-documentos, y muestra la cantidad de documentos que ya han sido procesados y los que están pendientes. Esta gráfica nos puede ayudar a identificar si existen problemas con el procesamiento de documentos.</p>
+                
+                <p><u>Gráfica 4: Distribución Demográfica (de Barras Horizontales)</u></p>
+                <p>Utiliza el endpoint /api/dashboard/graficos/distribucion-demografica, y muestra la composición demográfica de los pacientes, lo cual permite evaluar la representatividad de la población y entender el perfil de los usuarios del sistema.</p>
+                
+                <p><u>Gráfica 5: Crecimiento Acumulado de Usuarios (de Área)</u></p>
+                <p>Utiliza el endpoint /api/dashboard/graficos/crecimiento-acumulado-usuarios, y distingue entre los usuarios acumulados y los nuevos, además nos permite calcular la velocidad de adopción del sistema.</p>
+                
+                <p><u>Gráfica 6: Top Usuarios Activos (Barras Verticales)</u></p>
+                <p>Utiliza el endpoint /api/dashboard/graficos/top-usuarios-activos, y muestra los 5 usuarios más activos y comprometidos con el sistema, mide la participación a través de documentos subidos, signos vitales registrados, predicciones realizadas en base a su salud y participación total.</p>
+                
+                <br>
+                <h4><strong>Dashboards Especializados</strong></h4>
+                
+                <p><u>Dashboard de Monitoreo de Presión Arterial</u></p>
+                <p>Utiliza el endpoint /api/dashboard/monitoreo-pa, que utiliza el stored procedure sp_dashboard_monitoreo_pa para tener acceso a los datos completos de monitoreo de presión arterial sin procesamiento adicional. Mientras que utilizamos el endpoint /api/dashboard/monitoreo-pa-stats es una función de análisis estadístico que procesa datos de monitoreo de presión arterial para generar métricas clave como presión sistolica promedio, presión diastolica promedio, presión sistolica minima, etc.</p>
+                
+                <p><u>Dashboard de Signos Vitales</u></p>
+                <p>Utiliza el endpoint /api/dashboard/signos-vitales, utilizando el stored procedure sp_dashboard_signos_vitales para acceder a los datos completos de signos vitales de los pacientes en el sistema de PredictHealth.</p>
+                
+                <p><u>Dashboard de Laboratorios</u></p>
+                <p>Utiliza el endpoint /api/dashboard/lab, utilizando el stored procedure sp_dashboard_lab. Su función es acceder a los datos completos de análisis de los laboratorio de los pacientes en el sistema. Después utilizando el endpoint /api/dashboard/lab/stats hacemos el análisis estadístico avanzado que procesa datos de laboratorio para generar métricas clínicas.</p>
+                
+                <p><u>Dashboard de Estilo de vida</u></p>
+                <p>Utiliza el endpoint /api/dashboard/estilo-vida, y el stored procedure sp_dashboard_estilo_vida nos permite ver los datos completos de cuestionarios de estilo de vida de los pacientes en el sistema. Y con el endpoint /api/dashboard/estilo-vida-stats generamos el análisis estadístico y con el endpoint /api/dashboard/estilo-vida-charts las gráficas visuales de la información obtenida.</p>
+                
+                <p><u>Dashboard de Predicciones</u></p>
+                <p>Utiliza el endpoint /api/dashboard/predicciones, y el stored procedure sp_dashboard_predicciones nos permite obtener los datos completos de predicciones de modelos de inteligencia artificial.</p>
+                
+                <p><u>Dashboard de Medicación</u></p>
+                <p>Utiliza el endpoint /api/dashboard/medicacion, y el stored procedure sp_dashboard_medicacion nos permite tener acceso a los datos completos de medicamentos y tratamientos farmacológicos de los pacientes.</p>
+                
+                <p><u>Dashboard de Documentos</u></p>
+                <p>Utiliza el endpoint /api/dashboard/documentos, y el stored procedure sp_dashboard_documentos nos permite ver los datos completos de documentos médicos digitales almacenados en el sistema.</p>
+                
+                <p><u>Dashboard de Auditoría</u></p>
+                <p>Utiliza el endpoint /api/dashboard/auditoria, y el stored procedure sp_dashboard_auditoria que nos permite tener acceso al registro de auditoría del sistema para trazabilidad de acciones, detección de anomalías, cumplimiento de regulaciones de salud, y análisis de seguridad del sistema.</p>
+                
+                <p><u>Dashboard Completo</u></p>
+                <p>Utiliza el endpoint /api/dashboard/completo, y el stored procedure sp_dashboard_completo para proporcionar acceso a una vista consolidada y unificada de todos los dashboards del sistema.</p>
+                
+                <br>
+                <h4><strong>Interpretación General de las Métricas</strong></h4>
+                
+                <p><u>Análisis de Adopción</u></p>
+                <p>Las métricas de usuarios activos y crecimiento acumulado permiten evaluar la adopción del sistema y identificar tendencias de crecimiento.</p>
+                
+                <p><u>Análisis de Engagement</u></p>
+                <p>Los KPIs de actividad y el ranking de usuarios activos ayudan a entender qué tan comprometidos están los usuarios con el sistema.</p>
+                
+                <p><u>Análisis de Salud Pública</u></p>
+                <p>Las distribuciones de enfermedades y demográficas proporcionan insights valiosos sobre la salud de la población atendida.</p>
+                
+                <p><u>Análisis de Eficiencia</u></p>
+                <p>Las métricas de procesamiento de documentos y predicciones permiten evaluar la eficiencia del sistema e identificar áreas de mejora.</p>
+                
+                <p><u>Análisis de Calidad</u></p>
+                <p>Los indicadores de precisión y tiempo de respuesta ayudan a mantener la calidad del servicio y la satisfacción del usuario. Este conjunto completo de KPIs, métricas y gráficas proporciona una visión integral del sistema PredictHealth, permitiendo a los administradores y analistas tomar decisiones informadas basadas en datos reales y tendencias identificables.</p>
+            </div>
+
+            <div class="screenshots-section">
+                <h3>Capturas de pantalla del sistema en funcionamiento</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/1_Login.png" alt="Figura 1. Login" onclick="openImageModal(this.src)">
+                        <p>Figura 1. Login</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/2_Dashboard.png" alt="Figura 2. Dashboard" onclick="openImageModal(this.src)">
+                        <p>Figura 2. Dashboard</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/3_KPI.png" alt="Figura 3. KPI Indicadores Principales" onclick="openImageModal(this.src)">
+                        <p>Figura 3. KPI Indicadores Principales</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/4_KPI.png" alt="Figura 4. KPI Usuarios por Rol" onclick="openImageModal(this.src)">
+                        <p>Figura 4. KPI Usuarios por Rol</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/5_KPI.png" alt="Figura 5. KPI Frecuencia Diaria" onclick="openImageModal(this.src)">
+                        <p>Figura 5. KPI Frecuencia Diaria</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/6_KPI.png" alt="Figura 6. KPI Crecimiento Semanal" onclick="openImageModal(this.src)">
+                        <p>Figura 6. KPI Crecimiento Semanal</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/7_KPI.png" alt="Figura 7. KPI Actividad de Usuarios" onclick="openImageModal(this.src)">
+                        <p>Figura 7. KPI Actividad de Usuarios</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/8_KPI.png" alt="Figura 8. KPI Resumen Ejecutivo" onclick="openImageModal(this.src)">
+                        <p>Figura 8. KPI Resumen Ejecutivo</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/9_Reporte.png" alt="Figura 9. Reporte Monitoreo Presión Arterial" onclick="openImageModal(this.src)">
+                        <p>Figura 9. Reporte Monitoreo Presión Arterial</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/10_Reporte.png" alt="Figura 10. Reporte Monitoreo Presión Arterial Cont." onclick="openImageModal(this.src)">
+                        <p>Figura 10. Reporte Monitoreo Presión Arterial Cont.</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/11_Reporte.png" alt="Figura 11. Reporte Monitoreo Signos Vitales" onclick="openImageModal(this.src)">
+                        <p>Figura 11. Reporte Monitoreo Signos Vitales</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/12_Reporte.png" alt="Figura 12. Reporte Monitoreo Signos Vitales Cont." onclick="openImageModal(this.src)">
+                        <p>Figura 12. Reporte Monitoreo Signos Vitales Cont.</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/13_Reporte.png" alt="Figura 13. Reporte Laboratorio" onclick="openImageModal(this.src)">
+                        <p>Figura 13. Reporte Laboratorio</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/14_Reporte.png" alt="Figura 14. Reporte Laboratorio Cont." onclick="openImageModal(this.src)">
+                        <p>Figura 14. Reporte Laboratorio Cont.</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/15_Reporte.png" alt="Figura 15. Reporte Estilo de Vida" onclick="openImageModal(this.src)">
+                        <p>Figura 15. Reporte Estilo de Vida</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/16_Reporte.png" alt="Figura 16. Reporte Estilo de Vida Cont." onclick="openImageModal(this.src)">
+                        <p>Figura 16. Reporte Estilo de Vida Cont.</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance2ProyectoFinal/17_CRUD.png" alt="Figura 17. CRUD de Base de Datos" onclick="openImageModal(this.src)">
+                        <p>Figura 17. CRUD de Base de Datos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reflection-section">
+                <h3>Conclusiones</h3>
+                <div class="reflection-content">
+                    El desarrollo del módulo del backend permitió consolidar el entendimiento sobre la diferencia entre aplicaciones monolíticas y aplicaciones basadas en microservicios. Se pudo observar con mayor claridad cómo el frontend del cliente web únicamente consume los endpoints o rutas expuestas por el backend, los cuales pueden ser fácilmente sustituidos por los endpoints de los microservicios, siempre y cuando se mantenga la coherencia en los nombres y estructuras de dichos endpoints.
+                    <br><br>
+                    De igual manera, se apreciaron las ventajas de utilizar microservicios en lugar de una aplicación monolítica, ya que conforme se implementaban más rutas, el código del backend monolítico aumentaba considerablemente, generando una mayor complejidad visual y lógica. Esto provocaba que el mantenimiento del proyecto resultara más difícil, especialmente al intentar localizar errores o entender la estructura del sistema. En contraste, con el enfoque de microservicios, el código se percibe más limpio, modular y sencillo de comprender, lo cual facilita la detección de fallos y la escalabilidad del proyecto.
+                    <br><br>
+                    Por otro lado, uno de los principales retos enfrentados fue la automatización de la creación del backend mediante inteligencia artificial. Se observó que las herramientas de IA presentan limitaciones cuando se les asignan tareas demasiado amplias o con múltiples dependencias, lo que llevó a invertir una cantidad considerable de tiempo en desarrollar la primera instancia funcional de cada componente. Una vez completada esta fase, fue posible replicar las demás funcionalidades de forma más eficiente, al comprender la estructura general y los patrones que debían seguirse.
+                    <br><br>
+                    Asimismo, las lecciones aprendidas incluyeron la importancia de redactar prompts más específicos y proporcionar un contexto más detallado a la inteligencia artificial para obtener resultados precisos. También se comprendió la conveniencia de realizar los procesos de manipulación de datos directamente en el backend, dejando al frontend únicamente la tarea de consumir la información.
+                    <br><br>
+                    Contar con una base de datos completa y bien estructurada resultó esencial para mantener un control adecuado sobre la aplicación, especialmente al considerar su uso por parte de usuarios finales, donde será fundamental el monitoreo constante para detectar oportunidades de mejora o corregir errores. Finalmente, se reafirmó la relevancia de utilizar microservicios para evitar la sobrecarga de peticiones desde el frontend, ya que en algunos casos las solicitudes concurrentes provocaban retrasos o fallos en las respuestas cuando el sistema trabajaba de manera monolítica.
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

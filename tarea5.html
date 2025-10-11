@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea 5: XML + XSL - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="tarea5.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container tarea5">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Tarea 5: XML + XSL</h1>
+            <p>Catálogo de Música y Registro de Empleados</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información de la Tarea -->
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <h4>Catálogo de Música</h4>
+                <ol>
+                    <li>Transformación de la lista de álbumes:<ul>
+                        <li>Problema: Diseña un XSLT que transforme el XML de un catálogo de música en una página HTML que liste todos los álbumes, mostrando el título, año de lanzamiento, y género de cada uno. Agrupa los álbumes por artista y muestra el nombre y país de origen del artista antes de listar sus álbumes. Punto clave: Agrupación de elementos &lt;album&gt; por artista.</li>
+                    </ul>
+                    
+                    <li>Generación de una lista de canciones con duración total:<ul>
+                        <li>Problema: Crea un XSLT que transforme el XML en una tabla HTML que muestre las canciones de cada álbum junto con su duración, e incluya al final la duración total del álbum. Punto clave: Sumar la duración de las canciones y mostrar el total en la salida HTML.</li>
+                    </ul>
+                    
+                    <li>Filtrado de canciones que son sencillos:<ul>
+                        <li>Problema: Implementa un XSLT que filtre y muestre solo las canciones que son sencillos (single="true"). El resultado debe ser una lista de álbumes que incluya únicamente los sencillos, mostrando el título y la duración de cada uno. Punto clave: Uso de condiciones en XSLT (&lt;xsl:if&gt; o &lt;xsl:choose&gt;).</li>
+                    </ul>
+                    
+                    <li>Creación de un índice de artistas y sus álbumes:<ul>
+                        <li>Problema: Diseña un XSLT que transforme el XML en una página HTML con un índice alfabético de artistas. Cada artista debe tener una lista de sus álbumes debajo de su nombre. Los álbumes deben estar ordenados por año de lanzamiento. Punto clave: Ordenar los álbumes por un atributo (year).</li>
+                    </ul>
+                    
+                    <li>Aplicación de un filtro por género musical:<ul>
+                        <li>Problema: Crea un XSLT que permita filtrar los álbumes por género musical. El resultado debe ser una página HTML que muestre solo los álbumes pertenecientes a un género específico, como "Rock" o "Pop". Punto clave: Filtrado basado en el valor de un elemento (&lt;genre&gt;).</li>
+                    </ul>
+                </ol>
+                
+                <br>
+                
+                <h4>Registro de Empleados</h4>
+                <ol>
+                    <li>Transformación de la lista de empleados por departamento:<ul>
+                        <li>Problema: Crea un XSLT que transforme el XML en una tabla HTML que agrupe a los empleados por departamento, mostrando para cada uno el nombre completo, posición, y salario. El departamento debe aparecer como un encabezado separado. Punto clave: Agrupación por el elemento &lt;department&gt;.</li>
+                    </ul>
+                    
+                    <li>Cálculo del salario promedio por departamento:<ul>
+                        <li>Problema: Diseña un XSLT que calcule y muestre el salario promedio de los empleados en cada departamento. El resultado debe ser una lista de departamentos con el salario promedio mostrado al lado. Punto clave: Sumar y promediar valores numéricos en XSLT.</li>
+                    </ul>
+                    
+                    <li>Filtrado de empleados por tipo de contrato:<ul>
+                        <li>Problema: Implementa un XSLT que filtre y muestre solo a los empleados que trabajan a tiempo completo. La salida debe ser una lista con el nombre completo, posición, y salario de cada empleado a tiempo completo. Punto clave: Uso de condiciones en XSLT (&lt;xsl:if&gt; o &lt;xsl:choose&gt;).</li>
+                    </ul>
+                    
+                    <li>Generación de un informe de antigüedad de empleados:<ul>
+                        <li>Problema: Crea un XSLT que transforme el XML en un informe que muestre los empleados ordenados por fecha de contratación, de los más antiguos a los más nuevos. Incluye el nombre completo, posición, y fecha de contratación de cada empleado. Punto clave: Ordenar los empleados por un atributo (hire_date).</li>
+                    </ul>
+                    
+                    <li>Visualización jerárquica de departamentos y empleados:<ul>
+                        <li>Problema: Diseña un XSLT que muestre una vista jerárquica de la estructura de la empresa, donde cada departamento es un encabezado y debajo se listan los empleados asociados, mostrando su nombre completo, posición, y si son a tiempo completo o parcial. Punto clave: Visualización jerárquica basada en la estructura de los datos XML.</li>
+                    </ul>
+                </ol>
+            </div>
+
+            <div class="code-section">
+                <h3>Código</h3>
+
+                <!-- Grid de Opciones -->
+                <div class="menu-grid">
+                    <!-- Opción 1: Catálogo de Música -->
+                    <a href="codigo_tarea5.html" class="menu-card">
+                        <h3>Catálogo de Música</h3>
+                        <p>Código de las transformaciones XSLT para un catálogo de música</p>
+                        <div class="card-footer">
+                            <span class="arrow">→</span>
+                        </div>
+                    </a>
+
+                    <!-- Opción 2: Registro de Empleados -->
+                    <a href="codigo_empleados_tarea5.html" class="menu-card">
+                        <h3>Registro de Empleados</h3>
+                        <p>Código de las transformaciones XSLT para un registro de empleados</p>
+                        <div class="card-footer">
+                            <span class="arrow">→</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                
+                <!-- Catálogo de Música -->
+                <h4>Catálogo de Música</h4>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <h4>1. Transformación de la lista de álbumes</h4>
+                        <img src="images/Tarea05/Artista.png" alt="Transformación de la lista de álbumes" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>1. Transformación de la lista de álbumes (Varios álbumes)</h4>
+                        <img src="images/Tarea05/ArtistaVarios.png" alt="Transformación de la lista de álbumes - Varios álbumes" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>2. Generación de una lista de canciones con duración total</h4>
+                        <img src="images/Tarea05/DuracionTotal.png" alt="Generación de una lista de canciones con duración total" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>3. Filtrado de canciones que son sencillos</h4>
+                        <img src="images/Tarea05/DuracionSencillos.png" alt="Filtrado de canciones que son sencillos" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>4. Creación de un índice de artistas y sus álbumes (Inicio)</h4>
+                        <img src="images/Tarea05/AlfaInicio.png" alt="Creación de un índice de artistas y sus álbumes - Inicio" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>4. Creación de un índice de artistas y sus álbumes (Por año)</h4>
+                        <img src="images/Tarea05/AlfaAño.png" alt="Creación de un índice de artistas y sus álbumes - Por año" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>5. Aplicación de un filtro por género musical</h4>
+                        <img src="images/Tarea05/Genero.png" alt="Aplicación de un filtro por género musical" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                </div>
+
+                <!-- Registro de Empleados -->
+                <h4>Registro de Empleados</h4>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <h4>1. Transformación de la lista de empleados por departamento</h4>
+                        <img src="images/Tareas04/Departamentos.png" alt="Transformación de la lista de empleados por departamento" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>2. Cálculo del salario promedio por departamento</h4>
+                        <img src="images/Tareas04/SalarioPromedio.png" alt="Cálculo del salario promedio por departamento" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>3. Filtrado de empleados por tipo de contrato</h4>
+                        <img src="images/Tareas04/TiempoCompleto.png" alt="Filtrado de empleados por tipo de contrato" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>4. Generación de un informe de antigüedad de empleados</h4>
+                        <img src="images/Tareas04/FechaContratacion.png" alt="Generación de un informe de antigüedad de empleados" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                    
+                    <div class="screenshot-item">
+                        <h4>5. Visualización jerárquica de departamentos y empleados</h4>
+                        <img src="images/Tareas04/Jerarquia.png" alt="Visualización jerárquica de departamentos y empleados" class="screenshot" onclick="openImageModal(this.src)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <p>Esta tarea es continuación de la tarea 4, en donde creé dos bases de datos: una de catálogo de libros y otra de registros de empleados. En aquella ocasión los datos se crearon en XML. Sin embargo, el enfoque de esta nueva actividad fue implementar XSLT, el cual nos permite manejar y transformar los datos de manera más flexible y dinámica.</p>
+                
+                <p>Gracias a la variedad de los ejercicios, me pude dar cuenta de la amplia gama de opciones que existen para modificar, filtrar o crear nueva información a partir de un simple archivo XML. Por ejemplo, se pueden aplicar filtros de información para mostrar únicamente los datos que cumplen con cierto requisito, como en el caso de mostrar solo los álbumes de un género específico, como el rock. También se pueden realizar operaciones de agrupación, como organizar a los empleados según el departamento en el que trabajan. Asimismo, es posible generar nueva información al procesar los datos del XML, como calcular la duración total de un álbum sumando todas las canciones que lo componen.</p>
+                
+                <p>Por estas razones, al igual que en la actividad anterior, encuentro una clara relación entre el uso de XML junto con XSLT y el manejo de datos en un sistema de gestión de bases de datos (SGBD). En ambos casos se pueden realizar acciones similares: filtrar, agrupar, crear nuevos datos mediante procesos, ordenar resultados, entre otras operaciones. Sin embargo, una de las ventajas clave del XSLT es que se puede combinar con CSS, lo que permite darle estilo a la información. Así, los datos no se muestran únicamente en forma de consultas de texto en una terminal, como ocurre en una base de datos tradicional, sino que se presentan de una manera más visual y atractiva para el usuario.</p>
+                
+                <p>Además, después de realizar el ejercicio, me di cuenta de que realmente se podrían crear páginas completas para mostrar información de manera sencilla, incluso sin necesidad de tener una base de datos detrás si el proyecto es pequeño o si no se cuentan con los recursos suficientes (como tiempo o infraestructura). Me pareció muy interesante que el resultado de cada transformación se viera tan bien y que, con tan pocas herramientas, fuera posible lograr un front end básico directamente a partir de XML y XSLT. Esto me hizo valorar la importancia de estas tecnologías como soluciones prácticas y rápidas en determinados contextos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

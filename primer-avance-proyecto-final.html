@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primer Avance - Proyecto Final - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="proyecto-final.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio1 primer-avance">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Primer Avance - Proyecto Final</h1>
+            <p>Módulo 5: Base de Datos y Módulo 2: Frontend</p>   
+        </div>
+        
+        <div class="content">
+            <!-- Información -->
+            <div class="exercise-info">
+                <h3>Introducción y contexto del proyecto</h3>
+                <p>Según la Organización Mundial de la Salud (OMS) las enfermedades cardiovasculares (como diabetes e hipertensión) son la causa de muerte principal a nivel mundial. Según Eclon Health (2024) las enfermedades cardíacas son llamadas "asesinas silenciosas" ya que las personas pueden vivir años sin darse cuenta de su presencia. Por lo tanto, consideran que la detección temprana es lo que previene problemas mayores a futuro.</p>
+                <p>PredictHealth será una aplicación, tanto web como móvil, diseñada con el objetivo de poder ayudar a los pacientes a detectar los signos de riesgo a enfermedades cardiovasculares y a fomentar una detección temprana de ellas. A través de datos de su vida diaria y de estudios médicos que proporcionen, se hará uso de IA para poder evaluar el nivel riesgo en el que se encuentra el paciente. Tendremos una interfaz web para el médico, quien podrá ver los datos de todos sus pacientes. Así como también una interfaz móvil para los pacientes, que les permitirá registrar y consultar sus datos médicos.</p>
+                
+                <h3>Arquitectura del sistema</h3>
+                <div class="architecture-diagram">
+                    <img src="images/avance1ProyectoFinal/Arquitectura.jpeg" alt="Arquitectura del Sistema PredictHealth" onclick="openImageModal(this.src)">
+                    <p>Diagrama de arquitectura del sistema PredictHealth</p>
+                </div>
+                <p>Utilizaremos una arquitectura basada en microservicios implementados en una máquina virtual dentro de Google Cloud Platform (GCP). En nuestra arquitectura tendremos Clientes desde Web como desde Aplicación Android y ambos interactúan con los microservicios mediante JSON y XML.</p>
+                <p>Cada uno de los microservicios cumplirá una tarea específica, como la autenticación de los usuarios, la gestión de datos del usuario, la geolocalización, procesamiento de documentos, recomendaciones y predicciones. Estos microservicios estarán conectados a diferentes herramientas. Utilizaremos PostgreSQL para la base de datos relacional principal, Redis para el caché, Firebase para la autenticación, y Hadoop para la predicción de diabetes y/o hipertensión con IA. Y como punto de enlace de todos estos microservicios utilizaremos Flask, que es un framework ligero de Python.</p>
+                
+                <h3>Diseño del diagrama ER y modelo de datos</h3>
+                <div class="architecture-diagram">
+                    <img src="images/avance1ProyectoFinal/ModeloER.jpeg" alt="Diagrama ER del Sistema PredictHealth" onclick="openImageModal(this.src)">
+                    <p>Diagrama de entidad-relación del sistema PredictHealth</p>
+                </div>
+                <p>Después de un proceso de normalización, obtuvimos 22 tablas para nuestro modelo de base de datos. Tenemos entidades para guardar los datos de login del usuario, datos personales, datos de localización, historial médico, predicciones y recomendaciones. Además guardamos los documentos médicos que el paciente proporciona junto con los valores importantes para la predicción.</p>
+                
+                <h3>Procedimientos Almacenados</h3>
+                <p>Utilizaremos procedimientos almacenados y consultas complejos para analizar la información de los usuarios y que pueda ser utilizada por los profesionales para validar o descartar las predicciones.</p>
+                
+                <h4>Análisis de Documentos y Parámetros Médicos</h4>
+                <ul>
+                    <li><strong>analizar_documentos_medicos:</strong> Cuenta documentos médicos subidos por el usuario y muestra los valores más recientes de exámenes (HbA1c, glucosa, colesterol, presión arterial).</li>
+                    <li><strong>analizar_evolucion_parametros:</strong> Evalúa cómo han cambiado los valores médicos del usuario en los últimos 6 meses (promedios, mínimos, máximos).</li>
+                    <li><strong>resumen_integral_salud:</strong> Combina datos personales, historial médico, estilo de vida, exámenes recientes, diagnósticos y tratamientos en un solo resumen.</li>
+                </ul>
+                
+                <h4>Análisis de Tratamientos y Medicamentos</h4>
+                <ul>
+                    <li><strong>analizar_tratamientos_medicamentos:</strong> Muestra los medicamentos que está tomando un usuario y posibles complicaciones asociadas</li>
+                    <li><strong>analizar_compliance_adherencia:</strong> Evalúa la adherencia del usuario al tratamiento, considerando la frecuencia de carga de documentos médicos y la evolución de sus valores clínicos, y proporciona recomendaciones para mejorar el cumplimiento terapéutico.</li>
+                </ul>
+                
+                <h4>Evaluación de Riesgo</h4>
+                <ul>
+                    <li><strong>analizar_riesgo_datos_reales:</strong> Evalúa el riesgo de diabetes, problemas cardiovasculares y función renal basándose en los resultados reales de laboratorio del usuario.</li>
+                    <li><strong>usuarios_con_riesgo_alto:</strong> Identifica usuarios con IMC elevado, estrés alto y problemas cardiovasculares confirmados, incluyendo su estilo de vida y medicamentos.</li>
+                    <li><strong>usuarios_riesgo_cardiometabolico:</strong> Detecta usuarios con IMC elevado, consumo alto de sal, hipertensión o colesterol alto, considerando medicamentos y factores de estilo de vida asociados.</li>
+                </ul>
+                
+                <h4>Comportamiento y Predicciones del Usuario</h4>
+                <ul>
+                    <li><strong>predicciones_por_usuario:</strong> Proporciona el número de predicciones realizadas por usuario y tipo de enfermedad en los últimos 30 días, permitiendo un seguimiento de riesgos emergentes.</li>
+                    <li><strong>usuarios_movilidad_baja:</strong> Identifica a los usuarios con dificultades para caminar, baja actividad física y menos de tres días de salud física por semana.</li>
+                    <li><strong>usuarios_gps_patron:</strong> Detecta patrones de movilidad mediante coordenadas GPS, identificando lugares visitados repetidamente en el último mes.</li>
+                </ul>
+                
+                <h3>Mockups y justificación de diseño de la interfaz</h3>
+                
+                <h4>Aplicación Web</h4>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WebLogin.png" alt="Página de inicio de sesión web" onclick="openImageModal(this.src)">
+                        <p>Página de inicio de sesión web</p>
+                    </div>
+                </div>
+                <p>Esta es nuestra página de inicio de sesión, con una interfaz sencilla e intuitiva. Permite tener el login del doctor para ver los datos de sus pacientes. Utilizamos el color "Midnight Blue" ya que el azul transmite confianza y profesionalismo, además de que está relacionado con la seguridad.</p>
+                
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WebDashboard.png" alt="Dashboard del doctor" onclick="openImageModal(this.src)">
+                        <p>Dashboard del doctor</p>
+                    </div>
+                </div>
+                <p>Esta es la interfaz web del doctor, en donde obtiene un Dashboard con los datos que el seleccione del lado izquierdo de la pantalla. El nivel de riesgo se despliega, con una codificación de colores, Alto se despliega en color rojo y Moderado en amarillo. En la parte inferior el doctor puede ver la información personal del paciente, documentos que ha subido y las predicciones que la aplicación ha realizado sobre su riesgo de tener enfermedades como diabetes o hipertensión.</p>
+                
+                <h4>Aplicación Móvil</h4>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/AppLogIn.jpeg" alt="Interfaz móvil - Login" onclick="openImageModal(this.src)">
+                        <p>Interfaz móvil - Login</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WhatsApp Image 2025-09-18 at 10.06.59 PM.jpeg" alt="Interfaz móvil - Pantalla principal" onclick="openImageModal(this.src)">
+                        <p>Interfaz móvil - Pantalla principal</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WhatsApp Image 2025-09-18 at 10.07.05 PM.jpeg" alt="Interfaz móvil - Menú de opciones" onclick="openImageModal(this.src)">
+                        <p>Interfaz móvil - Menú de opciones</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WhatsApp Image 2025-09-18 at 10.07.11 PM.jpeg" alt="Interfaz móvil - Datos personales" onclick="openImageModal(this.src)">
+                        <p>Interfaz móvil - Datos personales</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WhatsApp Image 2025-09-18 at 10.07.24 PM.jpeg" alt="Interfaz móvil - Historial médico" onclick="openImageModal(this.src)">
+                        <p>Interfaz móvil - Historial médico</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/avance1ProyectoFinal/WhatsApp Image 2025-09-18 at 10.07.35 PM.jpeg" alt="Interfaz móvil - Predicciones" onclick="openImageModal(this.src)">
+                        <p>Interfaz móvil - Predicciones</p>
+                    </div>
+                </div>
+                <p>En nuestra interfaz para el usuario seguimos con el mismo esquema de color "Midnight Blue" para dar confianza al usuario de quere ingresar sus datos a la aplicación. Esta interfaz es un pequeño formulario en donde el usuario puede ingresar sus datos más relevantes iniciando la sesión a la aplicación.</p>
+                
+                <h3>Referencias</h3>
+                <ol>
+                    <li>Echelon Marketing. (2024, October 31). Why early heart disease screening Saves lives: Key benefits You should know. <em>Echelon Health</em>. Recuperado de <a href="https://www.echelon.health/early-heart-disease-screening-saves-lives/" target="_blank">https://www.echelon.health/early-heart-disease-screening-saves-lives/</a></li>
+                    <li>Equipo UDEM. (2025). <em>Base de Datos DML</em> [Documento no publicado]. Universidad de Monterrey. Recuperado de <a href="https://docs.google.com/document/d/1rEvLP03b2Vg-RNRP1V1NPEwThnwyppSAWdXHW_kgzj4/edit?usp=sharing" target="_blank">https://docs.google.com/document/d/1rEvLP03b2Vg-RNRP1V1NPEwThnwyppSAWdXHW_kgzj4/edit?usp=sharing</a></li>
+                    <li>Equipo UDEM. (2025). <em>Formularios</em> [Documento no publicado]. Universidad de Monterrey. Recuperado de <a href="https://docs.google.com/document/d/1DDVxPYFhKs7FMCuM7HOlUwLIojpXSd_S73FzS5eaxjw/edit?usp=sharing" target="_blank">https://docs.google.com/document/d/1DDVxPYFhKs7FMCuM7HOlUwLIojpXSd_S73FzS5eaxjw/edit?usp=sharing</a></li>
+                    <li>Equipo UDEM. (2025). <em>Modelo ER</em> [Documento no publicado]. Universidad de Monterrey. Recuperado de <a href="https://docs.google.com/document/d/1VXycVG1fAsWVyR-WUuyAO9iuKRno-keRreiZjPSXJNE/edit?usp=sharing" target="_blank">https://docs.google.com/document/d/1VXycVG1fAsWVyR-WUuyAO9iuKRno-keRreiZjPSXJNE/edit?usp=sharing</a></li>
+                </ol>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

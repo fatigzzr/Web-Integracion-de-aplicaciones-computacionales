@@ -1,0 +1,453 @@
+/* ===== ESTILOS GLOBALES PARA TODO EL SITIO WEB ===== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: white;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* Normalización global de texto */
+p, li, span, div {
+    line-height: 1.6;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+ul, ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+    text-align: left;
+}
+
+li {
+    margin-bottom: 0.5rem;
+    text-align: left;
+}
+
+/* Alineación consistente para todo el contenido */
+.container {
+    width: 100%;
+    background: white;
+    text-align: left;
+}
+
+.exercise-info, .reflection-content, .screenshots-section {
+    text-align: left;
+}
+
+/* ===== ESTILOS PARA INDEX.HTML ===== */
+
+/* Portada */
+.portada {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: #fbfbdb;
+    color: #333;
+    padding: 2.5rem 2rem 2rem 2rem;
+}
+
+.portada-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.portada-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.portada-info h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.portada-info p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+.portada-info .course {
+    font-weight: 600;
+    color: #000;
+}
+
+/* Header del menú */
+.header {
+    background: white;
+    color: #333;
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.header p {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+}
+
+/* Header especial para sección de tareas */
+.header.tareas-header {
+    background: #E8F4FD;
+    color: #333;
+    margin-top: 2rem;
+}
+
+/* Tarjetas del menú */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    margin-bottom: 0;
+}
+
+.menu-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 0;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Colores temáticos para tarjetas de ejercicios */
+.menu-card[href="ejercicio1.html"] {
+    border-color: #cc8899;
+}
+
+.menu-card[href="ejercicio1.html"] h3 {
+    color: #cc8899;
+}
+
+.menu-card[href="ejercicio1.html"] .arrow {
+    color: #cc8899;
+}
+
+.menu-card[href="ejercicio2.html"] {
+    border-color: #ffca91;
+}
+
+.menu-card[href="ejercicio2.html"] h3 {
+    color: #ffca91;
+}
+
+.menu-card[href="ejercicio2.html"] .arrow {
+    color: #ffca91;
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Hover effects con colores temáticos */
+.menu-card[href="ejercicio1.html"]:hover {
+    box-shadow: 0 8px 25px rgba(204, 136, 153, 0.3);
+}
+
+.menu-card[href="ejercicio2.html"]:hover {
+    box-shadow: 0 8px 25px rgba(255, 202, 145, 0.3);
+}
+
+/* Colores para futuros ejercicios */
+.menu-card[href="ejercicio3.html"] {
+    border-color: #b784a7;
+}
+
+.menu-card[href="ejercicio3.html"] h3 {
+    color: #b784a7;
+}
+
+.menu-card[href="ejercicio3.html"] .arrow {
+    color: #b784a7;
+}
+
+.menu-card[href="ejercicio3.html"]:hover {
+    box-shadow: 0 8px 25px rgba(183, 132, 167, 0.3);
+}
+
+.menu-card[href="ejercicio4.html"] {
+    border-color: #ffdd91;
+}
+
+.menu-card[href="ejercicio4.html"] h3 {
+    color: #ffdd91;
+}
+
+.menu-card[href="ejercicio4.html"] .arrow {
+    color: #ffdd91;
+}
+
+.menu-card[href="ejercicio4.html"]:hover {
+    box-shadow: 0 8px 25px rgba(255, 221, 145, 0.3);
+}
+
+.menu-card[href="ejercicio5.html"] {
+    border-color: #ff9a8b;
+}
+
+.menu-card[href="ejercicio5.html"] h3 {
+    color: #ff9a8b;
+}
+
+.menu-card[href="ejercicio5.html"] .arrow {
+    color: #ff9a8b;
+}
+
+.menu-card[href="ejercicio5.html"]:hover {
+    box-shadow: 0 8px 25px rgba(255, 154, 139, 0.3);
+}
+
+/* Colores para tareas */
+.menu-card[href="tarea1.html"] {
+    border-color: #9ff4f6;
+}
+
+.menu-card[href="tarea1.html"] h3 {
+    color: #9ff4f6;
+}
+
+.menu-card[href="tarea1.html"] .arrow {
+    color: #9ff4f6;
+}
+
+.menu-card[href="tarea1.html"]:hover {
+    box-shadow: 0 8px 25px rgba(159, 244, 246, 0.3);
+}
+
+.menu-card[href="tarea2.html"] {
+    border-color: #6fae93;
+}
+
+.menu-card[href="tarea2.html"] h3 {
+    color: #6fae93;
+}
+
+.menu-card[href="tarea2.html"] .arrow {
+    color: #6fae93;
+}
+
+.menu-card[href="tarea2.html"]:hover {
+    box-shadow: 0 8px 25px rgba(111, 174, 147, 0.3);
+}
+
+.menu-card[href="tarea3.html"] {
+    border-color: #9fd9f6;
+}
+
+.menu-card[href="tarea3.html"] h3 {
+    color: #9fd9f6;
+}
+
+.menu-card[href="tarea3.html"] .arrow {
+    color: #9fd9f6;
+}
+
+.menu-card[href="tarea3.html"]:hover {
+    box-shadow: 0 8px 25px rgba(159, 217, 246, 0.3);
+}
+
+.menu-card[href="tarea4.html"] {
+    border-color: #9fccf6;
+}
+
+.menu-card[href="tarea4.html"] h3 {
+    color: #9fccf6;
+}
+
+.menu-card[href="tarea4.html"] .arrow {
+    color: #9fccf6;
+}
+
+.menu-card[href="tarea4.html"]:hover {
+    box-shadow: 0 8px 25px rgba(159, 204, 246, 0.3);
+}
+
+.menu-card[href="tarea5.html"] {
+    border-color: #898AC4;
+}
+
+.menu-card[href="tarea5.html"] h3 {
+    color: #898AC4;
+}
+
+.menu-card[href="tarea5.html"] .arrow {
+    color: #898AC4;
+}
+
+.menu-card[href="tarea5.html"]:hover {
+    box-shadow: 0 8px 25px rgba(137, 138, 196, 0.3);
+}
+
+.menu-card h3 {
+    color: #000;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.menu-card p {
+    color: #666;
+    margin-bottom: 1rem;
+    text-align: left !important;
+}
+
+.menu-card .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.arrow {
+    color: #000;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.menu-card:hover .arrow {
+    transform: translateX(5px);
+}
+
+/* Sección de Ejercicios */
+.exercises-section {
+}
+
+.exercises-section .menu-grid {
+    padding: 2rem 2rem 0 2rem;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.exercises-section-header {
+    background: #f5aeae;
+    padding: 2rem;
+    text-align: center;
+}
+
+.exercises-section h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.exercises-section p {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+/* Sección de Tareas */
+.tasks-section {
+    margin-top: 5rem;
+}
+
+.tasks-section .menu-grid {
+    padding: 2rem 2rem 0 2rem;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.tasks-section-header {
+    background: #d0f3dd;
+    padding: 2rem;
+    text-align: center;
+}
+
+.tasks-section h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.tasks-section p {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .back-btn {
+        position: static;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .screenshot-gallery {
+        grid-template-columns: 1fr;
+    }
+    
+    .content {
+        padding: 1rem;
+    }
+    
+    .portada {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .portada-img {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .menu-grid {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

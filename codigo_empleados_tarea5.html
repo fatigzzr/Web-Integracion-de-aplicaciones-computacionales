@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código - Tarea 5: Registro de Empleados - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="codigo_tarea5.css">
+    <script src="script.js"></script>
+    <script src="codigo_tarea5.js"></script>
+</head>
+<body>
+    <div class="container tarea5">
+        <div class="header">
+            <a href="tarea5.html" class="back-btn">← Volver a Tarea 5</a>
+            <h1>Tarea 5: XML + XSL</h1>
+            <p>Código: Registro de Empleados</p>
+        </div>
+        
+        <div class="content">
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+            
+                <!-- XSLT 1: Transformación de la lista de empleados por departamento -->
+                <button class="collapsible">1. Transformación de la lista de empleados por departamento</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: empresa1.xsl</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XSLT</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Registro de Empleados - Por Departamento&lt;/title&gt;
+                &lt;link rel="stylesheet" href="empresa1.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Registro de Empleados - Por Departamento&lt;/h1&gt;
+                    
+                    &lt;!-- Agrupar empleados por departamento --&gt;
+                    &lt;xsl:for-each select="empresa/departamentos/departamento"&gt;
+                        &lt;xsl:sort select="nombre"/&gt;
+                        &lt;xsl:variable name="departamento-id" select="@id"/&gt;
+                        &lt;xsl:variable name="departamento-nombre" select="nombre"/&gt;
+                        
+                        &lt;!-- Verificar si el departamento tiene empleados --&gt;
+                        &lt;xsl:if test="count(//empleado[id_departamento = $departamento-id]) &gt; 0"&gt;
+                            &lt;div class="department-section"&gt;
+                                &lt;!-- Encabezado del departamento --&gt;
+                                &lt;div class="department-header"&gt;
+                                    &lt;xsl:value-of select="$departamento-nombre"/&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;!-- Tabla de empleados --&gt;
+                                &lt;table class="employees-table"&gt;
+                                    &lt;thead&gt;
+                                        &lt;tr&gt;
+                                            &lt;th&gt;Nombre Completo&lt;/th&gt;
+                                            &lt;th&gt;Posición&lt;/th&gt;
+                                            &lt;th&gt;Salario&lt;/th&gt;
+                                        &lt;/tr&gt;
+                                    &lt;/thead&gt;
+                                    &lt;tbody&gt;
+                                        &lt;xsl:for-each select="//empleado[id_departamento = $departamento-id]"&gt;
+                                            &lt;tr&gt;
+                                                &lt;td&gt;&lt;xsl:value-of select="nombre"/&gt; &lt;xsl:value-of select="apellido"/&gt;&lt;/td&gt;
+                                                &lt;td&gt;&lt;xsl:value-of select="posicion"/&gt;&lt;/td&gt;
+                                                &lt;td&gt;$&lt;xsl:value-of select="salario"/&gt;&lt;/td&gt;
+                                            &lt;/tr&gt;
+                                        &lt;/xsl:for-each&gt;
+                                    &lt;/tbody&gt;
+                                &lt;/table&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:if&gt;
+                    &lt;/xsl:for-each&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: empresa1.css</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">CSS</div>
+                        </div>
+                        <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.department-section {
+    margin-bottom: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.department-header {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.employees-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.employees-table th {
+    background-color: #34495e;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.employees-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.employees-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.employees-table tr:hover {
+    background-color: #e8f4f8;
+    transition: background-color 0.3s ease;
+}
+
+.employees-table td:last-child {
+    font-weight: bold;
+    color: #27ae60;
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- XSLT 2: Cálculo del salario promedio por departamento -->
+                <button class="collapsible">2. Cálculo del salario promedio por departamento</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: empresa2.xsl</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XSLT</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Salarios Promedio por Departamento&lt;/title&gt;
+                &lt;link rel="stylesheet" href="empresa2.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Salarios Promedio por Departamento&lt;/h1&gt;
+                    
+                    &lt;div class="stats-grid"&gt;
+                        &lt;xsl:for-each select="empresa/departamentos/departamento"&gt;
+                            &lt;xsl:sort select="nombre"/&gt;
+                            &lt;xsl:variable name="departamento-id" select="@id"/&gt;
+                            &lt;xsl:variable name="departamento-nombre" select="nombre"/&gt;
+                            &lt;xsl:variable name="empleados-departamento" select="//empleado[id_departamento = $departamento-id]"/&gt;
+                            
+                            &lt;xsl:if test="count($empleados-departamento) &gt; 0"&gt;
+                                &lt;xsl:variable name="total-salarios" select="sum($empleados-departamento/salario)"/&gt;
+                                &lt;xsl:variable name="cantidad-empleados" select="count($empleados-departamento)"/&gt;
+                                &lt;xsl:variable name="salario-promedio" select="$total-salarios div $cantidad-empleados"/&gt;
+                                
+                                &lt;div class="stat-card"&gt;
+                                    &lt;div class="stat-header"&gt;
+                                        &lt;xsl:value-of select="$departamento-nombre"/&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class="stat-content"&gt;
+                                        &lt;div class="stat-value"&gt;
+                                            $&lt;xsl:value-of select="format-number($salario-promedio, '#,##0.00')"/&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class="stat-label"&gt;Salario Promedio&lt;/div&gt;
+                                        &lt;div class="stat-details"&gt;
+                                            &lt;xsl:value-of select="$cantidad-empleados"/&gt; empleado(s)
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/xsl:if&gt;
+                        &lt;/xsl:for-each&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: empresa2.css</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">CSS</div>
+                        </div>
+                        <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 40px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 15px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 15px;
+    padding: 0;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.stat-header {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.stat-content {
+    padding: 25px;
+    text-align: center;
+    background: white;
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 1.1em;
+    color: #7f8c8d;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.stat-details {
+    font-size: 0.9em;
+    color: #95a5a6;
+    background: #ecf0f1;
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- XSLT 3: Filtrado de empleados por tipo de contrato -->
+                <button class="collapsible">3. Filtrado de empleados por tipo de contrato</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: empresa3.xsl</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XSLT</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Empleados a Tiempo Completo&lt;/title&gt;
+                &lt;link rel="stylesheet" href="empresa3.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Empleados a Tiempo Completo&lt;/h1&gt;
+                    
+                    &lt;div class="filter-info"&gt;
+                        &lt;p&gt;Mostrando únicamente empleados con contrato de tiempo completo&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class="employees-list"&gt;
+                        &lt;xsl:for-each select="empresa/empleados/empleado[tipo_contrato = 'Tiempo Completo']"&gt;
+                            &lt;xsl:sort select="apellido"/&gt;
+                            &lt;xsl:sort select="nombre"/&gt;
+                            
+                            &lt;div class="employee-card"&gt;
+                                &lt;div class="employee-info"&gt;
+                                    &lt;div class="employee-name"&gt;
+                                        &lt;xsl:value-of select="nombre"/&gt; &lt;xsl:value-of select="apellido"/&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class="employee-position"&gt;
+                                        &lt;xsl:value-of select="posicion"/&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                &lt;div class="employee-salary"&gt;
+                                    $&lt;xsl:value-of select="salario"/&gt;
+                                &lt;/div&gt;
+                                &lt;div class="contract-badge"&gt;
+                                    &lt;xsl:value-of select="tipo_contrato"/&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:for-each&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: empresa3.css</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">CSS</div>
+                        </div>
+                        <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #74b9ff;
+    padding-bottom: 15px;
+}
+
+.filter-info {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #e3f2fd;
+    border-radius: 10px;
+    border-left: 4px solid #74b9ff;
+}
+
+.filter-info p {
+    margin: 0;
+    color: #1976d2;
+    font-weight: 500;
+}
+
+.employees-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.employee-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.employee-card:hover {
+    border-color: #74b9ff;
+    box-shadow: 0 8px 20px rgba(116, 185, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.employee-info {
+    flex: 1;
+}
+
+.employee-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.employee-position {
+    color: #7f8c8d;
+    font-size: 1em;
+}
+
+.employee-salary {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #27ae60;
+    margin-right: 20px;
+}
+
+.contract-badge {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- XSLT 4: Generación de un informe de antigüedad de empleados -->
+                <button class="collapsible">4. Generación de un informe de antigüedad de empleados</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: empresa4.xsl</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XSLT</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Informe de Antigüedad de Empleados&lt;/title&gt;
+                &lt;link rel="stylesheet" href="empresa4.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Informe de Antigüedad de Empleados&lt;/h1&gt;
+                    
+                    &lt;div class="report-info"&gt;
+                        &lt;p&gt;Empleados ordenados por fecha de contratación (más antiguos primero)&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class="seniority-list"&gt;
+                        &lt;xsl:for-each select="empresa/empleados/empleado"&gt;
+                            &lt;xsl:sort select="fecha_contratacion" order="ascending"/&gt;
+                            
+                            &lt;div class="seniority-card"&gt;
+                                &lt;div class="seniority-rank"&gt;
+                                    &lt;xsl:value-of select="position()"/&gt;
+                                &lt;/div&gt;
+                                &lt;div class="employee-details"&gt;
+                                    &lt;div class="employee-name"&gt;
+                                        &lt;xsl:value-of select="nombre"/&gt; &lt;xsl:value-of select="apellido"/&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class="employee-position"&gt;
+                                        &lt;xsl:value-of select="posicion"/&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class="hire-date"&gt;
+                                        Contratado: &lt;xsl:value-of select="fecha_contratacion"/&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                &lt;div class="years-badge"&gt;
+                                    &lt;xsl:variable name="hire-year" select="substring(fecha_contratacion, 1, 4)"/&gt;
+                                    &lt;xsl:variable name="current-year" select="2024"/&gt;
+                                    &lt;xsl:variable name="years-worked" select="$current-year - $hire-year"/&gt;
+                                    &lt;xsl:value-of select="$years-worked"/&gt; años
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:for-each&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: empresa4.css</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">CSS</div>
+                        </div>
+                        <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #fd79a8;
+    padding-bottom: 15px;
+}
+
+.report-info {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #fce4ec;
+    border-radius: 10px;
+    border-left: 4px solid #fd79a8;
+}
+
+.report-info p {
+    margin: 0;
+    color: #c2185b;
+    font-weight: 500;
+}
+
+.seniority-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.seniority-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.seniority-card:hover {
+    border-color: #fd79a8;
+    box-shadow: 0 8px 20px rgba(253, 121, 168, 0.2);
+    transform: translateY(-2px);
+}
+
+.seniority-rank {
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.employee-details {
+    flex: 1;
+}
+
+.employee-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.employee-position {
+    color: #7f8c8d;
+    font-size: 1em;
+    margin-bottom: 5px;
+}
+
+.hire-date {
+    color: #95a5a6;
+    font-size: 0.9em;
+}
+
+.years-badge {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+    min-width: 80px;
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- XSLT 5: Visualización jerárquica de departamentos y empleados -->
+                <button class="collapsible">5. Visualización jerárquica de departamentos y empleados</button>
+                <div class="collapsible-content">
+                    <h4>Archivo XSL: empresa5.xsl</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XSLT</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+    &lt;xsl:output method="html" encoding="UTF-8" indent="yes"/&gt;
+    
+    &lt;xsl:template match="/"&gt;
+        &lt;html lang="es"&gt;
+            &lt;head&gt;
+                &lt;meta charset="UTF-8"/&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"/&gt;
+                &lt;title&gt;Estructura Jerárquica de la Empresa&lt;/title&gt;
+                &lt;link rel="stylesheet" href="empresa5.css"/&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="container"&gt;
+                    &lt;h1&gt;Estructura Jerárquica de la Empresa&lt;/h1&gt;
+                    
+                    &lt;div class="company-structure"&gt;
+                        &lt;xsl:for-each select="empresa/departamentos/departamento"&gt;
+                            &lt;xsl:sort select="nombre"/&gt;
+                            &lt;xsl:variable name="departamento-id" select="@id"/&gt;
+                            &lt;xsl:variable name="departamento-nombre" select="nombre"/&gt;
+                            
+                            &lt;div class="department-node"&gt;
+                                &lt;div class="department-header"&gt;
+                                    &lt;div class="department-icon"&gt;🏢&lt;/div&gt;
+                                    &lt;div class="department-name"&gt;
+                                        &lt;xsl:value-of select="$departamento-nombre"/&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="employees-container"&gt;
+                                    &lt;xsl:for-each select="//empleado[id_departamento = $departamento-id]"&gt;
+                                        &lt;xsl:sort select="apellido"/&gt;
+                                        &lt;xsl:sort select="nombre"/&gt;
+                                        
+                                        &lt;div class="employee-node"&gt;
+                                            &lt;div class="employee-card"&gt;
+                                                &lt;div class="employee-avatar"&gt;
+                                                    &lt;xsl:value-of select="substring(nombre, 1, 1)"/&gt;&lt;xsl:value-of select="substring(apellido, 1, 1)"/&gt;
+                                                &lt;/div&gt;
+                                                &lt;div class="employee-info"&gt;
+                                                    &lt;div class="employee-name"&gt;
+                                                        &lt;xsl:value-of select="nombre"/&gt; &lt;xsl:value-of select="apellido"/&gt;
+                                                    &lt;/div&gt;
+                                                    &lt;div class="employee-position"&gt;
+                                                        &lt;xsl:value-of select="posicion"/&gt;
+                                                    &lt;/div&gt;
+                                                    &lt;div class="contract-type"&gt;
+                                                        &lt;xsl:value-of select="tipo_contrato"/&gt;
+                                                    &lt;/div&gt;
+                                                &lt;/div&gt;
+                                            &lt;/div&gt;
+                                        &lt;/div&gt;
+                                    &lt;/xsl:for-each&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/xsl:for-each&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</code></pre>
+                    </div>
+
+                    <h4>Archivo CSS: empresa5.css</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">CSS</div>
+                        </div>
+                        <pre class="code-display"><code>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 40px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #a29bfe;
+    padding-bottom: 15px;
+}
+
+.company-structure {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.department-node {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.department-node:hover {
+    transform: translateY(-5px);
+}
+
+.department-header {
+    background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+    color: white;
+    padding: 25px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.department-icon {
+    font-size: 2em;
+}
+
+.department-name {
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+.employees-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.employee-node {
+    border-left: 4px solid #a29bfe;
+    padding-left: 15px;
+}
+
+.employee-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.employee-card:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.employee-avatar {
+    background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.employee-info {
+    flex: 1;
+}
+
+.employee-name {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.employee-position {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-bottom: 3px;
+}
+
+.contract-type {
+    font-size: 0.8em;
+    color: #95a5a6;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

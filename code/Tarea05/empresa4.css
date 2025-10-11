@@ -1,0 +1,264 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: white;
+    line-height: 1.6;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 15px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-info {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border-left: 5px solid #3498db;
+}
+
+.header-info h2 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+}
+
+.header-info p {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.employees-timeline {
+    position: relative;
+    padding-left: 80px;
+}
+
+.employees-timeline::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #3498db, #e74c3c);
+}
+
+.employee-item {
+    position: relative;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -70px;
+    top: 10px;
+    z-index: 2;
+}
+
+.date-badge {
+    background: #3498db;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    min-width: 50px;
+    text-align: center;
+}
+
+.employee-content {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    flex: 1;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.employee-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.employee-name {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.hire-date {
+    background: #e8f5e8;
+    color: #27ae60;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.employee-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.label {
+    font-weight: bold;
+    color: #7f8c8d;
+    font-size: 0.9em;
+    min-width: 120px;
+}
+
+.value {
+    color: #2c3e50;
+    font-weight: 500;
+    text-align: right;
+    flex: 1;
+}
+
+.value.position {
+    color: #3498db;
+    font-weight: bold;
+}
+
+.value.salary {
+    color: #27ae60;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.value.department {
+    color: #8e44ad;
+    font-weight: bold;
+}
+
+.contract-type .full-time {
+    background: #d5f4e6;
+    color: #27ae60;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.contract-type .part-time {
+    background: #fdf2e9;
+    color: #e67e22;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.timeline-summary {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    border-left: 5px solid #e74c3c;
+    margin-top: 40px;
+}
+
+.timeline-summary h3 {
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+    font-size: 1.4em;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-label {
+    display: block;
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .employees-timeline {
+        padding-left: 60px;
+    }
+    
+    .timeline-marker {
+        left: -50px;
+    }
+    
+    .date-badge {
+        font-size: 0.8em;
+        padding: 6px 10px;
+    }
+    
+    .employee-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .value {
+        text-align: left;
+    }
+    
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+}

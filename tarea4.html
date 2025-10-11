@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea 4: XML - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+    <script>
+        // Función simple para cargar el código
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Página cargada');
+        });
+    </script>
+</head>
+<body>
+    <div class="container tarea4">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Tarea 4: XML</h1>
+            <p>Catálogo de Música y Registro de Empleados</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información de la Tarea -->
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <h4>Catálogo de Música:</h4>
+                <p>Diseña un XML que represente un catálogo de música. Debe incluir información sobre álbumes, artistas, géneros y canciones. (20 canciones)</p>
+                
+                <hp>Requisitos:</hp>
+                <ul>
+                    <li>Cada álbum debe tener un título, año de lanzamiento, género y una lista de canciones.</li>
+                    <li>Cada canción debe tener un título, duración, y si es un sencillo (true/false).</li>
+                    <li>Cada álbum debe estar asociado con un artista, que tiene un nombre y un país de origen.</li>
+                </ul> <br>
+
+                <h4>Registro de Empleados:</h4>
+                <p>Diseña un XML que almacene información sobre empleados en una empresa. (20 empleados)</p>
+                
+                <p>Requisitos:</h4>
+                <ul>
+                    <li>Cada empleado debe tener un nombre, apellido, posición, y departamento.</li>
+                    <li>Debe incluir el salario, fecha de contratación y si es tiempo completo o parcial.</li>
+                    <li>El departamento debe tener un nombre y una localización.</li>
+                </ul>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                
+                <h4>Catálogo de Música (musica.xml)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XML</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;catalogo_musica&gt;
+    &lt;!-- Sección de Artistas --&gt;
+    &lt;artistas&gt;
+        &lt;artista id="1"&gt;
+            &lt;nombre&gt;Michael Jackson&lt;/nombre&gt;
+            &lt;pais_origen&gt;Estados Unidos&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="2"&gt;
+            &lt;nombre&gt;The Beatles&lt;/nombre&gt;
+            &lt;pais_origen&gt;Reino Unido&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="3"&gt;
+            &lt;nombre&gt;AC/DC&lt;/nombre&gt;
+            &lt;pais_origen&gt;Australia&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="4"&gt;
+            &lt;nombre&gt;Pink Floyd&lt;/nombre&gt;
+            &lt;pais_origen&gt;Reino Unido&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="5"&gt;
+            &lt;nombre&gt;Eagles&lt;/nombre&gt;
+            &lt;pais_origen&gt;Estados Unidos&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="6"&gt;
+            &lt;nombre&gt;Bruce Springsteen&lt;/nombre&gt;
+            &lt;pais_origen&gt;Estados Unidos&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="7"&gt;
+            &lt;nombre&gt;Prince&lt;/nombre&gt;
+            &lt;pais_origen&gt;Estados Unidos&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="8"&gt;
+            &lt;nombre&gt;Madonna&lt;/nombre&gt;
+            &lt;pais_origen&gt;Estados Unidos&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="9"&gt;
+            &lt;nombre&gt;Nirvana&lt;/nombre&gt;
+            &lt;pais_origen&gt;Estados Unidos&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+        &lt;artista id="10"&gt;
+            &lt;nombre&gt;Radiohead&lt;/nombre&gt;
+            &lt;pais_origen&gt;Reino Unido&lt;/pais_origen&gt;
+        &lt;/artista&gt;
+    &lt;/artistas&gt;
+
+    &lt;!-- Sección de Géneros --&gt;
+    &lt;generos&gt;
+        &lt;genero id="1"&gt;
+            &lt;nombre&gt;Pop&lt;/nombre&gt;
+            &lt;descripcion&gt;Música popular comercial&lt;/descripcion&gt;
+        &lt;/genero&gt;
+        &lt;genero id="2"&gt;
+            &lt;nombre&gt;Rock&lt;/nombre&gt;
+            &lt;descripcion&gt;Música rock clásica&lt;/descripcion&gt;
+        &lt;/genero&gt;
+        &lt;genero id="3"&gt;
+            &lt;nombre&gt;Hard Rock&lt;/nombre&gt;
+            &lt;descripcion&gt;Rock pesado y agresivo&lt;/descripcion&gt;
+        &lt;/genero&gt;
+        &lt;genero id="4"&gt;
+            &lt;nombre&gt;Progressive Rock&lt;/nombre&gt;
+            &lt;descripcion&gt;Rock progresivo experimental&lt;/descripcion&gt;
+        &lt;/genero&gt;
+        &lt;genero id="5"&gt;
+            &lt;nombre&gt;Pop Rock&lt;/nombre&gt;
+            &lt;descripcion&gt;Fusión de pop y rock&lt;/descripcion&gt;
+        &lt;/genero&gt;
+        &lt;genero id="6"&gt;
+            &lt;nombre&gt;Grunge&lt;/nombre&gt;
+            &lt;descripcion&gt;Rock alternativo de los 90s&lt;/descripcion&gt;
+        &lt;/genero&gt;
+        &lt;genero id="7"&gt;
+            &lt;nombre&gt;Alternative Rock&lt;/nombre&gt;
+            &lt;descripcion&gt;Rock alternativo independiente&lt;/descripcion&gt;
+        &lt;/genero&gt;
+    &lt;/generos&gt;
+
+    &lt;!-- Sección de Álbumes --&gt;
+    &lt;albumes&gt;
+        &lt;album id="1"&gt;
+            &lt;titulo&gt;Thriller&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1982&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;1&lt;/id_artista&gt;
+            &lt;id_genero&gt;1&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="2"&gt;
+            &lt;titulo&gt;Abbey Road&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1969&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;2&lt;/id_artista&gt;
+            &lt;id_genero&gt;2&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="3"&gt;
+            &lt;titulo&gt;Back in Black&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1980&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;3&lt;/id_artista&gt;
+            &lt;id_genero&gt;3&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="4"&gt;
+            &lt;titulo&gt;The Dark Side of the Moon&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1973&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;4&lt;/id_artista&gt;
+            &lt;id_genero&gt;4&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="5"&gt;
+            &lt;titulo&gt;Hotel California&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1976&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;5&lt;/id_artista&gt;
+            &lt;id_genero&gt;2&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="6"&gt;
+            &lt;titulo&gt;Born in the U.S.A.&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1984&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;6&lt;/id_artista&gt;
+            &lt;id_genero&gt;2&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="7"&gt;
+            &lt;titulo&gt;Purple Rain&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1984&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;7&lt;/id_artista&gt;
+            &lt;id_genero&gt;5&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="8"&gt;
+            &lt;titulo&gt;Like a Virgin&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1984&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;8&lt;/id_artista&gt;
+            &lt;id_genero&gt;1&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="9"&gt;
+            &lt;titulo&gt;Nevermind&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1991&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;9&lt;/id_artista&gt;
+            &lt;id_genero&gt;6&lt;/id_genero&gt;
+        &lt;/album&gt;
+        &lt;album id="10"&gt;
+            &lt;titulo&gt;OK Computer&lt;/titulo&gt;
+            &lt;año_lanzamiento&gt;1997&lt;/año_lanzamiento&gt;
+            &lt;id_artista&gt;10&lt;/id_artista&gt;
+            &lt;id_genero&gt;7&lt;/id_genero&gt;
+        &lt;/album&gt;
+    &lt;/albumes&gt;
+
+    &lt;!-- Sección de Canciones --&gt;
+    &lt;canciones&gt;
+        &lt;cancion id="1"&gt;
+            &lt;titulo&gt;Wanna Be Startin' Somethin'&lt;/titulo&gt;
+            &lt;duracion&gt;6:03&lt;/duracion&gt;
+            &lt;es_sencillo&gt;false&lt;/es_sencillo&gt;
+            &lt;id_album&gt;1&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="2"&gt;
+            &lt;titulo&gt;Thriller&lt;/titulo&gt;
+            &lt;duracion&gt;5:57&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;1&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="3"&gt;
+            &lt;titulo&gt;Beat It&lt;/titulo&gt;
+            &lt;duracion&gt;4:18&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;1&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="4"&gt;
+            &lt;titulo&gt;Come Together&lt;/titulo&gt;
+            &lt;duracion&gt;4:20&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;2&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="5"&gt;
+            &lt;titulo&gt;Something&lt;/titulo&gt;
+            &lt;duracion&gt;3:02&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;2&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="6"&gt;
+            &lt;titulo&gt;Here Comes the Sun&lt;/titulo&gt;
+            &lt;duracion&gt;3:05&lt;/duracion&gt;
+            &lt;es_sencillo&gt;false&lt;/es_sencillo&gt;
+            &lt;id_album&gt;2&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="7"&gt;
+            &lt;titulo&gt;Hells Bells&lt;/titulo&gt;
+            &lt;duracion&gt;5:12&lt;/duracion&gt;
+            &lt;es_sencillo&gt;false&lt;/es_sencillo&gt;
+            &lt;id_album&gt;3&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="8"&gt;
+            &lt;titulo&gt;Back in Black&lt;/titulo&gt;
+            &lt;duracion&gt;4:15&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;3&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="9"&gt;
+            &lt;titulo&gt;You Shook Me All Night Long&lt;/titulo&gt;
+            &lt;duracion&gt;3:30&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;3&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="10"&gt;
+            &lt;titulo&gt;Speak to Me&lt;/titulo&gt;
+            &lt;duracion&gt;1:30&lt;/duracion&gt;
+            &lt;es_sencillo&gt;false&lt;/es_sencillo&gt;
+            &lt;id_album&gt;4&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="11"&gt;
+            &lt;titulo&gt;Breathe&lt;/titulo&gt;
+            &lt;duracion&gt;2:43&lt;/duracion&gt;
+            &lt;es_sencillo&gt;false&lt;/es_sencillo&gt;
+            &lt;id_album&gt;4&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="12"&gt;
+            &lt;titulo&gt;Money&lt;/titulo&gt;
+            &lt;duracion&gt;6:22&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;4&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="13"&gt;
+            &lt;titulo&gt;Hotel California&lt;/titulo&gt;
+            &lt;duracion&gt;6:30&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;5&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="14"&gt;
+            &lt;titulo&gt;New Kid in Town&lt;/titulo&gt;
+            &lt;duracion&gt;5:04&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;5&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="15"&gt;
+            &lt;titulo&gt;Life in the Fast Lane&lt;/titulo&gt;
+            &lt;duracion&gt;4:46&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;5&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="16"&gt;
+            &lt;titulo&gt;Born in the U.S.A.&lt;/titulo&gt;
+            &lt;duracion&gt;4:38&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;6&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="17"&gt;
+            &lt;titulo&gt;Dancing in the Dark&lt;/titulo&gt;
+            &lt;duracion&gt;4:01&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;6&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="18"&gt;
+            &lt;titulo&gt;Let's Go Crazy&lt;/titulo&gt;
+            &lt;duracion&gt;4:40&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;7&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="19"&gt;
+            &lt;titulo&gt;Purple Rain&lt;/titulo&gt;
+            &lt;duracion&gt;8:41&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;7&lt;/id_album&gt;
+        &lt;/cancion&gt;
+        &lt;cancion id="20"&gt;
+            &lt;titulo&gt;Like a Virgin&lt;/titulo&gt;
+            &lt;duracion&gt;3:38&lt;/duracion&gt;
+            &lt;es_sencillo&gt;true&lt;/es_sencillo&gt;
+            &lt;id_album&gt;8&lt;/id_album&gt;
+        &lt;/cancion&gt;
+    &lt;/canciones&gt;
+&lt;/catalogo_musica&gt;</code></pre>
+                </div>
+
+                <h4>Registro de Empleados (empresa.xml)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XML</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;empresa&gt;
+    &lt;!-- Sección de Departamentos --&gt;
+    &lt;departamentos&gt;
+        &lt;departamento id="1"&gt;
+            &lt;nombre&gt;Recursos Humanos&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 3, Edificio A&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="2"&gt;
+            &lt;nombre&gt;Desarrollo de Software&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 5, Edificio B&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="3"&gt;
+            &lt;nombre&gt;Marketing&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 2, Edificio A&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="4"&gt;
+            &lt;nombre&gt;Ventas&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 1, Edificio A&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="5"&gt;
+            &lt;nombre&gt;Finanzas&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 4, Edificio A&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="6"&gt;
+            &lt;nombre&gt;Operaciones&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 6, Edificio B&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="7"&gt;
+            &lt;nombre&gt;Calidad&lt;/nombre&gt;
+            &lt;localizacion&gt;Piso 3, Edificio B&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+        &lt;departamento id="8"&gt;
+            &lt;nombre&gt;Logística&lt;/nombre&gt;
+            &lt;localizacion&gt;Almacén Principal&lt;/localizacion&gt;
+        &lt;/departamento&gt;
+    &lt;/departamentos&gt;
+
+    &lt;!-- Sección de Empleados --&gt;
+    &lt;empleados&gt;
+        &lt;empleado id="1"&gt;
+            &lt;nombre&gt;María&lt;/nombre&gt;
+            &lt;apellido&gt;González&lt;/apellido&gt;
+            &lt;posicion&gt;Gerente de Recursos Humanos&lt;/posicion&gt;
+            &lt;id_departamento&gt;1&lt;/id_departamento&gt;
+            &lt;salario&gt;85000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2020-03-15&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="2"&gt;
+            &lt;nombre&gt;Carlos&lt;/nombre&gt;
+            &lt;apellido&gt;Rodríguez&lt;/apellido&gt;
+            &lt;posicion&gt;Desarrollador Senior&lt;/posicion&gt;
+            &lt;id_departamento&gt;2&lt;/id_departamento&gt;
+            &lt;salario&gt;75000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2019-07-22&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="3"&gt;
+            &lt;nombre&gt;Ana&lt;/nombre&gt;
+            &lt;apellido&gt;Martínez&lt;/apellido&gt;
+            &lt;posicion&gt;Especialista en Marketing Digital&lt;/posicion&gt;
+            &lt;id_departamento&gt;3&lt;/id_departamento&gt;
+            &lt;salario&gt;55000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2021-01-10&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="4"&gt;
+            &lt;nombre&gt;Luis&lt;/nombre&gt;
+            &lt;apellido&gt;Fernández&lt;/apellido&gt;
+            &lt;posicion&gt;Ejecutivo de Ventas&lt;/posicion&gt;
+            &lt;id_departamento&gt;4&lt;/id_departamento&gt;
+            &lt;salario&gt;45000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2022-05-18&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="5"&gt;
+            &lt;nombre&gt;Laura&lt;/nombre&gt;
+            &lt;apellido&gt;Sánchez&lt;/apellido&gt;
+            &lt;posicion&gt;Contadora&lt;/posicion&gt;
+            &lt;id_departamento&gt;5&lt;/id_departamento&gt;
+            &lt;salario&gt;60000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2020-11-03&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="6"&gt;
+            &lt;nombre&gt;Diego&lt;/nombre&gt;
+            &lt;apellido&gt;López&lt;/apellido&gt;
+            &lt;posicion&gt;Analista de Operaciones&lt;/posicion&gt;
+            &lt;id_departamento&gt;6&lt;/id_departamento&gt;
+            &lt;salario&gt;52000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2021-09-14&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="7"&gt;
+            &lt;nombre&gt;Carmen&lt;/nombre&gt;
+            &lt;apellido&gt;García&lt;/apellido&gt;
+            &lt;posicion&gt;Especialista en Calidad&lt;/posicion&gt;
+            &lt;id_departamento&gt;7&lt;/id_departamento&gt;
+            &lt;salario&gt;48000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2022-02-28&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="8"&gt;
+            &lt;nombre&gt;Roberto&lt;/nombre&gt;
+            &lt;apellido&gt;Hernández&lt;/apellido&gt;
+            &lt;posicion&gt;Coordinador de Logística&lt;/posicion&gt;
+            &lt;id_departamento&gt;8&lt;/id_departamento&gt;
+            &lt;salario&gt;42000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2021-06-07&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="9"&gt;
+            &lt;nombre&gt;Isabel&lt;/nombre&gt;
+            &lt;apellido&gt;Jiménez&lt;/apellido&gt;
+            &lt;posicion&gt;Desarrolladora Junior&lt;/posicion&gt;
+            &lt;id_departamento&gt;2&lt;/id_departamento&gt;
+            &lt;salario&gt;40000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2023-01-15&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="10"&gt;
+            &lt;nombre&gt;Miguel&lt;/nombre&gt;
+            &lt;apellido&gt;Torres&lt;/apellido&gt;
+            &lt;posicion&gt;Asistente de Recursos Humanos&lt;/posicion&gt;
+            &lt;id_departamento&gt;1&lt;/id_departamento&gt;
+            &lt;salario&gt;35000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2022-08-20&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;false&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="11"&gt;
+            &lt;nombre&gt;Sofía&lt;/nombre&gt;
+            &lt;apellido&gt;Morales&lt;/apellido&gt;
+            &lt;posicion&gt;Diseñadora Gráfica&lt;/posicion&gt;
+            &lt;id_departamento&gt;3&lt;/id_departamento&gt;
+            &lt;salario&gt;38000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2021-12-05&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="12"&gt;
+            &lt;nombre&gt;Andrés&lt;/nombre&gt;
+            &lt;apellido&gt;Vargas&lt;/apellido&gt;
+            &lt;posicion&gt;Representante de Ventas&lt;/posicion&gt;
+            &lt;id_departamento&gt;4&lt;/id_departamento&gt;
+            &lt;salario&gt;32000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2023-03-12&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;false&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="13"&gt;
+            &lt;nombre&gt;Patricia&lt;/nombre&gt;
+            &lt;apellido&gt;Ramos&lt;/apellido&gt;
+            &lt;posicion&gt;Analista Financiera&lt;/posicion&gt;
+            &lt;id_departamento&gt;5&lt;/id_departamento&gt;
+            &lt;salario&gt;58000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2020-04-30&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="14"&gt;
+            &lt;nombre&gt;Javier&lt;/nombre&gt;
+            &lt;apellido&gt;Mendoza&lt;/apellido&gt;
+            &lt;posicion&gt;Supervisor de Operaciones&lt;/posicion&gt;
+            &lt;id_departamento&gt;6&lt;/id_departamento&gt;
+            &lt;salario&gt;65000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2019-10-15&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="15"&gt;
+            &lt;nombre&gt;Elena&lt;/nombre&gt;
+            &lt;apellido&gt;Castillo&lt;/apellido&gt;
+            &lt;posicion&gt;Auditora de Calidad&lt;/posicion&gt;
+            &lt;id_departamento&gt;7&lt;/id_departamento&gt;
+            &lt;salario&gt;50000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2021-05-22&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="16"&gt;
+            &lt;nombre&gt;Fernando&lt;/nombre&gt;
+            &lt;apellido&gt;Ruiz&lt;/apellido&gt;
+            &lt;posicion&gt;Operador de Almacén&lt;/posicion&gt;
+            &lt;id_departamento&gt;8&lt;/id_departamento&gt;
+            &lt;salario&gt;28000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2022-11-08&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;false&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="17"&gt;
+            &lt;nombre&gt;Valentina&lt;/nombre&gt;
+            &lt;apellido&gt;Silva&lt;/apellido&gt;
+            &lt;posicion&gt;Desarrolladora Full Stack&lt;/posicion&gt;
+            &lt;id_departamento&gt;2&lt;/id_departamento&gt;
+            &lt;salario&gt;70000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2020-08-12&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="18"&gt;
+            &lt;nombre&gt;Ricardo&lt;/nombre&gt;
+            &lt;apellido&gt;Peña&lt;/apellido&gt;
+            &lt;posicion&gt;Especialista en Reclutamiento&lt;/posicion&gt;
+            &lt;id_departamento&gt;1&lt;/id_departamento&gt;
+            &lt;salario&gt;45000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2021-07-25&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="19"&gt;
+            &lt;nombre&gt;Adriana&lt;/nombre&gt;
+            &lt;apellido&gt;Flores&lt;/apellido&gt;
+            &lt;posicion&gt;Coordinadora de Marketing&lt;/posicion&gt;
+            &lt;id_departamento&gt;3&lt;/id_departamento&gt;
+            &lt;salario&gt;62000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2019-12-03&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+        &lt;empleado id="20"&gt;
+            &lt;nombre&gt;Gabriel&lt;/nombre&gt;
+            &lt;apellido&gt;Ortega&lt;/apellido&gt;
+            &lt;posicion&gt;Gerente de Ventas&lt;/posicion&gt;
+            &lt;id_departamento&gt;4&lt;/id_departamento&gt;
+            &lt;salario&gt;80000&lt;/salario&gt;
+            &lt;fecha_contratacion&gt;2018-06-18&lt;/fecha_contratacion&gt;
+            &lt;tiempo_completo&gt;true&lt;/tiempo_completo&gt;
+        &lt;/empleado&gt;
+    &lt;/empleados&gt;
+&lt;/empresa&gt;</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/Tareas04/Artistas.png" alt="Sección de Artistas" onclick="openImageModal(this.src)">
+                        <p>Sección de Artistas</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tareas04/GenerosYAlbumes.png" alt="Géneros y Álbumes" onclick="openImageModal(this.src)">
+                        <p>Géneros y Álbumes</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tareas04/Canciones20.png" alt="20 Canciones" onclick="openImageModal(this.src)">
+                        <p>20 Canciones</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tareas04/DepartamentosEmpleados.png" alt="Departamentos y Empleados" onclick="openImageModal(this.src)">
+                        <p>Departamentos y Empleados</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tareas04/Empleados20.png" alt="20 Empleados" onclick="openImageModal(this.src)">
+                        <p>20 Empleados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <p>Igual que en la actividad que hicimos en clase, me di cuenta de que la Inteligencia Artificial ayuda grandemente a generar registros sintéticos de manera satisfactoria cuando le das toda la información necesaria. Aunque bien, tuve que especificar ciertos aspectos para que el resultado fuera útil, como que los datos tenían que estar conectados o que debían estructurarse como tablas diferentes. Dentro de la tabla principal debían aparecer otras etiquetas que funcionaran como tablas o entidades relacionadas con los álbumes, artistas, géneros y canciones, y que se pudieran conectar entre sí, tal como sucede en una base de datos en SQL. Este detalle fue muy importante, ya que si no se dan instrucciones claras, la IA puede generar datos correctos pero desorganizados o sin relación alguna entre ellos.</p>
+                
+                <p>Por otro lado, con esta tarea pude observar que dentro de un mismo archivo XML se puede tener una etiqueta principal que represente el nombre de la base de datos, y dentro de ella incluir etiquetas que representen las entidades junto con sus atributos, además de considerar las relaciones que existen entre esas entidades. Esto me permitió darme cuenta de que, en teoría, es posible almacenar toda la información de una base de datos dentro de un archivo XML, aunque reconozco que no sería lo más recomendable por temas de eficiencia y escalabilidad. Sin embargo, el ejercicio me sirvió para comprender cómo funciona la estructura jerárquica del XML y cómo se pueden modelar datos de manera similar a un esquema de base de datos relacional.</p>
+                
+                <p>Además, me dio a entender que se podría mandar toda la información de una base de datos gestionada en un sistema de gestión tradicional hacia un archivo XML para enviarlo o visualizarlo en una página web. Esto resultaría bastante útil para validar que los datos insertados o que actualmente se encuentran en la base de datos están correctos, sin necesidad de conectarse directamente al sistema gestor. También observé que esta alternativa sería muy práctica en los casos en los que no se tiene permiso para editar los datos directamente, pero sí se permite su consulta a través de un archivo estructurado como XML. De esta forma, el archivo se convierte en una buena opción para revisar la información cuando no se tiene acceso completo a la base de datos, asegurando al mismo tiempo la integridad de los datos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

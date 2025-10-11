@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea 2: Miniensayo - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container tarea2">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Tarea 2: Miniensayo</h1>
+            <p>¿Cloud-native o Cloud-enabled? Análisis de una app real.</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información de la Tarea -->
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <ul>
+                    <li>Tema: “¿Cloud-native o Cloud-enabled? Análisis de una app real.”</li>
+                    <li>Usa referencias bibliográficas actuales (IEEE, ACM, blogs técnicos confiables).</li>
+                    <li>Crea su página web y anexala al sitio web provisto por el profesor.</li>
+                </ul>
+            </div>
+
+            <!-- Miniensayo -->
+            <div class="exercise-info">
+                <h3>Miniensayo</h3>
+                
+                <p>Cloud-native y cloud-enabled son diferentes formas de abordar el uso de la computación en la nube al desarrollar y desplegar software. Las tecnologías cloud-native permiten implementar y ejecutar aplicaciones escalables en ambientes dinámicos y modernos, como nubes privadas, públicas o híbridas. Algunos ejemplos de lo anterior son las APIs declarativas, infraestructura inmutable, contenedores, service meshes y microservicios (CNCF, s.f.).</p>
+
+                <p>Al utilizar la técnica cloud-native, se obtienen sistemas débilmente acoplados (componentes independientes con mínimas dependencias) que son manejables, observables y resilientes. Además, al combinarse con una automatización robusta, los desarrolladores pueden implementar cambios de gran impacto con frecuencia y mínimo esfuerzo (CNCF, s.f.).</p>
+
+                <p>Cloud-native se refiere al software que "nació en la nube", en donde los desarrolladores diseñan su aplicación con esta filosofía desde el inicio, utilizando tecnologías cloud-based para ejecutarlas en una nube pública como AWS, GCP o Azure. Estas tecnologías facilitan la escalabilidad y accesibilidad, lo cual permite a los desarrolladores crear y entregar nuevos servicios de manera más rápida y sencilla. Cloud-native se apoya en la integración continua, motores de contenedores y orquestadores para crear y desplegar aplicaciones (SolarWinds, 2023).</p>
+
+                <p>Por otro lado, cloud-enabled describe a las aplicaciones que fueron construidas de manera tradicional y después migradas a la nube. En este caso, el diseño original seguía un patrón monolítico y utilizaba recursos y hardware locales. Al migrar, la aplicación pasa a usar recursos virtuales, pero la arquitectura base no cambia. Por ello, las aplicaciones cloud-enabled generalmente no aprovechan al máximo servicios compartidos o pools de recursos, y suelen presentar problemas de resiliencia y escalabilidad en comparación con las aplicaciones cloud-native (SolarWinds, 2023).</p>
+
+                <h4>Ejemplo de arquitectura cloud-native: Netflix</h4>
+                <p>Netflix utiliza dos nubes principales: AWS y Open Connect, las cuales trabajan en conjunto como el backbone de la plataforma.</p>
+
+                <p>Open Connect es la red personalizada de servidores distribuidos en diferentes ubicaciones geográficas. Se encarga de todo lo relacionado con el streaming de video según la ubicación del usuario. Esto significa que cuando alguien da play, la conexión se realiza con el servidor Open Connect más cercano, y no directamente con el servidor original, lo que optimiza la velocidad y la calidad del servicio.</p>
+
+                <p>AWS, por otro lado, se utiliza para gestionar el backend de Netflix: bases de datos, procesos administrativos y operaciones que no involucran directamente el streaming. Desde ahí también se coordinan la distribución de contenido a los servidores locales y la gestión del tráfico de red.</p>
+
+                <p>Además, Netflix emplea una arquitectura basada en microservicios, en la que cada servicio es independiente. Por ejemplo, el servicio de almacenamiento de video está desacoplado del servicio encargado de la transcodificación, lo que permite mayor escalabilidad, resiliencia y facilidad de actualización sin afectar al resto del sistema.</p>
+
+                <h4>Ejemplo de arquitectura cloud-native: JPMorgan Chase</h4>
+                <p>En los últimos años, JPMorgan Chase ha migrado aproximadamente 38% de sus aplicaciones a la nube, donde utilizan diversos servicios de la nube como Google Cloud, AWS y Microsoft Azure (Quang, 2023).</p>
+
+                <p>JPMC utiliza principios de diseño basados en dominios para dividir la aplicación monolítica en dominios separados, en donde primero se desarrollan las API, y después se emplea un enfoque basado en eventos para desacoplar los servicios y mejorar la resiliencia. Actualmente, se estima que la empresa opera con alrededor de 8,000 microservicios, lo que refleja la magnitud y complejidad de su arquitectura cloud-native (Guo & Meyyappan, 2023).</p>
+
+                <p>Asimismo, abordan una de las principales desventajas de las cloud-enabled, en donde no se cuenta con la escalabilidad y confiabilidad que ofrece una solución cloud-based moderna. Para enfrentar estos desafíos, con la adopción que tomaron, el framework enfrenta problemas de escalabilidad, y para ello lanzan parches menores para el framework todos los meses y también realizan lanzamientos principales en promedio cada 6 a 9 meses. De esta manera, están intentando que la aplicación evolucione gradualmente hacia un modelo completamente cloud-based y alineado con prácticas modernas (Guo & Meyyappan, 2023).</p>
+
+                <h4>Referencias</h4>
+                <ul>
+                    <li>Cloud Native Computing Foundation (CNCF). (s.f.). Cloud Native Definition. Recuperado de <a href="https://www.cncf.io/about/who-we-are/" target="_blank">https://www.cncf.io/about/who-we-are/</a></li>
+                    <li>Dans, E. (2005). Loosely coupled. Recuperado de <a href="https://www.enriquedans.com/2005/05/loosely-coupled.html" target="_blank">https://www.enriquedans.com/2005/05/loosely-coupled.html</a></li>
+                    <li>Geeksforgeeks. (2025). System Design Netflix | A Complete Architecture. Recuperado de <a href="https://www.geeksforgeeks.org/system-design/system-design-netflix-a-complete-architecture/" target="_blank">https://www.geeksforgeeks.org/system-design/system-design-netflix-a-complete-architecture/</a></li>
+                    <li>Guo, H., & Meyyappan, V. (2023). Recuperado de <a href="https://medium.com/next-at-chase/driving-native-cloud-adoption-at-scale-through-a-microservice-framework-a461e87bb8f2" target="_blank">https://medium.com/next-at-chase/driving-native-cloud-adoption-at-scale-through-a-microservice-framework-a461e87bb8f2</a></li>
+                    <li>Quang, H. (2023). Cloud Banking: A Cloud Bank of Benefits. Recuperado de <a href="https://fptsoftware.de/resource-center/blogs/cloud-banking-a-cloud-bank-of-benefits" target="_blank">https://fptsoftware.de/resource-center/blogs/cloud-banking-a-cloud-bank-of-benefits</a></li>
+                    <li>SolarWinds. (2023). Cloud-Based, Cloud-Native, and Cloud-Enabled Applications—What's the Difference? Recuperado de <a href="https://www.papertrail.com/solution/tips/cloud-based-cloud-native-and-cloud-enabled-applications-whats-the-difference/" target="_blank">https://www.papertrail.com/solution/tips/cloud-based-cloud-native-and-cloud-enabled-applications-whats-the-difference/</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

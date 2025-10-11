@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 5: JWT - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio5">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 5: JWT</h1>
+            <p>Autenticación con JWT en un microservicio Flask y consumo desde un cliente web.</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>En este ejercicio se desarrollará un microservicio en Flask que utiliza JWT (JSON Web Token) para autenticar usuarios contra una base de datos. El microservicio deberá permitir registrar usuarios, iniciar sesión, generar tokens JWT y proteger rutas que solo se puedan acceder con un token válido.</p>
+                <p>Además, se deberá construir una aplicación web (HTML, CSS, JS) separada que consuma el microservicio desde otra máquina, almacenando el token y enviándolo en las cabeceras de las solicitudes en un endpoint protegido, agregar a el microservicio de Libros. Incluir un botón que al pulsarlo nos de un una ventana emergente y utilizado localstorage almacene la ip, puerto, microservicios y endpoints. Cada acción en vista diferentes.</p>
+                <p>Se deberá incluir logs tanto en el servidor como en el cliente para visualizar cómo funciona el flujo de autenticación con JWT.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Conceptos</h3>
+                <ol>
+                    <li><strong>JSON Web Token (JWT):</strong>
+                        <ul>
+                            <li>Qué es un token JWT, sus partes (Header, Payload, Signature).</li>
+                            <li>Cómo se genera y verifica.</li>
+                            <li>Diferencia entre Access Token y Refresh Token.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Autenticación con JWT en microservicios:</strong>
+                        <ul>
+                            <li>Inicio de sesión y validación de credenciales.</li>
+                            <li>Emisión de un JWT firmado.</li>
+                            <li>Almacenamiento del JWT en el cliente.</li>
+                            <li>Envío del JWT en las cabeceras Authorization: Bearer.</li>
+                        </ul>
+                    </li>
+                    <li><strong>CORS (Cross-Origin Resource Sharing):</strong>
+                        <ul>
+                            <li>Por qué es necesario al consumir un API desde otra aplicación web en un dominio distinto.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Flask y Flask-MySQLdb:</strong>
+                        <ul>
+                            <li>Conexión a MariaDB desde Flask.</li>
+                            <li>Endpoints para registrar usuarios, iniciar sesión y acceder a recursos protegidos.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Cliente Web (HTML + CSS + JS):</strong>
+                        <ul>
+                            <li>Uso de fetch para consumir APIs.</li>
+                            <li>Almacenamiento de tokens en localStorage.</li>
+                            <li>Manejo de errores y logs en consola.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Logs:</strong>
+                        <ul>
+                            <li>Logs en el servidor para ver emisión, validación y expiración de tokens.</li>
+                            <li>Logs en el cliente para cada request y respuesta.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <ol>
+                    <li><strong>Configuración de la Base de Datos</strong>
+                        <ul>
+                            <li>Crear una base de datos llamada JWT en MariaDB.</li>
+                            <li>Crear las tablas users e items con la estructura base.</li>
+                            <li>Asegurarse de tener un usuario en MariaDB con permisos para conectarse desde Flask.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Desarrollo del Microservicio Flask</strong>
+                        <ul>
+                            <li>Implementar un microservicio en Flask que:
+                                <ul>
+                                    <li>Permita registrar usuarios con contraseña cifrada.</li>
+                                    <li>Permita iniciar sesión y devuelva un JWT válido.</li>
+                                    <li>Genere Access Token y Refresh Token.</li>
+                                    <li>Incluya un decorador @jwt_required para proteger rutas.</li>
+                                    <li>Exporte endpoints como:
+                                        <ul>
+                                            <li>/auth/register (registro)</li>
+                                            <li>/auth/login (login y generación de JWT)</li>
+                                            <li>/auth/refresh (nuevo access token desde refresh token)</li>
+                                            <li>/api/profile (devuelve información del usuario autenticado)</li>
+                                            <li>/api/items (listar y crear items del usuario autenticado)</li>
+                                        </ul>
+                                    </li>
+                                    <li>Incluya logs en consola mostrando intentos de login, emisión de tokens, accesos correctos e intentos fallidos.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Desarrollo de la Aplicación Web Cliente</strong>
+                        <ul>
+                            <li>Crear una aplicación con los archivos:
+                                <ul>
+                                    <li>index.html</li>
+                                    <li>style.css</li>
+                                    <li>app.js</li>
+                                </ul>
+                            </li>
+                            <li>Implementar:
+                                <ul>
+                                    <li>Un formulario para ingresar credenciales.</li>
+                                    <li>Botones para:
+                                        <ul>
+                                            <li>Registrar usuario.</li>
+                                            <li>Iniciar sesión.</li>
+                                            <li>Refrescar token.</li>
+                                            <li>Acceder a /api/profile.</li>
+                                            <li>Crear y listar items.</li>
+                                        </ul>
+                                    </li>
+                                    <li>Guardar tokens en localStorage.</li>
+                                    <li>Guardar con un botón, la ip, puerto y endpoints del servicios de microservicios</li>
+                                    <li>Enviar tokens en la cabecera Authorization: Bearer.</li>
+                                    <li>Mostrar logs en consola y en pantalla con los resultados de cada request.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Pruebas</strong>
+                        <ul>
+                            <li>Levantar el microservicio Flask en una instancia y colectar IP y puerto.</li>
+                            <li>Levantar la aplicación web en su máquina personal.</li>
+                            <li>Probar el flujo completo:
+                                <ul>
+                                    <li>Registro → Login → Obtener Access y Refresh → Guardar tokens → Acceder a recursos protegidos.</li>
+                                </ul>
+                            </li>
+                            <li>Verificar en los logs del servidor y los logs del cliente cómo se valida el JWT en cada paso.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>Microservicio Flask con JWT (micro.py)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code>import os
+import logging
+from datetime import datetime, timedelta
+from functools import wraps
+
+from flask import Flask, request, jsonify, g
+from flask_cors import CORS
+from flask_mysqldb import MySQL
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt  # PyJWT
+
+# ---------- CONFIG ----------
+app = Flask(__name__)
+CORS(app)
+
+# Configuración MySQL (ajusta con variables de entorno en producción)
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'libros_user')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', '666')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB', 'Libros')
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
+# JWT settings
+JWT_SECRET = os.getenv('JWT_SECRET', 'cambia_esta_clave_secreta')
+JWT_ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRES_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRES_MINUTES', 15))
+REFRESH_TOKEN_EXPIRES_DAYS = int(os.getenv('REFRESH_TOKEN_EXPIRES_DAYS', 7))
+
+mysql = MySQL(app)
+
+# ---------- LOGGING ----------
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+logger = logging.getLogger('auth_service')
+
+# Log every incoming request (method, path, ip, body if json)
+@app.before_request
+def log_request_info():
+    try:
+        body = request.get_json(silent=True)
+    except Exception:
+        body = None
+    logger.info("Incoming request: %s %s from %s body=%s",
+                request.method, request.path, request.remote_addr, body)
+
+# Utility: query helper
+def query_db(query, args=(), one=False):
+    cur = mysql.connection.cursor()
+    cur.execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+# ---------- JWT UTILITIES ----------
+def create_access_token(user_id, username):
+    """Create a short-lived access token"""
+    payload = {
+        'user_id': user_id,
+        'username': username,
+        'type': 'access',
+        'exp': datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES),
+        'iat': datetime.utcnow()
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    logger.info(f"Access token created for user {username} (ID: {user_id})")
+    return token
+
+def create_refresh_token(user_id, username):
+    """Create a long-lived refresh token"""
+    payload = {
+        'user_id': user_id,
+        'username': username,
+        'type': 'refresh',
+        'exp': datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRES_DAYS),
+        'iat': datetime.utcnow()
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    logger.info(f"Refresh token created for user {username} (ID: {user_id})")
+    return token
+
+def verify_token(token):
+    """Verify and decode a JWT token"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        logger.info(f"Token verified for user {payload.get('username')} (type: {payload.get('type')})")
+        return payload
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token expired")
+        return None
+    except jwt.InvalidTokenError:
+        logger.warning("Invalid token")
+        return None
+
+# ---------- DECORATORS ----------
+def jwt_required(f):
+    """Decorator to require JWT authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        auth_header = request.headers.get('Authorization')
+        
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+        
+        if not token:
+            logger.warning("No token provided")
+            return jsonify({'error': 'Token is missing'}), 401
+        
+        payload = verify_token(token)
+        if not payload:
+            logger.warning("Token verification failed")
+            return jsonify({'error': 'Token is invalid or expired'}), 401
+        
+        if payload.get('type') != 'access':
+            logger.warning("Invalid token type for protected route")
+            return jsonify({'error': 'Invalid token type'}), 401
+        
+        g.current_user = payload
+        logger.info(f"Access granted to user {payload.get('username')}")
+        return f(*args, **kwargs)
+    
+    return decorated
+
+# ---------- AUTH ROUTES ----------
+@app.route('/auth/register', methods=['POST'])
+def register():
+    """Register a new user"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not all([username, email, password]):
+            return jsonify({'error': 'Missing required fields'}), 400
+        
+        # Check if user already exists
+        existing_user = query_db(
+            "SELECT id FROM users WHERE username = %s OR email = %s",
+            (username, email), one=True
+        )
+        
+        if existing_user:
+            logger.warning(f"Registration attempt with existing user: {username}")
+            return jsonify({'error': 'User already exists'}), 409
+        
+        # Hash password and create user
+        password_hash = generate_password_hash(password)
+        query_db(
+            "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
+            (username, email, password_hash)
+        )
+        mysql.connection.commit()
+        
+        logger.info(f"User registered successfully: {username}")
+        return jsonify({'message': 'User registered successfully'}), 201
+        
+    except Exception as e:
+        logger.error(f"Registration error: {str(e)}")
+        return jsonify({'error': 'Registration failed'}), 500
+
+@app.route('/auth/login', methods=['POST'])
+def login():
+    """Login user and return JWT tokens"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not all([username, password]):
+            return jsonify({'error': 'Missing credentials'}), 400
+        
+        # Find user
+        user = query_db(
+            "SELECT id, username, email, password_hash FROM users WHERE username = %s",
+            (username,), one=True
+        )
+        
+        if not user or not check_password_hash(user['password_hash'], password):
+            logger.warning(f"Failed login attempt for user: {username}")
+            return jsonify({'error': 'Invalid credentials'}), 401
+        
+        # Create tokens
+        access_token = create_access_token(user['id'], user['username'])
+        refresh_token = create_refresh_token(user['id'], user['username'])
+        
+        logger.info(f"User logged in successfully: {username}")
+        return jsonify({
+            'message': 'Login successful',
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email']
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        return jsonify({'error': 'Login failed'}), 500
+
+@app.route('/auth/refresh', methods=['POST'])
+def refresh():
+    """Refresh access token using refresh token"""
+    try:
+        data = request.get_json()
+        refresh_token = data.get('refresh_token')
+        
+        if not refresh_token:
+            return jsonify({'error': 'Refresh token missing'}), 400
+        
+        payload = verify_token(refresh_token)
+        if not payload or payload.get('type') != 'refresh':
+            logger.warning("Invalid refresh token")
+            return jsonify({'error': 'Invalid refresh token'}), 401
+        
+        # Create new access token
+        access_token = create_access_token(payload['user_id'], payload['username'])
+        
+        logger.info(f"Access token refreshed for user: {payload['username']}")
+        return jsonify({
+            'message': 'Token refreshed successfully',
+            'access_token': access_token
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Token refresh error: {str(e)}")
+        return jsonify({'error': 'Token refresh failed'}), 500
+
+# ---------- PROTECTED ROUTES ----------
+@app.route('/api/profile', methods=['GET'])
+@jwt_required
+def get_profile():
+    """Get user profile"""
+    try:
+        user_id = g.current_user['user_id']
+        user = query_db(
+            "SELECT id, username, email, created_at FROM users WHERE id = %s",
+            (user_id,), one=True
+        )
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        logger.info(f"Profile accessed for user: {user['username']}")
+        return jsonify({
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'created_at': user['created_at'].isoformat() if user['created_at'] else None
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Profile access error: {str(e)}")
+        return jsonify({'error': 'Profile access failed'}), 500
+
+@app.route('/api/items', methods=['GET'])
+@jwt_required
+def list_items():
+    """List user's items"""
+    try:
+        user_id = g.current_user['user_id']
+        items = query_db(
+            "SELECT id, title, description, created_at FROM items WHERE user_id = %s ORDER BY created_at DESC",
+            (user_id,)
+        )
+        
+        logger.info(f"Items listed for user ID: {user_id}")
+        return jsonify({'items': items}), 200
+        
+    except Exception as e:
+        logger.error(f"List items error: {str(e)}")
+        return jsonify({'error': 'Failed to list items'}), 500
+
+@app.route('/api/items', methods=['POST'])
+@jwt_required
+def create_item():
+    """Create a new item"""
+    try:
+        user_id = g.current_user['user_id']
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        
+        if not title:
+            return jsonify({'error': 'Title is required'}), 400
+        
+        query_db(
+            "INSERT INTO items (user_id, title, description) VALUES (%s, %s, %s)",
+            (user_id, title, description)
+        )
+        mysql.connection.commit()
+        
+        logger.info(f"Item created for user ID: {user_id}")
+        return jsonify({'message': 'Item created successfully'}), 201
+        
+    except Exception as e:
+        logger.error(f"Create item error: {str(e)}")
+        return jsonify({'error': 'Failed to create item'}), 500
+
+# ---------- HEALTH CHECK ----------
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy', 'service': 'JWT Auth Service'}), 200
+
+# ---------- RUN ----------
+if __name__ == '__main__':
+    logger.info("Starting JWT Authentication Service...")
+    app.run(host='0.0.0.0', port=5003, debug=True)</code></pre>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <h4>Cliente Web JavaScript (app.js)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">JavaScript</div>
+                    </div>
+                    <pre class="code-display"><code>// JWT Authentication Frontend Application
+class JWTAuthApp {
+    constructor() {
+        this.baseURL = 'http://34.27.138.169:5003';
+        this.accessToken = localStorage.getItem('accessToken') || null;
+        this.refreshToken = localStorage.getItem('refreshToken') || null;
+        
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.updateTokenDisplay();
+        this.updateStatus();
+        this.loadConfig();
+    }
+
+    setupEventListeners() {
+        // Form submissions
+        document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+        document.getElementById('registerForm').addEventListener('submit', (e) => this.handleRegister(e));
+        document.getElementById('createItemForm').addEventListener('submit', (e) => this.handleCreateItem(e));
+
+        // Button clicks
+        document.getElementById('getProfileBtn').addEventListener('click', () => this.getProfile());
+        document.getElementById('listItemsBtn').addEventListener('click', () => this.listItems());
+        document.getElementById('refreshTokenBtn').addEventListener('click', () => this.refreshAccessToken());
+
+        // Header buttons
+        document.getElementById('configBtn').addEventListener('click', () => this.openConfigModal());
+        document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+
+        // Configuration modal
+        document.getElementById('configForm').addEventListener('submit', (e) => this.handleConfigSubmit(e));
+        document.getElementById('testConnectionBtn').addEventListener('click', () => this.testConnection());
+        document.querySelector('.close').addEventListener('click', () => this.closeConfigModal());
+        document.getElementById('configModal').addEventListener('click', (e) => {
+            if (e.target.id === 'configModal') this.closeConfigModal();
+        });
+    }
+
+    // API Helper Methods
+    async makeRequest(endpoint, options = {}) {
+        console.log('🚀 makeRequest iniciado:', endpoint);
+        const url = `${this.baseURL}${endpoint}`;
+        console.log('🌐 URL completa:', url);
+        
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+
+        // Add Authorization header if we have an access token
+        if (this.accessToken) {
+            defaultOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
+            console.log('🔑 Token agregado a headers:', this.accessToken.substring(0, 20) + '...');
+        }
+
+        const finalOptions = { ...defaultOptions, ...options };
+        console.log('📤 Opciones finales:', finalOptions);
+
+        try {
+            const response = await fetch(url, finalOptions);
+            const data = await response.json();
+            
+            console.log('📥 Respuesta recibida:', {
+                status: response.status,
+                statusText: response.statusText,
+                data: data
+            });
+
+            return { response, data };
+        } catch (error) {
+            console.error('❌ Error en makeRequest:', error);
+            throw error;
+        }
+    }
+
+    // Authentication Methods
+    async handleLogin(e) {
+        e.preventDefault();
+        console.log('🔐 Iniciando proceso de login...');
+        
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        try {
+            const { response, data } = await this.makeRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                this.accessToken = data.access_token;
+                this.refreshToken = data.refresh_token;
+                
+                // Store tokens in localStorage
+                localStorage.setItem('accessToken', this.accessToken);
+                localStorage.setItem('refreshToken', this.refreshToken);
+                
+                this.updateTokenDisplay();
+                this.updateStatus();
+                this.showMessage('loginMessages', '✅ Login exitoso!', 'success');
+                
+                console.log('✅ Login exitoso:', data);
+            } else {
+                this.showMessage('loginMessages', `❌ Error: ${data.error}`, 'error');
+                console.error('❌ Error en login:', data);
+            }
+        } catch (error) {
+            this.showMessage('loginMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        console.log('📝 Iniciando proceso de registro...');
+        
+        const username = document.getElementById('regUsername').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        
+        try {
+            const { response, data } = await this.makeRequest('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ username, email, password })
+            });
+
+            if (response.ok) {
+                this.showMessage('registerMessages', '✅ Usuario registrado exitosamente!', 'success');
+                console.log('✅ Registro exitoso:', data);
+            } else {
+                this.showMessage('registerMessages', `❌ Error: ${data.error}`, 'error');
+                console.error('❌ Error en registro:', data);
+            }
+        } catch (error) {
+            this.showMessage('registerMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    async refreshAccessToken() {
+        console.log('🔄 Refrescando access token...');
+        
+        if (!this.refreshToken) {
+            this.showMessage('tokenMessages', '❌ No hay refresh token disponible', 'error');
+            return;
+        }
+
+        try {
+            const { response, data } = await this.makeRequest('/auth/refresh', {
+                method: 'POST',
+                body: JSON.stringify({ refresh_token: this.refreshToken })
+            });
+
+            if (response.ok) {
+                this.accessToken = data.access_token;
+                localStorage.setItem('accessToken', this.accessToken);
+                this.updateTokenDisplay();
+                this.showMessage('tokenMessages', '✅ Token refrescado exitosamente!', 'success');
+                console.log('✅ Token refrescado:', data);
+            } else {
+                this.showMessage('tokenMessages', `❌ Error: ${data.error}`, 'error');
+                console.error('❌ Error al refrescar token:', data);
+            }
+        } catch (error) {
+            this.showMessage('tokenMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    // Protected API Methods
+    async getProfile() {
+        console.log('👤 Obteniendo perfil del usuario...');
+        
+        try {
+            const { response, data } = await this.makeRequest('/api/profile');
+
+            if (response.ok) {
+                this.showMessage('profileMessages', `✅ Perfil obtenido: ${JSON.stringify(data.user, null, 2)}`, 'success');
+                console.log('✅ Perfil obtenido:', data);
+            } else {
+                this.showMessage('profileMessages', `❌ Error: ${data.error}`, 'error');
+                console.error('❌ Error al obtener perfil:', data);
+            }
+        } catch (error) {
+            this.showMessage('profileMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    async listItems() {
+        console.log('📋 Listando items...');
+        
+        try {
+            const { response, data } = await this.makeRequest('/api/items');
+
+            if (response.ok) {
+                const itemsList = data.items.map(item => 
+                    `ID: ${item.id}, Título: ${item.title}, Descripción: ${item.description}`
+                ).join('\n');
+                
+                this.showMessage('itemsMessages', `✅ Items obtenidos:\n${itemsList}`, 'success');
+                console.log('✅ Items obtenidos:', data);
+            } else {
+                this.showMessage('itemsMessages', `❌ Error: ${data.error}`, 'error');
+                console.error('❌ Error al listar items:', data);
+            }
+        } catch (error) {
+            this.showMessage('itemsMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    async handleCreateItem(e) {
+        e.preventDefault();
+        console.log('➕ Creando nuevo item...');
+        
+        const title = document.getElementById('itemTitle').value;
+        const description = document.getElementById('itemDescription').value;
+        
+        try {
+            const { response, data } = await this.makeRequest('/api/items', {
+                method: 'POST',
+                body: JSON.stringify({ title, description })
+            });
+
+            if (response.ok) {
+                this.showMessage('itemsMessages', '✅ Item creado exitosamente!', 'success');
+                document.getElementById('createItemForm').reset();
+                console.log('✅ Item creado:', data);
+            } else {
+                this.showMessage('itemsMessages', `❌ Error: ${data.error}`, 'error');
+                console.error('❌ Error al crear item:', data);
+            }
+        } catch (error) {
+            this.showMessage('itemsMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    // Configuration Methods
+    openConfigModal() {
+        document.getElementById('configModal').style.display = 'block';
+    }
+
+    closeConfigModal() {
+        document.getElementById('configModal').style.display = 'none';
+    }
+
+    loadConfig() {
+        const savedConfig = localStorage.getItem('apiConfig');
+        if (savedConfig) {
+            const config = JSON.parse(savedConfig);
+            document.getElementById('configBaseURL').value = config.baseURL || this.baseURL;
+            document.getElementById('configIP').value = config.ip || '';
+            document.getElementById('configPort').value = config.port || '';
+            document.getElementById('configEndpoints').value = config.endpoints || '';
+        }
+    }
+
+    async handleConfigSubmit(e) {
+        e.preventDefault();
+        console.log('⚙️ Guardando configuración...');
+        
+        const baseURL = document.getElementById('configBaseURL').value;
+        const ip = document.getElementById('configIP').value;
+        const port = document.getElementById('configPort').value;
+        const endpoints = document.getElementById('configEndpoints').value;
+        
+        const config = {
+            baseURL,
+            ip,
+            port,
+            endpoints
+        };
+        
+        localStorage.setItem('apiConfig', JSON.stringify(config));
+        this.baseURL = baseURL;
+        
+        this.showMessage('configMessages', '✅ Configuración guardada!', 'success');
+        this.closeConfigModal();
+        console.log('✅ Configuración guardada:', config);
+    }
+
+    async testConnection() {
+        console.log('🔍 Probando conexión...');
+        
+        try {
+            const { response, data } = await this.makeRequest('/health');
+            
+            if (response.ok) {
+                this.showMessage('configMessages', '✅ Conexión exitosa!', 'success');
+                console.log('✅ Conexión exitosa:', data);
+            } else {
+                this.showMessage('configMessages', '❌ Error en la conexión', 'error');
+                console.error('❌ Error en la conexión:', data);
+            }
+        } catch (error) {
+            this.showMessage('configMessages', '❌ Error de conexión', 'error');
+            console.error('❌ Error de conexión:', error);
+        }
+    }
+
+    // Utility Methods
+    updateTokenDisplay() {
+        const tokenDisplay = document.getElementById('tokenDisplay');
+        if (this.accessToken) {
+            tokenDisplay.textContent = `Access Token: ${this.accessToken.substring(0, 20)}...`;
+        } else {
+            tokenDisplay.textContent = 'No hay tokens disponibles';
+        }
+    }
+
+    updateStatus() {
+        const statusElement = document.getElementById('status');
+        if (this.accessToken) {
+            statusElement.textContent = '✅ Logueado';
+            statusElement.className = 'status logged-in';
+        } else {
+            statusElement.textContent = '❌ No Logueado';
+            statusElement.className = 'status logged-out';
+        }
+    }
+
+    showMessage(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = `grid-messages ${type}`;
+        
+        // Auto-clear after 5 seconds
+        setTimeout(() => {
+            element.textContent = '';
+            element.className = 'grid-messages';
+        }, 5000);
+    }
+
+    logout() {
+        console.log('🚪 Cerrando sesión...');
+        
+        this.accessToken = null;
+        this.refreshToken = null;
+        
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        
+        this.updateTokenDisplay();
+        this.updateStatus();
+        
+        // Clear all messages
+        const messageElements = document.querySelectorAll('.grid-messages');
+        messageElements.forEach(el => {
+            el.textContent = '';
+            el.className = 'grid-messages';
+        });
+        
+        console.log('✅ Sesión cerrada');
+    }
+}
+
+// Initialize the application when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Inicializando JWT Auth App...');
+    new JWTAuthApp();
+});</code></pre>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <h4>Cliente Web HTML (index.html)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">HTML</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;JWT Authentication Frontend&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="container"&gt;
+        &lt;!-- Header --&gt;
+        &lt;header class="header"&gt;
+            &lt;h1&gt;🔐 JWT Authentication System&lt;/h1&gt;
+            &lt;div class="config-section"&gt;
+                &lt;button id="configBtn" class="config-btn"&gt;⚙️ Configurar Servicio&lt;/button&gt;
+                &lt;button id="logoutBtn" class="logout-btn"&gt;🚪 Cerrar Sesión&lt;/button&gt;
+                &lt;div id="status" class="status"&gt;❌ No Logueado&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/header&gt;
+
+        &lt;!-- Main Grid Layout --&gt;
+        &lt;main class="main-grid"&gt;
+            &lt;!-- Register Section --&gt;
+            &lt;section class="grid-item register-section"&gt;
+                &lt;h2&gt;📝 Registrar Usuario&lt;/h2&gt;
+                &lt;div id="registerMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;form id="registerForm"&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="regUsername"&gt;Usuario:&lt;/label&gt;
+                            &lt;input type="text" id="regUsername" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="regEmail"&gt;Email:&lt;/label&gt;
+                            &lt;input type="email" id="regEmail" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="regPassword"&gt;Contraseña:&lt;/label&gt;
+                            &lt;input type="password" id="regPassword" required&gt;
+                        &lt;/div&gt;
+                        &lt;button type="submit" class="btn btn-success"&gt;Registrar&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Login Section --&gt;
+            &lt;section class="grid-item login-section"&gt;
+                &lt;h2&gt;🔐 Iniciar Sesión&lt;/h2&gt;
+                &lt;div id="loginMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;form id="loginForm"&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="loginUsername"&gt;Usuario:&lt;/label&gt;
+                            &lt;input type="text" id="loginUsername" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="loginPassword"&gt;Contraseña:&lt;/label&gt;
+                            &lt;input type="password" id="loginPassword" required&gt;
+                        &lt;/div&gt;
+                        &lt;button type="submit" class="btn btn-primary"&gt;Iniciar Sesión&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Token Management Section --&gt;
+            &lt;section class="grid-item token-section"&gt;
+                &lt;h2&gt;🔄 Gestión de Tokens&lt;/h2&gt;
+                &lt;div id="tokenMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="token-display"&gt;
+                    &lt;div id="tokenDisplay" class="token-info"&gt;No hay tokens disponibles&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="token-actions"&gt;
+                    &lt;button id="refreshTokenBtn" class="btn btn-warning"&gt;🔄 Refrescar Token&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Profile Section --&gt;
+            &lt;section class="grid-item profile-section"&gt;
+                &lt;h2&gt;👤 Perfil de Usuario&lt;/h2&gt;
+                &lt;div id="profileMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="profile-actions"&gt;
+                    &lt;button id="getProfileBtn" class="btn btn-info"&gt;👤 Obtener Perfil&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Items Management Section --&gt;
+            &lt;section class="grid-item items-section"&gt;
+                &lt;h2&gt;📋 Gestión de Items&lt;/h2&gt;
+                &lt;div id="itemsMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="items-actions"&gt;
+                    &lt;button id="listItemsBtn" class="btn btn-secondary"&gt;📋 Listar Items&lt;/button&gt;
+                &lt;/div&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;h3&gt;Crear Nuevo Item&lt;/h3&gt;
+                    &lt;form id="createItemForm"&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="itemTitle"&gt;Título:&lt;/label&gt;
+                            &lt;input type="text" id="itemTitle" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="itemDescription"&gt;Descripción:&lt;/label&gt;
+                            &lt;textarea id="itemDescription" rows="3"&gt;&lt;/textarea&gt;
+                        &lt;/div&gt;
+                        &lt;button type="submit" class="btn btn-success"&gt;➕ Crear Item&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+        &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Configuration Modal --&gt;
+    &lt;div id="configModal" class="modal"&gt;
+        &lt;div class="modal-content"&gt;
+            &lt;span class="close"&gt;&times;&lt;/span&gt;
+            &lt;h2&gt;⚙️ Configuración del Servicio&lt;/h2&gt;
+            &lt;div id="configMessages" class="grid-messages"&gt;&lt;/div&gt;
+            &lt;form id="configForm"&gt;
+                &lt;div class="form-group"&gt;
+                    &lt;label for="configBaseURL"&gt;Base URL:&lt;/label&gt;
+                    &lt;input type="url" id="configBaseURL" placeholder="http://ip:puerto" required&gt;
+                &lt;/div&gt;
+                &lt;div class="form-group"&gt;
+                    &lt;label for="configIP"&gt;IP del Servidor:&lt;/label&gt;
+                    &lt;input type="text" id="configIP" placeholder="192.168.1.100"&gt;
+                &lt;/div&gt;
+                &lt;div class="form-group"&gt;
+                    &lt;label for="configPort"&gt;Puerto:&lt;/label&gt;
+                    &lt;input type="number" id="configPort" placeholder="5003"&gt;
+                &lt;/div&gt;
+                &lt;div class="form-group"&gt;
+                    &lt;label for="configEndpoints"&gt;Endpoints:&lt;/label&gt;
+                    &lt;textarea id="configEndpoints" rows="4" placeholder="Lista de endpoints disponibles"&gt;&lt;/textarea&gt;
+                &lt;/div&gt;
+                &lt;div class="modal-actions"&gt;
+                    &lt;button type="button" id="testConnectionBtn" class="btn btn-info"&gt;🔍 Probar Conexión&lt;/button&gt;
+                    &lt;button type="submit" class="btn btn-success"&gt;💾 Guardar Configuración&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <h4>Cliente Web CSS (styles.css)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header h1 {
+    color: #2c3e50;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.config-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.config-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.config-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.status {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status.logged-in {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status.logged-out {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Main Grid Layout */
+.main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.grid-item {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.grid-item h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* Form Styles */
+.form-container {
+    margin-top: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Button Styles */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #229954;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Messages */
+.grid-messages {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    white-space: pre-line;
+}
+
+.grid-messages.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.grid-messages.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Token Display */
+.token-display {
+    margin: 15px 0;
+}
+
+.token-info {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.token-actions {
+    margin-top: 15px;
+}
+
+/* Profile and Items Actions */
+.profile-actions,
+.items-actions {
+    margin-bottom: 20px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close:hover {
+    color: #000;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .config-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .grid-item {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/RegistroCliente.png" alt="Registro Cliente" onclick="openImageModal(this.src)">
+                        <p>Registro de Usuario - Cliente</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/RegistroServidor.png" alt="Registro Servidor" onclick="openImageModal(this.src)">
+                        <p>Registro de Usuario - Servidor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/IniciarCliente.png" alt="Iniciar Servidor" onclick="openImageModal(this.src)">
+                        <p>Iniciar Sesión - Cliente</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/IniciarServidor.png" alt="Iniciar Cliente" onclick="openImageModal(this.src)">
+                        <p>Iniciar Sesión - Servidor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/RefreshCliente.png" alt="Refresh Cliente" onclick="openImageModal(this.src)">
+                        <p>Refresh Token - Cliente</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/RefreshServidor.png" alt="Refresh Servidor" onclick="openImageModal(this.src)">
+                        <p>Refresh Token - Servidor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/PerfilCliente.png" alt="Perfil Cliente" onclick="openImageModal(this.src)">
+                        <p>Perfil Usuario - Cliente</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/PerfilServidor.png" alt="Perfil Servidor" onclick="openImageModal(this.src)">
+                        <p>Perfil Usuario - Servidor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/ItemsCliente.png" alt="Items Cliente" onclick="openImageModal(this.src)">
+                        <p>Gestión de Items - Cliente</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado05/ItemsServidor.png" alt="Items Servidor" onclick="openImageModal(this.src)">
+                        <p>Gestión de Items - Servidor</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <!-- Aquí irá la reflexión del ejercicio 5 -->
+                    <p>Reflexión sobre el uso de JWT en microservicios y la integración con frontend...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

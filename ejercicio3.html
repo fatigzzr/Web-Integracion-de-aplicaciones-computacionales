@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 3: XML + CSS - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio3">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 3: XML + CSS</h1>
+            <p>Sistema de gestión de una librería</p>
+        </div>
+
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivos</h3>
+                <p>Comprender el uso de XML y CSS</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+
+                <p>Eres el responsable del sistema de gestión de una librería en línea que ofrece
+                    libros en diferentes formatos (digitales y físicos). Para facilitar el intercambio,
+                    almacenamiento y procesamiento de la información, se requiere diseñar un
+                    archivo XML bien formado que represente el catálogo de libros disponible.</p>
+
+                <h4>Estructura del Elemento &lt;book&gt;</h4>
+                <p>El archivo XML debe incluir la siguiente información para cada libro:</p>
+                <ul>
+                    <li>ISBN del libro (atributo <code>isbn</code> en el elemento <code>&lt;book&gt;</code>)</li>
+                    <li>Título del libro (<code>&lt;title&gt;</code>)</li>
+                    <li>Autor o autores (<code>&lt;author&gt;</code>)</li>
+                    <li>Año de publicación (<code>&lt;year&gt;</code>)</li>
+                    <li>Género (<code>&lt;genre&gt;</code>)</li>
+                    <li>Precio (<code>&lt;price&gt;</code>)</li>
+                    <li>Disponibilidad en stock (<code>&lt;stock&gt;</code>)</li>
+                    <li>Formato (<code>&lt;format&gt;</code>)</li>
+                </ul>
+
+                <h4>Estilizado con CSS</h4>
+                <p>Como encargado de gestionar una librería en línea, necesitas mejorar la presentación visual de tu
+                    archivo XML que contiene la lista de libros. Para ello, deberás crear un archivo CSS llamado
+                    <code>library.css</code> y vincularlo a tu XML utilizando la directiva <code>&lt;?xml-stylesheet?&gt;</code>: <code>&lt;?xml-stylesheet type="text/css" href="library.css"?&gt;</code></p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Requisitos del CSS</h3>
+                <p>El CSS debe cumplir con los siguientes requisitos:</p>
+                
+                <p><strong>Estilizar el contenedor principal (library):</strong></p>
+                <ul>
+                    <li>Debe ocupar el 100% del ancho disponible.</li>
+                    <li>Debe tener un padding de 20px.</li>
+                    <li>El fondo debe ser de color <code>#f0f0f0</code>.</li>
+                    <li>Se debe utilizar la fuente <code>Verdana, Geneva, Arial, Helvetica, sans-serif</code>.</li>
+                </ul>
+
+                <p><strong>Estilizar la caja que contiene todos los libros (books):</strong></p>
+                <ul>
+                    <li>Debe ocupar el 100% del ancho disponible.</li>
+                    <li>El fondo debe ser de color <code>#cccccc</code>.</li>
+                    <li>Debe tener un padding de 15px.</li>
+                    <li>Debe tener un margen inferior de 20px.</li>
+                </ul>
+
+                <p><strong>Estilizar cada libro individual (book):</strong></p>
+                <ul>
+                    <li>Debe ocupar el 100% del ancho disponible.</li>
+                    <li>El fondo debe ser de color <code>#e0e0e0</code>.</li>
+                    <li>Debe tener un borde de 1px sólido de color <code>#999</code>.</li>
+                    <li>Debe tener un padding de 10px.</li>
+                    <li>Debe tener un margen inferior de 10px.</li>
+                </ul>
+
+                <p><strong>Estilizar los elementos dentro de cada libro:</strong></p>
+                <ul>
+                    <li>Título (title): Debe tener un tamaño de fuente de <code>1.2em</code>, estar en negrita, y tener un margen inferior de 5px.</li>
+                    <li>Autor (author): Debe estar en cursiva y tener un margen inferior de 5px.</li>
+                    <li>Género (genre), Precio (price), Stock (stock), Formato (format): Deben tener un margen inferior de 3px y ser mostrados en bloques.</li>
+                </ul>
+
+                <p><strong>Colores específicos:</strong></p>
+                <ul>
+                    <li>Género: color <code>#666</code>.</li>
+                    <li>Precio: color <code>#009900</code>.</li>
+                    <li>Stock: color <code>#ff0000</code>.</li>
+                    <li>Formato: color <code>#0000ff</code>.</li>
+                </ul>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Código</h3>
+                
+                <h4>Catálogo de Libros (library.xml)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">XML</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;?xml-stylesheet type="text/css" href="library.css"?&gt;
+&lt;library&gt;
+    &lt;book isbn="978-0-7475-3269-9"&gt;
+        &lt;title&gt;Harry Potter and the Philosopher's Stone&lt;/title&gt;
+        &lt;author&gt;J.K. Rowling&lt;/author&gt;
+        &lt;publication_year&gt;1997&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;24.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-7475-3274-3"&gt;
+        &lt;title&gt;Harry Potter and the Chamber of Secrets&lt;/title&gt;
+        &lt;author&gt;J.K. Rowling&lt;/author&gt;
+        &lt;publication_year&gt;1998&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;26.50&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-7475-4624-5"&gt;
+        &lt;title&gt;The Hobbit&lt;/title&gt;
+        &lt;author&gt;J.R.R. Tolkien&lt;/author&gt;
+        &lt;publication_year&gt;1937&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;18.75&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-618-34614-4"&gt;
+        &lt;title&gt;The Lord of the Rings&lt;/title&gt;
+        &lt;author&gt;J.R.R. Tolkien&lt;/author&gt;
+        &lt;publication_year&gt;1954&lt;/publication_year&gt;
+        &lt;genre&gt;Fantasy&lt;/genre&gt;
+        &lt;price&gt;45.00&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Box Set&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-7432-4722-1"&gt;
+        &lt;title&gt;The Great Gatsby&lt;/title&gt;
+        &lt;author&gt;F. Scott Fitzgerald&lt;/author&gt;
+        &lt;publication_year&gt;1925&lt;/publication_year&gt;
+        &lt;genre&gt;Classic&lt;/genre&gt;
+        &lt;price&gt;12.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-14-028333-4"&gt;
+        &lt;title&gt;1984&lt;/title&gt;
+        &lt;author&gt;George Orwell&lt;/author&gt;
+        &lt;publication_year&gt;1949&lt;/publication_year&gt;
+        &lt;genre&gt;Dystopian&lt;/genre&gt;
+        &lt;price&gt;14.25&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-679-72369-5"&gt;
+        &lt;title&gt;To Kill a Mockingbird&lt;/title&gt;
+        &lt;author&gt;Harper Lee&lt;/author&gt;
+        &lt;publication_year&gt;1960&lt;/publication_year&gt;
+        &lt;genre&gt;Classic&lt;/genre&gt;
+        &lt;price&gt;15.99&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76948-0"&gt;
+        &lt;title&gt;The Fault in Our Stars&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2012&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;16.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76949-7"&gt;
+        &lt;title&gt;Looking for Alaska&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2005&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;14.50&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76950-3"&gt;
+        &lt;title&gt;Paper Towns&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2008&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;15.25&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76951-0"&gt;
+        &lt;title&gt;An Abundance of Katherines&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2006&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;13.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76952-7"&gt;
+        &lt;title&gt;Turtles All the Way Down&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2017&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;17.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76953-4"&gt;
+        &lt;title&gt;The Anthropocene Reviewed&lt;/title&gt;
+        &lt;author&gt;John Green&lt;/author&gt;
+        &lt;publication_year&gt;2021&lt;/publication_year&gt;
+        &lt;genre&gt;Non-fiction&lt;/genre&gt;
+        &lt;price&gt;22.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76954-1"&gt;
+        &lt;title&gt;Will Grayson, Will Grayson&lt;/title&gt;
+        &lt;author&gt;John Green, David Levithan&lt;/author&gt;
+        &lt;publication_year&gt;2010&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;16.50&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76955-8"&gt;
+        &lt;title&gt;Let It Snow&lt;/title&gt;
+        &lt;author&gt;John Green, Maureen Johnson, Lauren Myracle&lt;/author&gt;
+        &lt;publication_year&gt;2008&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;14.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76956-5"&gt;
+        &lt;title&gt;The Hunger Games&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2008&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;18.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76957-2"&gt;
+        &lt;title&gt;Catching Fire&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2009&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;19.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76958-9"&gt;
+        &lt;title&gt;Mockingjay&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2010&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;20.99&lt;/price&gt;
+        &lt;stock&gt;false&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76959-6"&gt;
+        &lt;title&gt;The Ballad of Songbirds and Snakes&lt;/title&gt;
+        &lt;author&gt;Suzanne Collins&lt;/author&gt;
+        &lt;publication_year&gt;2020&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;24.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Hardcover&lt;/format&gt;
+    &lt;/book&gt;
+    
+    &lt;book isbn="978-0-316-76960-2"&gt;
+        &lt;title&gt;Twilight&lt;/title&gt;
+        &lt;author&gt;Stephenie Meyer&lt;/author&gt;
+        &lt;publication_year&gt;2005&lt;/publication_year&gt;
+        &lt;genre&gt;Young Adult&lt;/genre&gt;
+        &lt;price&gt;17.99&lt;/price&gt;
+        &lt;stock&gt;true&lt;/stock&gt;
+        &lt;format&gt;Paperback&lt;/format&gt;
+    &lt;/book&gt;
+&lt;/library&gt;</code></pre>
+                </div>
+
+                <h4>Estilos para XML (library.css)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>/* Estilizar el contenedor principal (library) */
+library {
+    width: 100%;
+    padding: 20px;
+    background-color: #f0f0f0;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+/* Estilizar la caja que contiene todos los libros (books) */
+books {
+    width: 100%;
+    background-color: #cccccc;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Estilizar cada libro individual (book) */
+book {
+    width: 100%;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Estilizar los elementos dentro de cada libro */
+
+/* Título (title) */
+title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Autor (author) */
+author {
+    font-style: italic;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Año de publicación (publication_year) */
+publication_year {
+    margin-bottom: 3px;
+    display: block;
+}
+
+/* Género (genre) */
+genre {
+    margin-bottom: 3px;
+    display: block;
+    color: #666;
+}
+
+/* Precio (price) */
+price {
+    margin-bottom: 3px;
+    display: block;
+    color: #009900;
+}
+
+/* Stock (stock) */
+stock {
+    margin-bottom: 3px;
+    display: block;
+    color: #ff0000;
+}
+
+/* Formato (format) */
+format {
+    margin-bottom: 3px;
+    display: block;
+    color: #0000ff;
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado03/Library.png" alt="Screenshot 1" onclick="openImageModal(this.src)">
+                        <p>Screenshot 1</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+
+                <p>En la clase vimos el uso del XML, el cual es un lenguaje de marcado bastante interesante. Anteriormente, no había escuchado sobre este tipo de archivo, y me sorprendió que se vea tan similar al HTML. Esto tiene sentido porque, al igual que el HTML, es un lenguaje de marcado que utiliza etiquetas para estructurar información. Sin embargo, la diferencia principal es que, mientras el HTML está diseñado para mostrar contenido en un navegador, el XML se utiliza principalmente para guardar, organizar o enviar información entre diferentes sistemas.</p>
+                <p>Algo que me llamó la atención es que en XML yo puedo personalizar las etiquetas. A diferencia del HTML, en donde las etiquetas ya vienen definidas, en XML yo puedo crear mis propias etiquetas según lo que necesite. Me imaginé esto como si fueran entidades o tablas en una base de datos, ya que puedo definir una etiqueta general, como “librería”, y dentro colocar atributos o subelementos como “ISBN”, “autor” o “título”. Esta forma de organizar datos me parece bastante lógica y flexible, sobre todo porque puedo adaptar el archivo XML a diferentes contextos.</p>
+                <p>También me pareció interesante que el archivo XML se pueda visualizar directamente en el navegador. Al principio me sorprendió, pero tiene sentido porque en clase vimos que XML cumple un papel parecido al de JSON: ambos sirven para transmitir información estructurada. Si puedo abrir un archivo JSON en un sitio web, entonces también debería poder ver un archivo XML, y al comprobarlo noté que efectivamente así funciona.</p>
+                <p>Finalmente, otro aspecto que me pareció llamativo es que en XML se pueden aplicar directamente formatos de estilo CSS, de forma parecida a como ocurre con HTML. Esto refuerza la idea de que CSS funciona como un lenguaje complementario que da estilo a lenguajes de marcado. Aunque no estoy seguro si JSON permite algo similar, lo que sí me queda claro es que XML tiene más relación estructural con HTML, y de ahí que pueda aprovechar estas mismas posibilidades de estilización.</p>
+                <p>En conclusión, conocer XML me ayudó a entender mejor la lógica detrás de los lenguajes de marcado y cómo se conectan con conceptos que ya conocía, como HTML, CSS y bases de datos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

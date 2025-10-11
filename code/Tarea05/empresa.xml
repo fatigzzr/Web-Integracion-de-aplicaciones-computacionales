@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="empresa5.xsl"?>
+<empresa>
+    <!-- Sección de Departamentos -->
+    <departamentos>
+        <departamento id="1">
+            <nombre>Recursos Humanos</nombre>
+            <localizacion>Piso 3, Edificio A</localizacion>
+        </departamento>
+        <departamento id="2">
+            <nombre>Desarrollo de Software</nombre>
+            <localizacion>Piso 5, Edificio B</localizacion>
+        </departamento>
+        <departamento id="3">
+            <nombre>Marketing</nombre>
+            <localizacion>Piso 2, Edificio A</localizacion>
+        </departamento>
+        <departamento id="4">
+            <nombre>Ventas</nombre>
+            <localizacion>Piso 1, Edificio A</localizacion>
+        </departamento>
+        <departamento id="5">
+            <nombre>Finanzas</nombre>
+            <localizacion>Piso 4, Edificio A</localizacion>
+        </departamento>
+        <departamento id="6">
+            <nombre>Operaciones</nombre>
+            <localizacion>Piso 6, Edificio B</localizacion>
+        </departamento>
+        <departamento id="7">
+            <nombre>Calidad</nombre>
+            <localizacion>Piso 3, Edificio B</localizacion>
+        </departamento>
+        <departamento id="8">
+            <nombre>Logística</nombre>
+            <localizacion>Almacén Principal</localizacion>
+        </departamento>
+    </departamentos>
+
+    <!-- Sección de Empleados -->
+    <empleados>
+        <empleado id="1">
+            <nombre>María</nombre>
+            <apellido>González</apellido>
+            <posicion>Gerente de Recursos Humanos</posicion>
+            <id_departamento>1</id_departamento>
+            <salario>85000</salario>
+            <fecha_contratacion>2020-03-15</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="2">
+            <nombre>Carlos</nombre>
+            <apellido>Rodríguez</apellido>
+            <posicion>Desarrollador Senior</posicion>
+            <id_departamento>2</id_departamento>
+            <salario>75000</salario>
+            <fecha_contratacion>2019-07-22</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="3">
+            <nombre>Ana</nombre>
+            <apellido>Martínez</apellido>
+            <posicion>Especialista en Marketing Digital</posicion>
+            <id_departamento>3</id_departamento>
+            <salario>55000</salario>
+            <fecha_contratacion>2021-01-10</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="4">
+            <nombre>Luis</nombre>
+            <apellido>Fernández</apellido>
+            <posicion>Ejecutivo de Ventas</posicion>
+            <id_departamento>4</id_departamento>
+            <salario>45000</salario>
+            <fecha_contratacion>2022-05-18</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="5">
+            <nombre>Laura</nombre>
+            <apellido>Sánchez</apellido>
+            <posicion>Contadora</posicion>
+            <id_departamento>5</id_departamento>
+            <salario>60000</salario>
+            <fecha_contratacion>2020-11-03</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="6">
+            <nombre>Diego</nombre>
+            <apellido>López</apellido>
+            <posicion>Analista de Operaciones</posicion>
+            <id_departamento>6</id_departamento>
+            <salario>52000</salario>
+            <fecha_contratacion>2021-09-14</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="7">
+            <nombre>Carmen</nombre>
+            <apellido>García</apellido>
+            <posicion>Especialista en Calidad</posicion>
+            <id_departamento>7</id_departamento>
+            <salario>48000</salario>
+            <fecha_contratacion>2022-02-28</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="8">
+            <nombre>Roberto</nombre>
+            <apellido>Hernández</apellido>
+            <posicion>Coordinador de Logística</posicion>
+            <id_departamento>8</id_departamento>
+            <salario>42000</salario>
+            <fecha_contratacion>2021-06-07</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="9">
+            <nombre>Isabel</nombre>
+            <apellido>Jiménez</apellido>
+            <posicion>Desarrolladora Junior</posicion>
+            <id_departamento>2</id_departamento>
+            <salario>40000</salario>
+            <fecha_contratacion>2023-01-15</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="10">
+            <nombre>Miguel</nombre>
+            <apellido>Torres</apellido>
+            <posicion>Asistente de Recursos Humanos</posicion>
+            <id_departamento>1</id_departamento>
+            <salario>35000</salario>
+            <fecha_contratacion>2022-08-20</fecha_contratacion>
+            <tiempo_completo>false</tiempo_completo>
+        </empleado>
+        <empleado id="11">
+            <nombre>Sofía</nombre>
+            <apellido>Morales</apellido>
+            <posicion>Diseñadora Gráfica</posicion>
+            <id_departamento>3</id_departamento>
+            <salario>38000</salario>
+            <fecha_contratacion>2021-12-05</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="12">
+            <nombre>Andrés</nombre>
+            <apellido>Vargas</apellido>
+            <posicion>Representante de Ventas</posicion>
+            <id_departamento>4</id_departamento>
+            <salario>32000</salario>
+            <fecha_contratacion>2023-03-12</fecha_contratacion>
+            <tiempo_completo>false</tiempo_completo>
+        </empleado>
+        <empleado id="13">
+            <nombre>Patricia</nombre>
+            <apellido>Ramos</apellido>
+            <posicion>Analista Financiera</posicion>
+            <id_departamento>5</id_departamento>
+            <salario>58000</salario>
+            <fecha_contratacion>2020-04-30</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="14">
+            <nombre>Javier</nombre>
+            <apellido>Mendoza</apellido>
+            <posicion>Supervisor de Operaciones</posicion>
+            <id_departamento>6</id_departamento>
+            <salario>65000</salario>
+            <fecha_contratacion>2019-10-15</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="15">
+            <nombre>Elena</nombre>
+            <apellido>Castillo</apellido>
+            <posicion>Auditora de Calidad</posicion>
+            <id_departamento>7</id_departamento>
+            <salario>50000</salario>
+            <fecha_contratacion>2021-05-22</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="16">
+            <nombre>Fernando</nombre>
+            <apellido>Ruiz</apellido>
+            <posicion>Operador de Almacén</posicion>
+            <id_departamento>8</id_departamento>
+            <salario>28000</salario>
+            <fecha_contratacion>2022-11-08</fecha_contratacion>
+            <tiempo_completo>false</tiempo_completo>
+        </empleado>
+        <empleado id="17">
+            <nombre>Valentina</nombre>
+            <apellido>Silva</apellido>
+            <posicion>Desarrolladora Full Stack</posicion>
+            <id_departamento>2</id_departamento>
+            <salario>70000</salario>
+            <fecha_contratacion>2020-08-12</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="18">
+            <nombre>Ricardo</nombre>
+            <apellido>Peña</apellido>
+            <posicion>Especialista en Reclutamiento</posicion>
+            <id_departamento>1</id_departamento>
+            <salario>45000</salario>
+            <fecha_contratacion>2021-07-25</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="19">
+            <nombre>Adriana</nombre>
+            <apellido>Flores</apellido>
+            <posicion>Coordinadora de Marketing</posicion>
+            <id_departamento>3</id_departamento>
+            <salario>62000</salario>
+            <fecha_contratacion>2019-12-03</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+        <empleado id="20">
+            <nombre>Gabriel</nombre>
+            <apellido>Ortega</apellido>
+            <posicion>Gerente de Ventas</posicion>
+            <id_departamento>4</id_departamento>
+            <salario>80000</salario>
+            <fecha_contratacion>2018-06-18</fecha_contratacion>
+            <tiempo_completo>true</tiempo_completo>
+        </empleado>
+    </empleados>
+</empresa>

@@ -1,0 +1,346 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    border-bottom: 3px solid #898AC4;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.description {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-left: 4px solid #898AC4;
+}
+
+/* Navegación de géneros */
+.genre-nav {
+    background: linear-gradient(135deg, #898AC4, #6d6ea0);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.genre-nav h3 {
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-size: 18px;
+}
+
+.genre-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.genre-button {
+    display: inline-block;
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.genre-button:hover {
+    background-color: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.genre-button.active {
+    background-color: rgba(255,255,255,0.4);
+    border: 2px solid rgba(255,255,255,0.8);
+    font-weight: bold;
+}
+
+.genre-name {
+    font-weight: bold;
+}
+
+.genre-count {
+    opacity: 0.8;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+/* Género actual */
+.current-genre {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    border-radius: 8px;
+    border: 1px solid #4caf50;
+}
+
+.current-genre h2 {
+    margin: 0 0 10px 0;
+    color: #2e7d32;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.genre-icon {
+    font-size: 24px;
+}
+
+.genre-description {
+    margin: 0;
+    color: #2e7d32;
+    font-style: italic;
+    font-size: 16px;
+}
+
+/* Sección de álbumes */
+.albums-section {
+    margin-bottom: 30px;
+}
+
+.albums-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.albums-header h3 {
+    color: #333;
+    font-size: 20px;
+    margin: 0;
+}
+
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.album-card {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.album-header {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.album-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.3;
+}
+
+.album-year {
+    background: linear-gradient(45deg, #898AC4, #6d6ea0);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.album-info {
+    margin-bottom: 15px;
+}
+
+.artist-info, .country-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #666;
+    font-size: 14px;
+}
+
+.artist-icon, .flag-icon {
+    font-size: 14px;
+}
+
+.artist-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.album-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #898AC4;
+}
+
+.album-actions {
+    text-align: center;
+}
+
+.view-album-btn {
+    background: linear-gradient(45deg, #898AC4, #6d6ea0);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-album-btn:hover {
+    background: linear-gradient(45deg, #6d6ea0, #5a5b8a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Sin álbumes */
+.no-albums {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.no-albums h3 {
+    color: #999;
+    margin-bottom: 10px;
+}
+
+/* Resumen de géneros */
+.genres-summary {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.genres-summary h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    text-align: center;
+    font-size: 18px;
+}
+
+.genres-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.genre-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.genre-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.genre-album-count {
+    color: #666;
+    font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .genre-buttons {
+        gap: 8px;
+    }
+    
+    .genre-button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .albums-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .album-card {
+        padding: 15px;
+    }
+    
+    .album-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .genres-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .genre-item {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat con DeepSeek Coder (Ollama)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #2d3748;
+      margin-top: 40px;
+    }
+    #chat-container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 600px;
+      padding: 24px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #response {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 16px;
+      min-height: 80px;
+      white-space: pre-wrap;
+      color: #222;
+    }
+    form {
+      display: flex;
+      gap: 8px;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+    input {
+      flex: 1;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chat con DeepSeek Coder (Ollama)</h1>
+  <div id="chat-container">
+    <form id="prompt-form">
+      <input type="text" id="prompt" placeholder="Escribe tu pregunta o código..." required autocomplete="off" />
+      <button type="submit">Enviar</button>
+    </form>
+    <div id="response">La respuesta aparecerá aquí.</div>
+  </div>
+  <script>
+    const form = document.getElementById('prompt-form');
+    const promptInput = document.getElementById('prompt');
+    const responseDiv = document.getElementById('response');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+      
+      responseDiv.textContent = 'Pensando...';
+      promptInput.disabled = true;
+      
+      try {
+        const res = await fetch('/api/respuesta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
+        }
+        
+        responseDiv.textContent = data.respuesta;
+      } catch (err) {
+        responseDiv.textContent = 'Error: ' + err.message;
+        console.error('Error completo:', err);
+      } finally {
+        promptInput.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,977 @@
+/* ===== ESTILOS ESPECÍFICOS PARA EJERCICIOS Y TAREAS ===== */
+
+/* Header de ejercicios */
+.header {
+    background: white;
+    color: #333;
+    padding: 0.25rem 1.5rem 1rem 8rem;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+    margin-top: 0;
+    margin-left: -3.25rem;
+}
+
+.header p {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 0;
+    margin-left: -3.25rem;
+}
+
+.back-btn {
+    position: absolute;
+    top: 1rem;
+    left: 3rem;
+    transform: none;
+    background: #000;
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #333;
+    color: white;
+}
+
+.content {
+    padding: 0.25rem 3rem;
+    width: 100%;
+}
+
+/* Secciones de ejercicios */
+.exercise-info {
+    background: white;
+    padding: 0;
+    border-radius: 0;
+    margin-bottom: 1rem;
+    border: none;
+    border-bottom: none;
+}
+
+.exercise-info h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+
+.exercise-info ul {
+    margin: 0.25rem 0;
+    padding-left: 2rem;
+}
+
+.exercise-info li {
+    margin-bottom: 0.1rem;
+    line-height: 1.3;
+    font-size: 1rem;
+}
+
+.exercise-info p {
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    font-size: 1rem;
+}
+
+/* Screenshots */
+.screenshots-section {
+    margin-bottom: 1rem;
+    padding: 0;
+    border-bottom: none;
+}
+
+.screenshots-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+
+.screenshot-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.screenshot-item {
+    text-align: center;
+    background: white;
+    padding: 1rem;
+    border-radius: 0;
+    border: 1px solid #e9ecef;
+}
+
+.screenshot-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.screenshot-item img:hover {
+    transform: scale(1.02);
+}
+
+/* Reflexión */
+.reflection-section {
+    margin-bottom: 1rem;
+    padding: 0;
+    border-bottom: none;
+}
+
+.reflection-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+
+.reflection-content {
+    line-height: 1.6;
+    font-size: 1rem;
+    color: #333;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.reflection-content ul,
+.reflection-content ol {
+    margin-left: 2rem;
+    margin-bottom: 0.25rem;
+    list-style-type: disc;
+}
+
+.reflection-content ul ul {
+    list-style-type: circle;
+}
+
+.reflection-content ul ul ul {
+    list-style-type: square;
+}
+
+.reflection-content ol {
+    list-style-type: decimal;
+}
+
+.reflection-content ol ol {
+    list-style-type: lower-alpha;
+}
+
+.reflection-content ol ol ol {
+    list-style-type: lower-roman;
+}
+
+.reflection-content li {
+    margin-bottom: 0.1rem;
+    line-height: 1.3;
+    font-size: 1rem;
+}
+
+.reflection-content p {
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    font-size: 1rem;
+}
+
+/* Código */
+.code-section {
+    margin-bottom: 1rem;
+}
+
+.code-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+
+.download-link {
+    display: inline-block;
+    background: #667eea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.download-link:hover {
+    background: #5a6fd8;
+    color: white;
+}
+
+.code-preview {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 0;
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    margin-top: 1rem;
+    position: relative;
+    border: 1px solid #333;
+}
+
+.code-header-bar {
+    background: #2d2d2d;
+    padding: 0.25rem 0.75rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+    min-height: 32px;
+}
+
+.code-language {
+    color: #9ca3af;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    flex: 1;
+}
+
+.code-toggle-top {
+    background: #000;
+    color: white;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: fit-content;
+    height: 30px;
+    white-space: nowrap;
+}
+
+.code-toggle-top:hover {
+    background: #333;
+}
+
+.toggle-icon-top {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon-top.expanded {
+    transform: rotate(180deg);
+}
+
+.code-preview pre {
+    margin: 0;
+    white-space: pre-wrap;
+    padding: 1.5rem;
+    background: transparent;
+    text-align: left;
+}
+
+/* Syntax highlighting como Notion */
+.code-preview .keyword {
+    color: #569cd6;
+    font-weight: 600;
+}
+
+.code-preview .string {
+    color: #ce9178;
+}
+
+.code-preview .comment {
+    color: #6a9955;
+    font-style: italic;
+}
+
+.code-preview .function {
+    color: #dcdcaa;
+}
+
+.code-preview .variable {
+    color: #9cdcfe;
+}
+
+.code-preview .number {
+    color: #b5cea8;
+}
+
+.code-preview .operator {
+    color: #d4d4d4;
+}
+
+.code-preview .punctuation {
+    color: #d4d4d4;
+}
+
+.code-preview .builtin {
+    color: #4ec9b0;
+}
+
+.code-preview .class {
+    color: #4ec9b0;
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+
+.code-toggle {
+    display: none;
+}
+
+.code-collapsed {
+    max-height: 500px;
+    overflow: hidden;
+    position: relative;
+}
+
+.code-collapsed::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(transparent, #2d3748);
+    pointer-events: none;
+}
+
+.expand-btn {
+    display: none;
+}
+
+/* Estilos para código */
+.code-display {
+    display: block;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Cuando el código está dentro de un code-preview, ajustar estilos */
+.code-preview .code-display {
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+    padding: 8px 20px;
+}
+
+.code-display code {
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0;
+    border: none;
+}
+
+/* Estilos para iframe de PDF */
+.pdf-iframe {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    min-height: 1600px;
+    width: 100%;
+}
+
+/* Modal para imágenes */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.9);
+    animation: fadeIn 0.3s ease;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.image-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    animation: zoomIn 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.image-modal img {
+    max-width: calc(90vw - 80px);
+    max-height: calc(90vh - 80px);
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    width: auto;
+    height: auto;
+    display: block;
+    margin: auto;
+}
+
+.image-modal-close {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    transition: color 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-modal-close:hover {
+    color: #667eea;
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA TAREAS ===== */
+
+.file-preview {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    margin-bottom: 1rem;
+}
+
+.file-preview h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+
+.file-preview-content {
+    line-height: 1.4;
+    font-size: 1rem;
+    color: #333;
+    background: transparent;
+    padding: 0;
+}
+
+.file-preview-content p {
+    margin-bottom: 0.25rem;
+}
+
+.file-preview-content li {
+    margin-bottom: 0.1rem;
+}
+
+.description-content {
+    line-height: 1.4;
+    font-size: 1rem;
+    color: #333;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.description-content p {
+    margin-bottom: 0.25rem;
+}
+
+.description-content li {
+    margin-bottom: 0.1rem;
+}
+
+/* ===== ESTILOS ESPECÍFICOS POR EJERCICIO ===== */
+
+/* Estilos específicos para ejercicio1 (#cc8899) */
+.ejercicio1 .header h1 {
+    color: #cc8899;
+}
+
+.ejercicio1 .exercise-info h3,
+.ejercicio1 .screenshots-section h3,
+.ejercicio1 .reflection-section h3,
+.ejercicio1 .code-section h3 {
+    border-bottom: 2px solid #cc8899;
+    text-align: left;
+}
+
+.ejercicio1 .image-modal-close:hover {
+    color: #cc8899;
+}
+
+.ejercicio1 a {
+    color: #cc8899;
+    text-decoration: underline;
+}
+
+.ejercicio1 a:hover {
+    color: #b87788;
+    text-decoration: underline;
+}
+
+.ejercicio1 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio1 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para ejercicio2 (#ffca91) */
+.ejercicio2 .header h1 {
+    color: #ffca91;
+}
+
+.ejercicio2 .exercise-info h3,
+.ejercicio2 .screenshots-section h3,
+.ejercicio2 .reflection-section h3,
+.ejercicio2 .code-section h3 {
+    border-bottom: 2px solid #ffca91;
+    text-align: left;
+}
+
+.ejercicio2 .image-modal-close:hover {
+    color: #ffca91;
+}
+
+.ejercicio2 a {
+    color: #ffca91;
+    text-decoration: underline;
+}
+
+.ejercicio2 a:hover {
+    color: #e6b882;
+    text-decoration: underline;
+}
+
+.ejercicio2 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio2 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para ejercicio3 (#b784a7) */
+.ejercicio3 .header h1 {
+    color: #b784a7;
+}
+
+.ejercicio3 .exercise-info h3,
+.ejercicio3 .screenshots-section h3,
+.ejercicio3 .reflection-section h3,
+.ejercicio3 .code-section h3 {
+    border-bottom: 2px solid #b784a7;
+    text-align: left;
+}
+
+.ejercicio3 .image-modal-close:hover {
+    color: #b784a7;
+}
+
+/* Estilos específicos para ejercicio4 (#ffdd91) */
+.ejercicio4 .header h1 {
+    color: #ffdd91;
+}
+
+.ejercicio4 .exercise-info h3,
+.ejercicio4 .screenshots-section h3,
+.ejercicio4 .reflection-section h3,
+.ejercicio4 .code-section h3 {
+    border-bottom: 2px solid #ffdd91;
+    text-align: left;
+}
+
+.ejercicio4 .image-modal-close:hover {
+    color: #ffdd91;
+}
+
+/* Estilos específicos para tarea1 (#9ff4f6) */
+.tarea1 .header h1 {
+    color: #9ff4f6 !important;
+}
+
+.tarea1 .exercise-info h3,
+.tarea1 .screenshots-section h3,
+.tarea1 .file-preview h3,
+.tarea1 .reflection-section h3,
+.tarea1 .code-section h3 {
+    border-bottom: 2px solid #9ff4f6 !important;
+    text-align: left;
+}
+
+.tarea1 .image-modal-close:hover {
+    color: #9ff4f6;
+}
+
+.tarea1 a {
+    color: #9ff4f6;
+    text-decoration: underline;
+}
+
+.tarea1 a:hover {
+    color: #7dd8da;
+    text-decoration: underline;
+}
+
+.tarea1 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea1 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para tarea2 (#6fae93) */
+.tarea2 .header h1 {
+    color: #6fae93;
+}
+
+.tarea2 .exercise-info h3,
+.tarea2 .file-preview h3,
+.tarea2 .reflection-section h3,
+.tarea2 .code-section h3 {
+    border-bottom: 2px solid #6fae93;
+    text-align: left;
+}
+
+.tarea2 .image-modal-close:hover {
+    color: #6fae93;
+}
+
+.tarea2 a {
+    color: #6fae93;
+    text-decoration: underline;
+}
+
+.tarea2 a:hover {
+    color: #5a8f77;
+    text-decoration: underline;
+}
+
+.tarea2 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea2 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+.tarea1 .screenshot-gallery {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    margin: 1rem 0 0 0;
+}
+
+/* Estilos específicos para tarea3 (#9fd9f6) */
+.tarea3 .header h1 {
+    color: #9fd9f6;
+}
+
+.tarea3 .exercise-info h3,
+.tarea3 .screenshots-section h3,
+.tarea3 .file-preview h3,
+.tarea3 .reflection-section h3,
+.tarea3 .code-section h3 {
+    border-bottom: 2px solid #9fd9f6;
+    text-align: left;
+}
+
+.tarea3 .image-modal-close:hover {
+    color: #9fd9f6;
+}
+
+.tarea3 a {
+    color: #9fd9f6;
+    text-decoration: underline;
+}
+
+.tarea3 a:hover {
+    color: #7bc4e6;
+    text-decoration: underline;
+}
+
+.tarea3 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea3 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para tarea4 (#9fccf6) */
+.tarea4 .header h1 {
+    color: #9fccf6;
+}
+
+.tarea4 .exercise-info h3,
+.tarea4 .screenshots-section h3,
+.tarea4 .file-preview h3,
+.tarea4 .reflection-section h3,
+.tarea4 .code-section h3 {
+    border-bottom: 2px solid #9fccf6;
+    text-align: left;
+}
+
+.tarea4 .image-modal-close:hover {
+    color: #9fccf6;
+}
+
+.tarea4 a {
+    color: #9fccf6;
+    text-decoration: underline;
+}
+
+.tarea4 a:hover {
+    color: #7bb8e6;
+    text-decoration: underline;
+}
+
+.tarea4 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea4 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para tarea5 (#898AC4) */
+.tarea5 .header h1 {
+    color: #898AC4;
+}
+
+.tarea5 .exercise-info h3,
+.tarea5 .screenshots-section h3,
+.tarea5 .file-preview h3,
+.tarea5 .reflection-section h3,
+.tarea5 .code-section h3 {
+    border-bottom: 2px solid #898AC4;
+    text-align: left;
+}
+
+.tarea5 .image-modal-close:hover {
+    color: #898AC4;
+}
+
+.tarea5 a {
+    color: #898AC4;
+    text-decoration: underline;
+}
+
+.tarea5 a:hover {
+    color: #6d6ea0;
+    text-decoration: underline;
+}
+
+.tarea5 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea5 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* ===== RESPONSIVE DESIGN PARA EJERCICIOS ===== */
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .back-btn {
+        position: static;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .screenshot-gallery {
+        grid-template-columns: 1fr;
+    }
+    
+    .content {
+        padding: 1rem 2rem;
+    }
+}
+
+/* Estilos específicos para ejercicio5 (#ff9a8b) */
+.ejercicio5 .header h1 {
+    color: #ff9a8b;
+}
+
+.ejercicio5 .exercise-info h3,
+.ejercicio5 .screenshots-section h3,
+.ejercicio5 .reflection-section h3,
+.ejercicio5 .code-section h3 {
+    border-bottom: 2px solid #ff9a8b;
+    text-align: left;
+}
+
+.ejercicio5 .image-modal-close:hover {
+    color: #ff9a8b;
+}
+
+/* Estilos específicos para primer-avance (#a78bb5) */
+.primer-avance .header h1 {
+    color: #a78bb5;
+}
+
+.primer-avance .exercise-info h3,
+.primer-avance .screenshots-section h3,
+.primer-avance .reflection-section h3,
+.primer-avance .code-section h3 {
+    border-bottom: 2px solid #a78bb5;
+    text-align: left;
+}
+
+.primer-avance .image-modal-close:hover {
+    color: #a78bb5;
+}
+
+.primer-avance a {
+    color: #a78bb5;
+    text-decoration: underline;
+}
+
+.primer-avance a:hover {
+    color: #9666a5;
+    text-decoration: underline;
+}
+
+.primer-avance .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.primer-avance .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para segundo-avance (#8b5a9f) */
+.segundo-avance .header h1 {
+    color: #8b5a9f;
+}
+
+.segundo-avance .exercise-info h3,
+.segundo-avance .screenshots-section h3,
+.segundo-avance .reflection-section h3,
+.segundo-avance .code-section h3 {
+    border-bottom: 2px solid #8b5a9f;
+    text-align: left;
+}
+
+.segundo-avance .image-modal-close:hover {
+    color: #8b5a9f;
+}
+
+.segundo-avance a {
+    color: #8b5a9f;
+    text-decoration: underline;
+}
+
+.segundo-avance a:hover {
+    color: #7a4a8f;
+    text-decoration: underline;
+}
+
+.segundo-avance .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.segundo-avance .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
