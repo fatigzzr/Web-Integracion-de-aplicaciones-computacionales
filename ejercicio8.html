@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 8: Desktop App Java - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio8">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 8: Desktop App Java</h1>
+            <p>Aplicación de escritorio desarrollada con Java</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Desarrollar una aplicación de escritorio usando Java que funcione como cliente para consumir los endpoints de un microservicio con autenticación JWT.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <p>Desarrollar una aplicación de escritorio en Java que consuma un microservicio de autenticación JWT con las siguientes funcionalidades:</p>
+                
+                <p><strong>Funcionalidades:</strong></p>
+                <ul>
+                    <li>/health - Verificar estado del servidor</li>
+                    <li>/register - Registrar nuevo usuario</li>
+                    <li>/login - Iniciar sesión y obtener tokens</li>
+                    <li>/refresh - Renovar token de acceso</li>
+                    <li>/logout - Cerrar sesión</li>
+                </ul>
+
+                <br>
+                <p><strong>Prompt:</strong></p>
+                <p>Escribe un programa en Java que use la librería JavaFX para crear un cliente que consuma los endpoints de@micro.py. El microservicio registra usuarios, autentica usuarios con JWT, crea tokens verifica health del microservicio, protege endpoints y hace logout. Ej. 136.115.136.5:5003/api/health</p>
+                
+                <p>1. Crea en la GUI una sección que pida usuario y contraseña</p>
+                <p>2. Crea una sección en la GUI que permita registrar usuarios</p>
+                <p>3. Crea una sección en la GUI que permita refrescar el token generado</p>
+                <p>4. Crea una sección en la GUI que permita con localstorage definir y guardar la ip, puerto y endpoints del microservicio de manera persistente.</p>
+                <p>5. Crea una sección en la GUI que muestre el endpoint protegido siempre y cuando se le mande el token en el encabezado y el usuario haya sido autenticado</p>
+                <p>6. Crea una sección en la GUI que maneje un semáforo en donde se muestre en color verde si el microservicio está prendido, naranja si está en proceso, y en rojo si el microservicio está fuera de servicio</p>
+                <p>7. Asegurate de diseñar una GUI fácil de manejar utilizando botones y colores</p>
+                <p>8. Muestra en todo momento en la GUI las peticiones y datos obtenidos de los endpoints. Tambien muestra el JWT para validar como es creado, enviado y recibido</p>
+
+                <br>
+                <p><strong>Comandos para ejecutar:</strong></p>
+                <p><code>cd "/Users/fati/Library/Mobile Documents/com~apple~CloudDocs/UDEM/ITC/Integracion de aplicaciones computacionales/temp2/DesktopAppTemp/JavaFXClient"
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
+mvn clean compile
+mvn javafx:run</code></p>
+
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>Clase Principal JavaFX (Main.java)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Java</div>
+                    </div>
+                    <pre class="code-display"><code>package com.jwtclient;
+
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+        Scene scene = new Scene(loader.load(), 1000, 700);
+        
+        primaryStage.setTitle("JWT Client - Microservicio Authentication");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(true);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}</code></pre>
+                </div>
+
+                <div class="code-section">
+                    <h4>Controlador Principal (MainController.java)</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">Java</div>
+                        </div>
+                        <pre class="code-display"><code>package com.jwtclient.controller;
+
+import com.jwtclient.service.ApiService;
+import com.jwtclient.service.ConfigService;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class MainController implements Initializable {
+    
+    @FXML private TextField serverIpField;
+    @FXML private TextField serverPortField;
+    @FXML private Button saveConfigButton;
+    @FXML private Circle statusIndicator;
+    @FXML private Label statusLabel;
+    
+    @FXML private TextField loginUsernameField;
+    @FXML private PasswordField loginPasswordField;
+    @FXML private Button loginButton;
+    
+    @FXML private TextField registerUsernameField;
+    @FXML private TextField registerEmailField;
+    @FXML private PasswordField registerPasswordField;
+    @FXML private Button registerButton;
+    
+    @FXML private Button refreshTokenButton;
+    @FXML private Button logoutButton;
+    
+    @FXML private Button getProfileButton;
+    @FXML private Button getItemsButton;
+    @FXML private Button createItemButton;
+    @FXML private TextField itemTitleField;
+    @FXML private TextField itemDescriptionField;
+    
+    @FXML private TextArea responseArea;
+    @FXML private TextArea jwtArea;
+    @FXML private TextArea profileArea;
+    
+    private ApiService apiService;
+    private ConfigService configService;
+    private ScheduledExecutorService healthCheckScheduler;
+    private String currentAccessToken;
+    private String currentRefreshToken;
+    
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        apiService = new ApiService();
+        configService = new ConfigService();
+        
+        // Cargar configuración guardada
+        loadSavedConfig();
+        
+        // Configurar event handlers
+        setupEventHandlers();
+        
+        // Iniciar health check periódico
+        startHealthCheck();
+        
+        // Configurar área de respuesta
+        responseArea.setEditable(false);
+        jwtArea.setEditable(false);
+        profileArea.setEditable(false);
+        
+        logMessage("Aplicación iniciada. Configura la IP y puerto del servidor.");
+    }
+    
+    private void loadSavedConfig() {
+        String ip = configService.getServerIp();
+        String port = configService.getServerPort();
+        
+        if (ip != null && !ip.isEmpty()) {
+            serverIpField.setText(ip);
+        }
+        if (port != null && !port.isEmpty()) {
+            serverPortField.setText(port);
+        }
+        
+        // Actualizar la URL del ApiService automáticamente con la configuración cargada
+        if (ip != null && !ip.isEmpty() && port != null && !port.isEmpty()) {
+            apiService.updateBaseUrl("http://" + ip + ":" + port);
+            logMessage("Configuración cargada automáticamente: " + ip + ":" + port);
+        }
+    }
+    
+    private void setupEventHandlers() {
+        saveConfigButton.setOnAction(e -> saveConfig());
+        loginButton.setOnAction(e -> performLogin());
+        registerButton.setOnAction(e -> performRegister());
+        refreshTokenButton.setOnAction(e -> performRefreshToken());
+        logoutButton.setOnAction(e -> performLogout());
+        getProfileButton.setOnAction(e -> getProfile());
+        getItemsButton.setOnAction(e -> getItems());
+        createItemButton.setOnAction(e -> createItem());
+    }
+    
+    // Métodos públicos para FXML
+    @FXML
+    public void saveConfig() {
+        String ip = serverIpField.getText().trim();
+        String port = serverPortField.getText().trim();
+        
+        if (ip.isEmpty() || port.isEmpty()) {
+            showAlert("Error", "IP y puerto son requeridos");
+            return;
+        }
+        
+        configService.saveServerConfig(ip, port);
+        apiService.updateBaseUrl("http://" + ip + ":" + port);
+        logMessage("Configuración guardada: " + ip + ":" + port);
+        showAlert("Éxito", "Configuración guardada correctamente");
+    }
+    
+    @FXML
+    public void performLogin() {
+        String username = loginUsernameField.getText().trim();
+        String password = loginPasswordField.getText();
+        
+        if (username.isEmpty() || password.isEmpty()) {
+            showAlert("Error", "Usuario y contraseña son requeridos");
+            return;
+        }
+        
+        Task<String> loginTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.login(username, password);
+            }
+        };
+        
+        loginTask.setOnSucceeded(e -> {
+            String response = loginTask.getValue();
+            logMessage("LOGIN RESPONSE: " + response);
+            
+            // Parsear respuesta para extraer tokens
+            if (response.contains("access_token")) {
+                // Extraer tokens de la respuesta JSON
+                String accessToken = extractTokenFromResponse(response, "access_token");
+                String refreshToken = extractTokenFromResponse(response, "refresh_token");
+                
+                if (accessToken != null) {
+                    currentAccessToken = accessToken;
+                    currentRefreshToken = refreshToken;
+                    jwtArea.setText("Access Token: " + accessToken + "\n\nRefresh Token: " + refreshToken);
+                    logMessage("Login exitoso. Tokens guardados.");
+                }
+            }
+        });
+        
+        loginTask.setOnFailed(e -> {
+            logMessage("ERROR LOGIN: " + loginTask.getException().getMessage());
+            showAlert("Error", "Error en login: " + loginTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(loginTask);
+    }
+    
+    @FXML
+    public void performRegister() {
+        String username = registerUsernameField.getText().trim();
+        String email = registerEmailField.getText().trim();
+        String password = registerPasswordField.getText();
+        
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            showAlert("Error", "Todos los campos son requeridos");
+            return;
+        }
+        
+        Task<String> registerTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.register(username, email, password);
+            }
+        };
+        
+        registerTask.setOnSucceeded(e -> {
+            String response = registerTask.getValue();
+            logMessage("REGISTER RESPONSE: " + response);
+            showAlert("Éxito", "Usuario registrado correctamente");
+        });
+        
+        registerTask.setOnFailed(e -> {
+            logMessage("ERROR REGISTER: " + registerTask.getException().getMessage());
+            showAlert("Error", "Error en registro: " + registerTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(registerTask);
+    }
+    
+    @FXML
+    public void performRefreshToken() {
+        if (currentRefreshToken == null) {
+            showAlert("Error", "No hay refresh token disponible. Haz login primero.");
+            return;
+        }
+        
+        logMessage("🔄 Iniciando refresh token...");
+        showAlert("Info", "Refrescando token de acceso...");
+        
+        Task<String> refreshTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.refreshToken(currentRefreshToken);
+            }
+        };
+        
+        refreshTask.setOnSucceeded(e -> {
+            String response = refreshTask.getValue();
+            logMessage("REFRESH RESPONSE: " + response);
+            
+            String newAccessToken = extractTokenFromResponse(response, "access_token");
+            if (newAccessToken != null) {
+                currentAccessToken = newAccessToken;
+                jwtArea.setText("Access Token: " + newAccessToken + "\n\nRefresh Token: " + currentRefreshToken);
+                logMessage("✅ Token refrescado exitosamente.");
+                showAlert("Éxito", "Token de acceso refrescado correctamente.");
+            }
+        });
+        
+        refreshTask.setOnFailed(e -> {
+            logMessage("ERROR REFRESH: " + refreshTask.getException().getMessage());
+            showAlert("Error", "Error al refrescar token: " + refreshTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(refreshTask);
+    }
+    
+    @FXML
+    public void performLogout() {
+        if (currentRefreshToken == null) {
+            showAlert("Error", "No hay refresh token disponible.");
+            return;
+        }
+        
+        Task<String> logoutTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.logout(currentRefreshToken);
+            }
+        };
+        
+        logoutTask.setOnSucceeded(e -> {
+            String response = logoutTask.getValue();
+            logMessage("LOGOUT RESPONSE: " + response);
+            
+            currentAccessToken = null;
+            currentRefreshToken = null;
+            jwtArea.clear();
+            logMessage("✅ Logout exitoso. Tokens limpiados.");
+            showAlert("Éxito", "Sesión cerrada correctamente.");
+        });
+        
+        logoutTask.setOnFailed(e -> {
+            logMessage("ERROR LOGOUT: " + logoutTask.getException().getMessage());
+            showAlert("Error", "Error en logout: " + logoutTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(logoutTask);
+    }
+    
+    @FXML
+    public void getProfile() {
+        if (currentAccessToken == null) {
+            showAlert("Error", "No hay access token disponible. Haz login primero.");
+            return;
+        }
+        
+        logMessage("👤 Obteniendo información del perfil...");
+        
+        Task<String> profileTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.getProfile(currentAccessToken);
+            }
+        };
+        
+        profileTask.setOnSucceeded(e -> {
+            String response = profileTask.getValue();
+            logMessage("PROFILE RESPONSE: " + response);
+            
+            // Mostrar la información del perfil en el área específica de perfil
+            profileArea.setText(response);
+            showAlert("Éxito", "Información del perfil obtenida correctamente.");
+        });
+        
+        profileTask.setOnFailed(e -> {
+            logMessage("ERROR PROFILE: " + profileTask.getException().getMessage());
+            showAlert("Error", "Error al obtener perfil: " + profileTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(profileTask);
+    }
+    
+    @FXML
+    public void getItems() {
+        if (currentAccessToken == null) {
+            showAlert("Error", "No hay access token disponible. Haz login primero.");
+            return;
+        }
+        
+        logMessage("📋 Obteniendo lista de items...");
+        
+        Task<String> itemsTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.getItems(currentAccessToken);
+            }
+        };
+        
+        itemsTask.setOnSucceeded(e -> {
+            String response = itemsTask.getValue();
+            logMessage("ITEMS RESPONSE: " + response);
+            
+            // Mostrar la información de los items en el área específica
+            profileArea.setText(response);
+            showAlert("Éxito", "Lista de items obtenida correctamente.");
+        });
+        
+        itemsTask.setOnFailed(e -> {
+            logMessage("ERROR ITEMS: " + itemsTask.getException().getMessage());
+            showAlert("Error", "Error al obtener items: " + itemsTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(itemsTask);
+    }
+    
+    @FXML
+    public void createItem() {
+        if (currentAccessToken == null) {
+            showAlert("Error", "No hay access token disponible. Haz login primero.");
+            return;
+        }
+        
+        String title = itemTitleField.getText().trim();
+        String description = itemDescriptionField.getText().trim();
+        
+        if (title.isEmpty()) {
+            showAlert("Error", "El título es requerido");
+            return;
+        }
+        
+        Task<String> createTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                return apiService.createItem(currentAccessToken, title, description);
+            }
+        };
+        
+        createTask.setOnSucceeded(e -> {
+            String response = createTask.getValue();
+            logMessage("CREATE ITEM RESPONSE: " + response);
+            logMessage("✅ Item creado exitosamente.");
+            showAlert("Éxito", "Item creado correctamente.");
+            itemTitleField.clear();
+            itemDescriptionField.clear();
+        });
+        
+        createTask.setOnFailed(e -> {
+            logMessage("ERROR CREATE ITEM: " + createTask.getException().getMessage());
+            showAlert("Error", "Error al crear item: " + createTask.getException().getMessage());
+        });
+        
+        Executors.newSingleThreadExecutor().submit(createTask);
+    }
+    
+    
+    private void startHealthCheck() {
+        healthCheckScheduler = Executors.newScheduledThreadPool(1);
+        healthCheckScheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                Task<String> healthTask = new Task<String>() {
+                    @Override
+                    protected String call() throws Exception {
+                        return apiService.healthCheck();
+                    }
+                };
+                
+                healthTask.setOnSucceeded(e -> {
+                    String response = healthTask.getValue();
+                    logMessage("HEALTH CHECK: " + response);
+                    updateStatusIndicator("OK", Color.GREEN);
+                });
+                
+                healthTask.setOnFailed(e -> {
+                    logMessage("HEALTH CHECK FAILED: " + healthTask.getException().getMessage());
+                    updateStatusIndicator("ERROR", Color.RED);
+                });
+                
+                Executors.newSingleThreadExecutor().submit(healthTask);
+            });
+        }, 0, 10, TimeUnit.SECONDS);
+    }
+    
+    private void updateStatusIndicator(String status, Color color) {
+        statusIndicator.setFill(color);
+        statusLabel.setText("Estado: " + status);
+    }
+    
+    private String extractTokenFromResponse(String response, String tokenType) {
+        try {
+            // Buscar el token en la respuesta JSON
+            String pattern = "\"" + tokenType + "\"\\s*:\\s*\"([^\"]+)\"";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(response);
+            if (m.find()) {
+                return m.group(1);
+            }
+        } catch (Exception e) {
+            logMessage("Error extrayendo token: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    private void logMessage(String message) {
+        Platform.runLater(() -> {
+            String timestamp = java.time.LocalDateTime.now().toString();
+            responseArea.appendText("[" + timestamp + "] " + message + "\n");
+            responseArea.setScrollTop(Double.MAX_VALUE);
+        });
+    }
+    
+    private void showAlert(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+    
+    public void shutdown() {
+        if (healthCheckScheduler != null) {
+            healthCheckScheduler.shutdown();
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <h4>Servicio de API (ApiService.java)</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">Java</div>
+                        </div>
+                        <pre class="code-display"><code>package com.jwtclient.service;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+public class ApiService {
+    private String baseUrl = "http://localhost:5003";
+    
+    public void updateBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+    
+    public String healthCheck() throws Exception {
+        return makeRequest("GET", "/api/health", null, null);
+    }
+    
+    public String login(String username, String password) throws Exception {
+        String jsonBody = String.format(
+            "{\"username\":\"%s\",\"password\":\"%s\"}", 
+            username, password
+        );
+        return makeRequest("POST", "/api/auth/login", jsonBody, null);
+    }
+    
+    public String register(String username, String email, String password) throws Exception {
+        String jsonBody = String.format(
+            "{\"username\":\"%s\",\"email\":\"%s\",\"password\":\"%s\"}", 
+            username, email, password
+        );
+        return makeRequest("POST", "/api/auth/register", jsonBody, null);
+    }
+    
+    public String refreshToken(String refreshToken) throws Exception {
+        String jsonBody = String.format("{\"refresh_token\":\"%s\"}", refreshToken);
+        return makeRequest("POST", "/api/auth/refresh", jsonBody, null);
+    }
+    
+    public String logout(String refreshToken) throws Exception {
+        String jsonBody = String.format("{\"refresh_token\":\"%s\"}", refreshToken);
+        return makeRequest("POST", "/api/auth/logout", jsonBody, null);
+    }
+    
+    public String getProfile(String accessToken) throws Exception {
+        return makeRequest("GET", "/api/profile", null, accessToken);
+    }
+    
+    public String getItems(String accessToken) throws Exception {
+        return makeRequest("GET", "/api/items", null, accessToken);
+    }
+    
+    public String createItem(String accessToken, String title, String description) throws Exception {
+        String jsonBody = String.format(
+            "{\"title\":\"%s\",\"description\":\"%s\"}", 
+            title, description
+        );
+        return makeRequest("POST", "/api/items", jsonBody, accessToken);
+    }
+    
+    private String makeRequest(String method, String endpoint, String jsonBody, String authToken) throws Exception {
+        URL url = new URL(baseUrl + endpoint);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        
+        connection.setRequestMethod(method);
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Accept", "application/json");
+        
+        if (authToken != null) {
+            connection.setRequestProperty("Authorization", "Bearer " + authToken);
+        }
+        
+        if (jsonBody != null) {
+            connection.setDoOutput(true);
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+        }
+        
+        int responseCode = connection.getResponseCode();
+        
+        BufferedReader reader;
+        if (responseCode >= 200 && responseCode < 300) {
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+        }
+        
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+        reader.close();
+        
+        if (responseCode >= 400) {
+            throw new Exception("HTTP " + responseCode + ": " + response.toString());
+        }
+        
+        return response.toString();
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <h4>Servicio de Configuración (ConfigService.java)</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">Java</div>
+                        </div>
+                        <pre class="code-display"><code>package com.jwtclient.service;
+
+import java.io.*;
+import java.util.Properties;
+
+public class ConfigService {
+    private static final String CONFIG_FILE = "config.properties";
+    private Properties properties;
+    
+    public ConfigService() {
+        properties = new Properties();
+        loadConfig();
+    }
+    
+    private void loadConfig() {
+        try (FileInputStream fis = new FileInputStream(CONFIG_FILE)) {
+            properties.load(fis);
+        } catch (FileNotFoundException e) {
+            // Archivo no existe, usar valores por defecto
+            properties.setProperty("server.ip", "136.115.136.5");
+            properties.setProperty("server.port", "5003");
+        } catch (IOException e) {
+            System.err.println("Error cargando configuración: " + e.getMessage());
+        }
+    }
+    
+    public void saveServerConfig(String ip, String port) {
+        properties.setProperty("server.ip", ip);
+        properties.setProperty("server.port", port);
+        saveConfig();
+    }
+    
+    public String getServerIp() {
+        return properties.getProperty("server.ip", "136.115.136.5");
+    }
+    
+    public String getServerPort() {
+        return properties.getProperty("server.port", "5003");
+    }
+    
+    private void saveConfig() {
+        try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE)) {
+            properties.store(fos, "JWT Client Configuration");
+        } catch (IOException e) {
+            System.err.println("Error guardando configuración: " + e.getMessage());
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <h4>Configuración Maven (pom.xml)</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XML</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.jwtclient&lt;/groupId&gt;
+    &lt;artifactId&gt;jwt-client&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;packaging&gt;jar&lt;/packaging&gt;
+
+    &lt;name&gt;JWT Client&lt;/name&gt;
+    &lt;description&gt;JavaFX Client for JWT Microservice&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;11&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;11&lt;/maven.compiler.target&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;javafx.version&gt;17.0.2&lt;/javafx.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;!-- JavaFX Controls --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.openjfx&lt;/groupId&gt;
+            &lt;artifactId&gt;javafx-controls&lt;/artifactId&gt;
+            &lt;version&gt;${javafx.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        
+        &lt;!-- JavaFX FXML --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.openjfx&lt;/groupId&gt;
+            &lt;artifactId&gt;javafx-fxml&lt;/artifactId&gt;
+            &lt;version&gt;${javafx.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;!-- Maven Compiler Plugin --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.8.1&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;source&gt;11&lt;/source&gt;
+                    &lt;target&gt;11&lt;/target&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+
+            &lt;!-- JavaFX Maven Plugin --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.openjfx&lt;/groupId&gt;
+                &lt;artifactId&gt;javafx-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;0.0.8&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;mainClass&gt;com.jwtclient.Main&lt;/mainClass&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+
+            &lt;!-- Maven Shade Plugin for creating fat JAR --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-shade-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.2.4&lt;/version&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;phase&gt;package&lt;/phase&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;shade&lt;/goal&gt;
+                        &lt;/goals&gt;
+                        &lt;configuration&gt;
+                            &lt;transformers&gt;
+                                &lt;transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"&gt;
+                                    &lt;mainClass&gt;com.jwtclient.Main&lt;/mainClass&gt;
+                                &lt;/transformer&gt;
+                            &lt;/transformers&gt;
+                        &lt;/configuration&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <h4>Interfaz FXML (main.fxml)</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">XML</div>
+                        </div>
+                        <pre class="code-display"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;?import javafx.geometry.Insets?&gt;
+&lt;?import javafx.scene.control.*?&gt;
+&lt;?import javafx.scene.layout.*?&gt;
+&lt;?import javafx.scene.paint.Color?&gt;
+&lt;?import javafx.scene.shape.Circle?&gt;
+&lt;?import javafx.scene.text.*?&gt;
+
+&lt;BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jwtclient.controller.MainController"&gt;
+   &lt;top&gt;
+      &lt;VBox spacing="10.0" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"&gt;
+         &lt;children&gt;
+            &lt;Text fill="#2c3e50" strokeType="OUTSIDE" strokeWidth="0.0" text="JWT Client - Microservicio Authentication" textAlignment="CENTER"&gt;
+               &lt;font&gt;
+                  &lt;Font name="System Bold" size="18.0" /&gt;
+               &lt;/font&gt;
+            &lt;/Text&gt;
+            
+            &lt;!-- Configuración del Servidor --&gt;
+            &lt;HBox spacing="10.0" style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+               &lt;children&gt;
+                  &lt;Label text="IP del Servidor:" /&gt;
+                  &lt;TextField fx:id="serverIpField" prefWidth="120.0" promptText="136.115.136.5" /&gt;
+                  &lt;Label text="Puerto:" /&gt;
+                  &lt;TextField fx:id="serverPortField" prefWidth="80.0" promptText="5003" /&gt;
+                  &lt;Button fx:id="saveConfigButton" mnemonicParsing="false" onAction="#saveConfig" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Guardar Config" /&gt;
+               &lt;/children&gt;
+            &lt;/HBox&gt;
+            
+            &lt;!-- Estado del Servidor --&gt;
+            &lt;HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+               &lt;children&gt;
+                  &lt;Circle fx:id="statusIndicator" fill="#e74c3c" radius="8.0" stroke="BLACK" strokeType="INSIDE" /&gt;
+                  &lt;Label fx:id="statusLabel" text="Estado: Verificando..." /&gt;
+               &lt;/children&gt;
+            &lt;/HBox&gt;
+         &lt;/children&gt;
+      &lt;/VBox&gt;
+   &lt;/top&gt;
+   
+   &lt;center&gt;
+      &lt;SplitPane dividerPositions="0.5" orientation="HORIZONTAL"&gt;
+         &lt;items&gt;
+            &lt;!-- Panel Izquierdo - Autenticación --&gt;
+            &lt;VBox spacing="10.0" style="-fx-padding: 10;"&gt;
+               &lt;children&gt;
+                  &lt;!-- Login Section --&gt;
+                  &lt;VBox spacing="5.0" style="-fx-background-color: #e8f5e8; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+                     &lt;children&gt;
+                        &lt;Text fill="#27ae60" strokeType="OUTSIDE" strokeWidth="0.0" text="🔐 LOGIN"&gt;
+                           &lt;font&gt;
+                              &lt;Font name="System Bold" size="14.0" /&gt;
+                           &lt;/font&gt;
+                        &lt;/Text&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Label text="Usuario:" /&gt;
+                              &lt;TextField fx:id="loginUsernameField" prefWidth="120.0" promptText="username" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Label text="Contraseña:" /&gt;
+                              &lt;PasswordField fx:id="loginPasswordField" prefWidth="120.0" promptText="password" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                        &lt;Button fx:id="loginButton" mnemonicParsing="false" onAction="#performLogin" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Login" /&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+                  
+                  &lt;!-- Register Section --&gt;
+                  &lt;VBox spacing="5.0" style="-fx-background-color: #e3f2fd; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+                     &lt;children&gt;
+                        &lt;Text fill="#2196f3" strokeType="OUTSIDE" strokeWidth="0.0" text="📝 REGISTRO"&gt;
+                           &lt;font&gt;
+                              &lt;Font name="System Bold" size="14.0" /&gt;
+                           &lt;/font&gt;
+                        &lt;/Text&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Label text="Usuario:" /&gt;
+                              &lt;TextField fx:id="registerUsernameField" prefWidth="120.0" promptText="new_user" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Label text="Email:" /&gt;
+                              &lt;TextField fx:id="registerEmailField" prefWidth="120.0" promptText="user@email.com" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Label text="Contraseña:" /&gt;
+                              &lt;PasswordField fx:id="registerPasswordField" prefWidth="120.0" promptText="password" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                        &lt;Button fx:id="registerButton" mnemonicParsing="false" onAction="#performRegister" style="-fx-background-color: #2196f3; -fx-text-fill: white;" text="Registrar" /&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+                  
+                  &lt;!-- Token Management --&gt;
+                  &lt;VBox spacing="5.0" style="-fx-background-color: #fff3e0; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+                     &lt;children&gt;
+                        &lt;Text fill="#ff9800" strokeType="OUTSIDE" strokeWidth="0.0" text="🔄 GESTIÓN DE TOKENS"&gt;
+                           &lt;font&gt;
+                              &lt;Font name="System Bold" size="14.0" /&gt;
+                           &lt;/font&gt;
+                        &lt;/Text&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Button fx:id="refreshTokenButton" mnemonicParsing="false" onAction="#performRefreshToken" style="-fx-background-color: #ff9800; -fx-text-fill: white;" text="Refresh Token" /&gt;
+                              &lt;Button fx:id="logoutButton" mnemonicParsing="false" onAction="#performLogout" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Logout" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+                  
+                  &lt;!-- Protected Endpoints --&gt;
+                  &lt;VBox spacing="5.0" style="-fx-background-color: #f3e5f5; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+                     &lt;children&gt;
+                        &lt;Text fill="#9c27b0" strokeType="OUTSIDE" strokeWidth="0.0" text="🔒 ENDPOINTS PROTEGIDOS"&gt;
+                           &lt;font&gt;
+                              &lt;Font name="System Bold" size="14.0" /&gt;
+                           &lt;/font&gt;
+                        &lt;/Text&gt;
+                        &lt;HBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Button fx:id="getProfileButton" mnemonicParsing="false" onAction="#getProfile" style="-fx-background-color: #9c27b0; -fx-text-fill: white;" text="Obtener Perfil" /&gt;
+                              &lt;Button fx:id="getItemsButton" mnemonicParsing="false" onAction="#getItems" style="-fx-background-color: #9c27b0; -fx-text-fill: white;" text="Obtener Items" /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+                        
+                        &lt;!-- Create Item --&gt;
+                        &lt;VBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;HBox spacing="5.0"&gt;
+                                 &lt;children&gt;
+                                    &lt;Label text="Título:" /&gt;
+                                    &lt;TextField fx:id="itemTitleField" prefWidth="150.0" promptText="Título del item" /&gt;
+                                 &lt;/children&gt;
+                              &lt;/HBox&gt;
+                              &lt;HBox spacing="5.0"&gt;
+                                 &lt;children&gt;
+                                    &lt;Label text="Descripción:" /&gt;
+                                    &lt;TextField fx:id="itemDescriptionField" prefWidth="150.0" promptText="Descripción del item" /&gt;
+                                 &lt;/children&gt;
+                              &lt;/HBox&gt;
+                              &lt;Button fx:id="createItemButton" mnemonicParsing="false" onAction="#createItem" style="-fx-background-color: #9c27b0; -fx-text-fill: white;" text="Crear Item" /&gt;
+                           &lt;/children&gt;
+                        &lt;/VBox&gt;
+                        
+                        &lt;!-- Profile Information Display --&gt;
+                        &lt;VBox spacing="5.0"&gt;
+                           &lt;children&gt;
+                              &lt;Text fill="#9c27b0" strokeType="OUTSIDE" strokeWidth="0.0" text="👤 INFORMACIÓN DEL PERFIL"&gt;
+                                 &lt;font&gt;
+                                    &lt;Font name="System Bold" size="12.0" /&gt;
+                                 &lt;/font&gt;
+                              &lt;/Text&gt;
+                              &lt;TextArea fx:id="profileArea" editable="false" prefHeight="150.0" promptText="La información del perfil aparecerá aquí..." /&gt;
+                           &lt;/children&gt;
+                        &lt;/VBox&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+               &lt;/children&gt;
+            &lt;/VBox&gt;
+            
+            &lt;!-- Panel Derecho - Respuestas y JWT --&gt;
+            &lt;VBox spacing="10.0" style="-fx-padding: 10;"&gt;
+               &lt;children&gt;
+                  &lt;!-- JWT Display --&gt;
+                  &lt;VBox spacing="5.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+                     &lt;children&gt;
+                        &lt;Text fill="#6c757d" strokeType="OUTSIDE" strokeWidth="0.0" text="🔑 JWT TOKENS"&gt;
+                           &lt;font&gt;
+                              &lt;Font name="System Bold" size="14.0" /&gt;
+                           &lt;/font&gt;
+                        &lt;/Text&gt;
+                        &lt;TextArea fx:id="jwtArea" editable="false" prefHeight="120.0" promptText="Los tokens JWT aparecerán aquí después del login..." /&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+                  
+                  &lt;!-- Response Display --&gt;
+                  &lt;VBox spacing="5.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"&gt;
+                     &lt;children&gt;
+                        &lt;Text fill="#6c757d" strokeType="OUTSIDE" strokeWidth="0.0" text="📡 RESPUESTAS DEL SERVIDOR"&gt;
+                           &lt;font&gt;
+                              &lt;Font name="System Bold" size="14.0" /&gt;
+                           &lt;/font&gt;
+                        &lt;/Text&gt;
+                        &lt;TextArea fx:id="responseArea" editable="false" prefHeight="300.0" promptText="Las respuestas del servidor aparecerán aquí..." /&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+               &lt;/children&gt;
+            &lt;/VBox&gt;
+         &lt;/items&gt;
+      &lt;/SplitPane&gt;
+   &lt;/center&gt;
+&lt;/BorderPane&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <h4>Archivo de Configuración (config.properties)</h4>
+                    <div class="code-preview">
+                        <div class="code-header-bar">
+                            <div class="code-language">Properties</div>
+                        </div>
+                        <pre class="code-display"><code>#JWT Client Configuration
+#Fri Oct 17 23:13:10 CDT 2025
+server.ip=136.115.136.5
+server.port=5003</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Semaforo.png" alt="Semaforo" onclick="openImageModal(this.src)">
+                        <p>Estado de Conexión</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Registro.png" alt="Registro" onclick="openImageModal(this.src)">
+                        <p>Registro de Usuario</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Login.png" alt="Login" onclick="openImageModal(this.src)">
+                        <p>Iniciar Sesión</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Refresh.png" alt="Refresh" onclick="openImageModal(this.src)">
+                        <p>Refresh Token</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Perfil.png" alt="Perfil" onclick="openImageModal(this.src)">
+                        <p>Perfil de Usuario</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/CrearItem.png" alt="Crear Item" onclick="openImageModal(this.src)">
+                        <p>Crear Nuevo Item</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Items.png" alt="Items" onclick="openImageModal(this.src)">
+                        <p>Lista de Items</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado08/Logout.png" alt="Logout" onclick="openImageModal(this.src)">
+                        <p>Cerrar Sesión</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>En este ejercicio desarrollé una aplicación de escritorio en Java usando JavaFX para consumir un microservicio que maneja autenticación con JWT. Este microservicio permite registrar usuarios, iniciar sesión, renovar tokens, cerrar sesión y verificar el estado del servidor. Al principio me pareció más complejo que el ejercicio anterior con Tkinter, principalmente porque Java tiene una estructura más estricta y requiere varios pasos para que la aplicación pueda ejecutarse correctamente.</p>
+                    
+                    <p>Una de las principales diferencias que noté fue el esfuerzo necesario para poder correr la aplicación. En Python bastaba con ejecutar el archivo directamente con python app.py, pero en Java tuve que preparar todo un entorno de desarrollo con Maven, especificar una versión exacta de Java temurin-11 y usar varios comandos para compilar y ejecutar el proyecto, como mvn clean compile y mvn javafx:run. Además, tuve que asegurarme de tener bien configurado JAVA_HOME, lo cual me tomó algo de tiempo entender y ajustar, especialmente porque estoy usando Mac, lo que complicó un poco la configuración de rutas y permisos.</p>
+                    
+                    <p>Otra diferencia importante fue que en JavaFX la forma de construir la interfaz gráfica es más estructurada, usando controladores, escenas y layouts. Aunque esto puede parecer más complicado al principio, me ayudó a comprender mejor cómo se organizan las aplicaciones de escritorio en Java y cómo se separa la lógica de la interfaz. En comparación con Tkinter, que es más directo y sencillo, JavaFX es más formal y requiere más configuración, pero también ofrece más control y personalización visual.</p>
+                    
+                    <p>A pesar de las diferencias técnicas, noté que la lógica general del frontend era similar a la de los ejercicios anteriores. Tuve que crear secciones para ingresar usuario y contraseña, registrar usuarios, refrescar el token, cerrar sesión y mostrar el estado del microservicio con un semáforo de colores. También agregué una parte para guardar de forma persistente la IP, el puerto y los endpoints, algo que ya habíamos hecho en Python.</p>
+                    
+                    <p>En general, este proyecto me ayudó a valorar la diferencia de esfuerzo entre usar Python y Java para desarrollar una aplicación de escritorio. Con Python, todo es más rápido de probar y ejecutar, mientras que en Java se necesita una configuración más detallada, especialmente en Mac, pero el resultado final se siente más robusto y profesional. Me gustó mucho ver cómo ambos lenguajes pueden lograr lo mismo, aunque con enfoques muy distintos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

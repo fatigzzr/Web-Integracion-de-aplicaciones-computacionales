@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 7: Desktop App TK - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio7">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 7: Desktop App TK</h1>
+            <p>Aplicación de escritorio desarrollada con Tkinter (TK) Python</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Desarrollar una aplicación de escritorio usando Tkinter que funcione como cliente para consumir los endpoints de un microservicio con autenticación JWT.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <p><strong>Funcionalidades:</strong></p>
+                <ul>
+                    <li>/health</li>
+                    <li>/register</li>
+                    <li>/login</li>
+                    <li>/refresh</li>
+                    <li>/logout</li>
+                </ul>
+                
+                <br>
+                <p><strong>Prompt:</strong></p>
+                <p>Escribe un programa en Python que use la librería Tkinter para crear un cliente que consuma los endpoints de micro.py. El microservicio registra usuarios, autentica usuarios con JWT, crea tokens verifica health del microservicio, protege endpoints y hace logout.</p>
+                
+                <ol>
+                    <li>Crea en la GUI una sección que pida usuario y contraseña</li>
+                    <li>Crea una sección en la GUI que permita registrar usuarios</li>
+                    <li>Crea una sección en la GUI que permita refrescar el token generado</li>
+                    <li>Crea una sección en la GUI que permita con localstorage definir y guardar la ip, puerto y endpoints del microservicio de manera persistente</li>
+                    <li>Crea una sección en la GUI que muestre el endpoint protegido siempre y cuando se le mande el token en el encabezado y el usuario haya sido autenticado</li>
+                    <li>Crea una sección en la GUI que maneje un semáforo en donde se muestre en color verde si el microservicio está prendido, naranja si está en proceso, y en rojo si el microservicio está fuera de servicio</li>
+                    <li>Asegurate de diseñar una GUI fácil de manejar utilizando botones y colores</li>
+                    <li>Muestra en todo momento en la GUI las peticiones y datos obtenidos de los endpoints. Tambien muestra el JWT para validar como es creado, enviado y recibido</li>
+                </ol>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>Aplicación de Escritorio con Tkinter (app.py)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code>import tkinter as tk
+from tkinter import ttk, scrolledtext, messagebox
+import requests
+import json
+import threading
+import time
+from datetime import datetime
+import os
+import pickle
+
+class MicroserviceClient:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Microservice JWT Client")
+        self.root.geometry("1200x800")
+        self.root.configure(bg='#2b2b2b')
+        
+        # Configure ttk styles for dark mode
+        self.configure_dark_theme()
+        
+        # Configuration storage
+        self.config_file = "microservice_config.pkl"
+        self.load_config()
+        
+        # JWT tokens
+        self.access_token = None
+        self.refresh_token = None
+        self.current_user = None
+        
+        # Create GUI
+        self.create_widgets()
+        
+        # Start health check thread
+        self.start_health_monitor()
+        
+        # Bind mouse wheel to canvas
+        self.bind_mousewheel()
+        
+        # Bind additional Mac trackpad gestures
+        self.bind_mac_gestures()
+    
+    def configure_dark_theme(self):
+        """Configure ttk styles for dark mode"""
+        style = ttk.Style()
+        
+        # Configure LabelFrame style
+        style.configure('TLabelframe', background='#2b2b2b', foreground='white')
+        style.configure('TLabelframe.Label', background='#2b2b2b', foreground='white')
+        
+        # Configure Entry style
+        style.configure('TEntry', fieldbackground='#404040', foreground='white', 
+                       insertcolor='white', bordercolor='#666666')
+        
+        # Configure Button style
+        style.configure('TButton', background='#404040', foreground='white',
+                       focuscolor='none', borderwidth=1, relief='raised')
+        style.map('TButton', background=[('active', '#555555')])
+        
+        # Configure Combobox style
+        style.configure('TCombobox', fieldbackground='#404040', foreground='white',
+                       arrowcolor='white', bordercolor='#666666')
+        
+        # Configure Checkbutton style
+        style.configure('TCheckbutton', background='#2b2b2b', foreground='white',
+                       focuscolor='none')
+    
+    def load_config(self):
+        """Load configuration from file"""
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'rb') as f:
+                    config = pickle.load(f)
+                    self.base_url = config.get('base_url', 'http://localhost:5000')
+                    self.ip = config.get('ip', 'localhost')
+                    self.port = config.get('port', '5000')
+            else:
+                self.base_url = 'http://localhost:5000'
+                self.ip = 'localhost'
+                self.port = '5000'
+        except Exception as e:
+            print(f"Error loading config: {e}")
+            self.base_url = 'http://localhost:5000'
+            self.ip = 'localhost'
+            self.port = '5000'
+    
+    def save_config(self):
+        """Save configuration to file"""
+        try:
+            config = {
+                'base_url': self.base_url,
+                'ip': self.ip,
+                'port': self.port
+            }
+            with open(self.config_file, 'wb') as f:
+                pickle.dump(config, f)
+        except Exception as e:
+            print(f"Error saving config: {e}")
+    
+    def create_widgets(self):
+        """Create all GUI widgets"""
+        # Main container with scrollbar
+        self.main_frame = tk.Frame(self.root, bg='#2b2b2b')
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Create canvas and scrollbar
+        self.canvas = tk.Canvas(self.main_frame, bg='#2b2b2b', highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self.main_frame, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = tk.Frame(self.canvas, bg='#2b2b2b')
+        
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Status indicator (traffic light)
+        self.create_status_section()
+        
+        # Configuration section
+        self.create_config_section()
+        
+        # Authentication section
+        self.create_auth_section()
+        
+        # User management section
+        self.create_user_section()
+        
+        # Token management section
+        self.create_token_section()
+        
+        # Protected endpoints section
+        self.create_protected_section()
+        
+        # Log section
+        self.create_log_section()
+        
+        # Pack canvas and scrollbar
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+    
+    def create_status_section(self):
+        """Create status indicator section"""
+        status_frame = ttk.LabelFrame(self.scrollable_frame, text="Estado del Microservicio", 
+                                    style='TLabelframe')
+        status_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Status indicator
+        self.status_label = tk.Label(status_frame, text="●", font=("Arial", 24), 
+                                   fg="red", bg='#2b2b2b')
+        self.status_label.pack(side=tk.LEFT, padx=10, pady=5)
+        
+        self.status_text = tk.Label(status_frame, text="Desconectado", 
+                                  font=("Arial", 12), fg="white", bg='#2b2b2b')
+        self.status_text.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        # Health check button
+        ttk.Button(status_frame, text="Verificar Estado", 
+                  command=self.check_health).pack(side=tk.RIGHT, padx=5, pady=5)
+    
+    def create_config_section(self):
+        """Create configuration section"""
+        config_frame = ttk.LabelFrame(self.scrollable_frame, text="Configuración del Servidor", 
+                                    style='TLabelframe')
+        config_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # IP and Port configuration
+        ip_frame = tk.Frame(config_frame, bg='#2b2b2b')
+        ip_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        tk.Label(ip_frame, text="IP:", bg='#2b2b2b', fg='white').pack(side=tk.LEFT, padx=5)
+        self.ip_var = tk.StringVar(value=self.ip)
+        self.ip_entry = ttk.Entry(ip_frame, textvariable=self.ip_var, width=15)
+        self.ip_entry.pack(side=tk.LEFT, padx=5)
+        
+        tk.Label(ip_frame, text="Puerto:", bg='#2b2b2b', fg='white').pack(side=tk.LEFT, padx=10)
+        self.port_var = tk.StringVar(value=self.port)
+        self.port_entry = ttk.Entry(ip_frame, textvariable=self.port_var, width=10)
+        self.port_entry.pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(ip_frame, text="Actualizar URL", 
+                  command=self.update_url).pack(side=tk.RIGHT, padx=5)
+    
+    def create_auth_section(self):
+        """Create authentication section"""
+        auth_frame = ttk.LabelFrame(self.scrollable_frame, text="Autenticación", 
+                                  style='TLabelframe')
+        auth_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Login form
+        login_frame = tk.Frame(auth_frame, bg='#2b2b2b')
+        login_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        tk.Label(login_frame, text="Usuario:", bg='#2b2b2b', fg='white').grid(row=0, column=0, sticky=tk.W, padx=5)
+        self.username_var = tk.StringVar()
+        ttk.Entry(login_frame, textvariable=self.username_var, width=20).grid(row=0, column=1, padx=5)
+        
+        tk.Label(login_frame, text="Contraseña:", bg='#2b2b2b', fg='white').grid(row=0, column=2, sticky=tk.W, padx=5)
+        self.password_var = tk.StringVar()
+        self.password_entry = ttk.Entry(login_frame, textvariable=self.password_var, 
+                                      show="*", width=20)
+        self.password_entry.grid(row=0, column=3, padx=5)
+        
+        ttk.Button(login_frame, text="Iniciar Sesión", 
+                  command=self.login).grid(row=0, column=4, padx=5)
+        
+        # Current user info
+        self.user_info_label = tk.Label(auth_frame, text="No autenticado", 
+                                      bg='#2b2b2b', fg='white')
+        self.user_info_label.pack(pady=5)
+    
+    def create_user_section(self):
+        """Create user registration section"""
+        user_frame = ttk.LabelFrame(self.scrollable_frame, text="Registro de Usuario", 
+                                  style='TLabelframe')
+        user_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Registration form
+        reg_frame = tk.Frame(user_frame, bg='#2b2b2b')
+        reg_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        tk.Label(reg_frame, text="Nuevo Usuario:", bg='#2b2b2b', fg='white').grid(row=0, column=0, sticky=tk.W, padx=5)
+        self.new_username_var = tk.StringVar()
+        ttk.Entry(reg_frame, textvariable=self.new_username_var, width=20).grid(row=0, column=1, padx=5)
+        
+        tk.Label(reg_frame, text="Nueva Contraseña:", bg='#2b2b2b', fg='white').grid(row=0, column=2, sticky=tk.W, padx=5)
+        self.new_password_var = tk.StringVar()
+        ttk.Entry(reg_frame, textvariable=self.new_password_var, show="*", width=20).grid(row=0, column=3, padx=5)
+        
+        ttk.Button(reg_frame, text="Registrar", 
+                  command=self.register).grid(row=0, column=4, padx=5)
+    
+    def create_token_section(self):
+        """Create token management section"""
+        token_frame = ttk.LabelFrame(self.scrollable_frame, text="Gestión de Tokens", 
+                                   style='TLabelframe')
+        token_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Token display
+        token_display_frame = tk.Frame(token_frame, bg='#2b2b2b')
+        token_display_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        tk.Label(token_display_frame, text="Access Token:", bg='#2b2b2b', fg='white').pack(anchor=tk.W)
+        self.access_token_text = tk.Text(token_display_frame, height=3, width=80, 
+                                       bg='#404040', fg='white', font=('Courier', 8))
+        self.access_token_text.pack(fill=tk.X, padx=5, pady=2)
+        
+        tk.Label(token_display_frame, text="Refresh Token:", bg='#2b2b2b', fg='white').pack(anchor=tk.W)
+        self.refresh_token_text = tk.Text(token_display_frame, height=3, width=80, 
+                                        bg='#404040', fg='white', font=('Courier', 8))
+        self.refresh_token_text.pack(fill=tk.X, padx=5, pady=2)
+        
+        # Token actions
+        token_actions_frame = tk.Frame(token_frame, bg='#2b2b2b')
+        token_actions_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(token_actions_frame, text="Refrescar Token", 
+                  command=self.refresh_token).pack(side=tk.LEFT, padx=5)
+        ttk.Button(token_actions_frame, text="Cerrar Sesión", 
+                  command=self.logout).pack(side=tk.LEFT, padx=5)
+    
+    def create_protected_section(self):
+        """Create protected endpoints section"""
+        protected_frame = ttk.LabelFrame(self.scrollable_frame, text="Endpoints Protegidos", 
+                                       style='TLabelframe')
+        protected_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Protected endpoints buttons
+        endpoints_frame = tk.Frame(protected_frame, bg='#2b2b2b')
+        endpoints_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(endpoints_frame, text="Obtener Items", 
+                  command=self.get_items).pack(side=tk.LEFT, padx=5)
+        ttk.Button(endpoints_frame, text="Crear Item", 
+                  command=self.create_item).pack(side=tk.LEFT, padx=5)
+        ttk.Button(endpoints_frame, text="Actualizar Item", 
+                  command=self.update_item).pack(side=tk.LEFT, padx=5)
+        ttk.Button(endpoints_frame, text="Eliminar Item", 
+                  command=self.delete_item).pack(side=tk.LEFT, padx=5)
+    
+    def create_log_section(self):
+        """Create log section"""
+        log_frame = ttk.LabelFrame(self.scrollable_frame, text="Registro de Actividad", 
+                                 style='TLabelframe')
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        self.log_text = scrolledtext.ScrolledText(log_frame, height=15, width=100, 
+                                                bg='#1e1e1e', fg='white', 
+                                                font=('Courier', 9))
+        self.log_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Clear log button
+        ttk.Button(log_frame, text="Limpiar Log", 
+                  command=self.clear_log).pack(pady=5)
+    
+    def log_message(self, message):
+        """Add message to log"""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        log_entry = f"[{timestamp}] {message}\n"
+        self.log_text.insert(tk.END, log_entry)
+        self.log_text.see(tk.END)
+        self.root.update_idletasks()
+    
+    def clear_log(self):
+        """Clear the log"""
+        self.log_text.delete(1.0, tk.END)
+    
+    def update_url(self):
+        """Update base URL from configuration"""
+        self.ip = self.ip_var.get()
+        self.port = self.port_var.get()
+        self.base_url = f"http://{self.ip}:{self.port}"
+        self.save_config()
+        self.log_message(f"URL actualizada: {self.base_url}")
+    
+    def check_health(self):
+        """Check microservice health"""
+        try:
+            response = requests.get(f"{self.base_url}/health", timeout=5)
+            if response.status_code == 200:
+                self.status_label.config(fg="green")
+                self.status_text.config(text="Conectado")
+                self.log_message("✓ Microservicio conectado")
+                return True
+            else:
+                self.status_label.config(fg="orange")
+                self.status_text.config(text="Error de respuesta")
+                self.log_message(f"⚠ Respuesta inesperada: {response.status_code}")
+                return False
+        except requests.exceptions.RequestException as e:
+            self.status_label.config(fg="red")
+            self.status_text.config(text="Desconectado")
+            self.log_message(f"✗ Error de conexión: {str(e)}")
+            return False
+    
+    def start_health_monitor(self):
+        """Start health monitoring thread"""
+        def monitor():
+            while True:
+                self.check_health()
+                time.sleep(10)  # Check every 10 seconds
+        
+        thread = threading.Thread(target=monitor, daemon=True)
+        thread.start()
+    
+    def login(self):
+        """Login user"""
+        username = self.username_var.get()
+        password = self.password_var.get()
+        
+        if not username or not password:
+            messagebox.showerror("Error", "Por favor ingresa usuario y contraseña")
+            return
+        
+        try:
+            data = {"username": username, "password": password}
+            response = requests.post(f"{self.base_url}/login", json=data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.access_token = result.get('access_token')
+                self.refresh_token = result.get('refresh_token')
+                self.current_user = username
+                
+                # Update token display
+                self.access_token_text.delete(1.0, tk.END)
+                self.access_token_text.insert(1.0, self.access_token or "No disponible")
+                self.refresh_token_text.delete(1.0, tk.END)
+                self.refresh_token_text.insert(1.0, self.refresh_token or "No disponible")
+                
+                # Update user info
+                self.user_info_label.config(text=f"Usuario: {username}")
+                
+                self.log_message(f"✓ Login exitoso para usuario: {username}")
+                messagebox.showinfo("Éxito", "Login exitoso")
+            else:
+                self.log_message(f"✗ Error en login: {response.status_code}")
+                messagebox.showerror("Error", f"Error en login: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error en login: {str(e)}")
+            messagebox.showerror("Error", f"Error en login: {str(e)}")
+    
+    def register(self):
+        """Register new user"""
+        username = self.new_username_var.get()
+        password = self.new_password_var.get()
+        
+        if not username or not password:
+            messagebox.showerror("Error", "Por favor ingresa usuario y contraseña")
+            return
+        
+        try:
+            data = {"username": username, "password": password}
+            response = requests.post(f"{self.base_url}/register", json=data)
+            
+            if response.status_code == 201:
+                self.log_message(f"✓ Usuario registrado: {username}")
+                messagebox.showinfo("Éxito", "Usuario registrado exitosamente")
+                # Clear form
+                self.new_username_var.set("")
+                self.new_password_var.set("")
+            else:
+                self.log_message(f"✗ Error en registro: {response.status_code}")
+                messagebox.showerror("Error", f"Error en registro: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error en registro: {str(e)}")
+            messagebox.showerror("Error", f"Error en registro: {str(e)}")
+    
+    def refresh_token(self):
+        """Refresh access token"""
+        if not self.refresh_token:
+            messagebox.showerror("Error", "No hay refresh token disponible")
+            return
+        
+        try:
+            data = {"refresh_token": self.refresh_token}
+            response = requests.post(f"{self.base_url}/refresh", json=data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.access_token = result.get('access_token')
+                
+                # Update token display
+                self.access_token_text.delete(1.0, tk.END)
+                self.access_token_text.insert(1.0, self.access_token or "No disponible")
+                
+                self.log_message("✓ Token refrescado exitosamente")
+                messagebox.showinfo("Éxito", "Token refrescado exitosamente")
+            else:
+                self.log_message(f"✗ Error al refrescar token: {response.status_code}")
+                messagebox.showerror("Error", f"Error al refrescar token: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error al refrescar token: {str(e)}")
+            messagebox.showerror("Error", f"Error al refrescar token: {str(e)}")
+    
+    def logout(self):
+        """Logout user"""
+        if not self.access_token:
+            messagebox.showwarning("Advertencia", "No hay sesión activa")
+            return
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.access_token}"}
+            response = requests.post(f"{self.base_url}/logout", headers=headers)
+            
+            if response.status_code == 200:
+                self.log_message("✓ Logout exitoso")
+                messagebox.showinfo("Éxito", "Logout exitoso")
+            else:
+                self.log_message(f"⚠ Error en logout: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"⚠ Error en logout: {str(e)}")
+        finally:
+            # Clear session data
+            self.access_token = None
+            self.refresh_token = None
+            self.current_user = None
+            
+            # Update displays
+            self.access_token_text.delete(1.0, tk.END)
+            self.refresh_token_text.delete(1.0, tk.END)
+            self.user_info_label.config(text="No autenticado")
+    
+    def get_items(self):
+        """Get items from protected endpoint"""
+        if not self.access_token:
+            messagebox.showerror("Error", "No hay token de acceso")
+            return
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.access_token}"}
+            response = requests.get(f"{self.base_url}/items", headers=headers)
+            
+            if response.status_code == 200:
+                items = response.json()
+                self.log_message(f"✓ Items obtenidos: {len(items)} elementos")
+                messagebox.showinfo("Éxito", f"Items obtenidos: {len(items)} elementos")
+            else:
+                self.log_message(f"✗ Error al obtener items: {response.status_code}")
+                messagebox.showerror("Error", f"Error al obtener items: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error al obtener items: {str(e)}")
+            messagebox.showerror("Error", f"Error al obtener items: {str(e)}")
+    
+    def create_item(self):
+        """Create new item"""
+        if not self.access_token:
+            messagebox.showerror("Error", "No hay token de acceso")
+            return
+        
+        # Simple dialog for item creation
+        item_name = tk.simpledialog.askstring("Crear Item", "Nombre del item:")
+        if not item_name:
+            return
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.access_token}"}
+            data = {"name": item_name}
+            response = requests.post(f"{self.base_url}/items", json=data, headers=headers)
+            
+            if response.status_code == 201:
+                self.log_message(f"✓ Item creado: {item_name}")
+                messagebox.showinfo("Éxito", f"Item '{item_name}' creado exitosamente")
+            else:
+                self.log_message(f"✗ Error al crear item: {response.status_code}")
+                messagebox.showerror("Error", f"Error al crear item: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error al crear item: {str(e)}")
+            messagebox.showerror("Error", f"Error al crear item: {str(e)}")
+    
+    def update_item(self):
+        """Update existing item"""
+        if not self.access_token:
+            messagebox.showerror("Error", "No hay token de acceso")
+            return
+        
+        item_id = tk.simpledialog.askstring("Actualizar Item", "ID del item:")
+        if not item_id:
+            return
+        
+        item_name = tk.simpledialog.askstring("Actualizar Item", "Nuevo nombre del item:")
+        if not item_name:
+            return
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.access_token}"}
+            data = {"name": item_name}
+            response = requests.put(f"{self.base_url}/items/{item_id}", json=data, headers=headers)
+            
+            if response.status_code == 200:
+                self.log_message(f"✓ Item actualizado: {item_id}")
+                messagebox.showinfo("Éxito", f"Item '{item_id}' actualizado exitosamente")
+            else:
+                self.log_message(f"✗ Error al actualizar item: {response.status_code}")
+                messagebox.showerror("Error", f"Error al actualizar item: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error al actualizar item: {str(e)}")
+            messagebox.showerror("Error", f"Error al actualizar item: {str(e)}")
+    
+    def delete_item(self):
+        """Delete item"""
+        if not self.access_token:
+            messagebox.showerror("Error", "No hay token de acceso")
+            return
+        
+        item_id = tk.simpledialog.askstring("Eliminar Item", "ID del item:")
+        if not item_id:
+            return
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.access_token}"}
+            response = requests.delete(f"{self.base_url}/items/{item_id}", headers=headers)
+            
+            if response.status_code == 200:
+                self.log_message(f"✓ Item eliminado: {item_id}")
+                messagebox.showinfo("Éxito", f"Item '{item_id}' eliminado exitosamente")
+            else:
+                self.log_message(f"✗ Error al eliminar item: {response.status_code}")
+                messagebox.showerror("Error", f"Error al eliminar item: {response.status_code}")
+        except Exception as e:
+            self.log_message(f"✗ Error al eliminar item: {str(e)}")
+            messagebox.showerror("Error", f"Error al eliminar item: {str(e)}")
+    
+    def bind_mousewheel(self):
+        """Bind mouse wheel to canvas"""
+        def _on_mousewheel(event):
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        self.canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    
+    def bind_mac_gestures(self):
+        """Bind Mac trackpad gestures"""
+        def _on_mac_scroll(event):
+            self.canvas.yview_scroll(int(-1*event.delta), "units")
+        
+        self.canvas.bind_all("<Button-4>", _on_mac_scroll)
+        self.canvas.bind_all("<Button-5>", _on_mac_scroll)
+
+def main():
+    root = tk.Tk()
+    app = MicroserviceClient(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/Online.png" alt="Online - Semáforo de estado del microservicio" onclick="openImageModal(this.src)">
+                        <p>Online - Semáforo de estado del microservicio</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/Registrar.png" alt="Registro - Sección de registro de usuarios" onclick="openImageModal(this.src)">
+                        <p>Registro - Sección de registro de usuarios</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/LogIn.png" alt="Login - Sección de autenticación" onclick="openImageModal(this.src)">
+                        <p>Login - Sección de autenticación</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/TokenRefresh.png" alt="Token Refresh - Refrescar token JWT" onclick="openImageModal(this.src)">
+                        <p>Token Refresh - Refrescar token JWT</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/Profile.png" alt="Profile - Configuración de IP y puerto" onclick="openImageModal(this.src)">
+                        <p>Profile - Datos del Usuario</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/CrearItem.png" alt="Crear Item - Crear nuevo elemento" onclick="openImageModal(this.src)">
+                        <p>Crear Item - Crear nuevo elemento</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/MostrarItems.png" alt="Mostrar Items - Endpoint protegido" onclick="openImageModal(this.src)">
+                        <p>Items - Mostrar items del Usuario</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado07/LogOut.png" alt="Logout - Cerrar sesión" onclick="openImageModal(this.src)">
+                        <p>Logout - Cerrar sesión</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>En este ejercicio el objetivo fue desarrollar una aplicación de escritorio usando Tkinter que funcionara como cliente para consumir los endpoints de un microservicio con autenticación JWT. Al principio me pareció algo completamente nuevo porque yo no sabía que en Python se podían hacer aplicaciones de escritorio. Siempre había pensado que para eso se necesitaban programas especializados como Android Studio o Xcode, que son los que se usan normalmente para desarrollar aplicaciones móviles o de escritorio. Me sorprendió mucho descubrir que con Tkinter se puede crear una interfaz gráfica totalmente funcional solo con Python.</p>
+                    
+                    <p>Algo que me llamó mucho la atención fue que la implementación del frontend en Tkinter es muy parecida a lo que ya habíamos hecho en el frontend web, porque seguimos usando eventos, botones, campos de texto y peticiones a endpoints. Sin embargo, visualmente es diferente, ya que en lugar de abrirse en un navegador, la aplicación se abre en una ventana tipo pop up, como una app independiente del sistema. Esa diferencia hace que la experiencia sea distinta, pero a la vez se siente familiar por la lógica que ya habíamos usado en el sitio web.</p>
+                    
+                    <p>También noté algo curioso, aunque todos usamos las mismas funciones base de Tkinter, mi aplicación se veía diferente a la de mis compañeros. Probablemente eso pasa porque yo uso Mac, mientras que ellos usan Windows, y Tkinter adapta su apariencia según el sistema operativo. Me pareció interesante ver cómo el mismo código puede verse distinto dependiendo del entorno donde se ejecute.</p>
+                    
+                    <p>En general, este proyecto me enseñó que Python no solo sirve para backend o scripts, sino que también permite crear interfaces gráficas completas. Fue una experiencia muy útil para entender cómo conectar el frontend con un microservicio, y me dejó con muchas ganas de seguir explorando lo que se puede hacer con Tkinter.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

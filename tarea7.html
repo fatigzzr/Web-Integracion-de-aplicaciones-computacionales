@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea 7: JWT local Vs JWT de Redis - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+    <script>
+        // Función simple para cargar el código
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Página cargada');
+        });
+    </script>
+</head>
+<body>
+    <div class="container tarea7">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Tarea 7: JWT local Vs JWT de Redis</h1>
+            <p>Implementación con comparación JWT local vs Redis</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información de la Tarea -->
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <ol>
+                    <li>Configura la BD en MariaDB con la tabla users y la tabla books ya definida.</li>
+                    <li>Configura Redis como almacenamiento para tokens.</li>
+                    <li>Protege todos los endpoints /api/books/... con un decorador @jwt_required.</li>
+                    <li>Implementa logout y revocación en Redis.</li>
+                    <li>Actualiza el cliente web (HTML, CSS, JS) para:
+                        <ul>
+                            <li>Autenticarse y guardar tokens.</li>
+                            <li>Consumir todos los endpoints de libros enviando el Authorization: Bearer &lt;access&gt;.</li>
+                            <li>Refrescar el access token cuando expire.</li>
+                        </ul>
+                    </li>
+                    <li>Muestra en el log de tu cliente la <mark>comparación del JWT local Vs JWT de Redis</mark>.</li>
+                    <li>Realiza pruebas con curl con el cliente web.</li>
+                    <li>Documenta el flujo de autenticación y evidencias de funcionamiento.</li>
+                </ol>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Flujo de autenticación</h3>
+                <h4>1. Proceso de Login</h4>
+                <ol>
+                    <li>Usuario ingresa credenciales (username/password) en el cliente web</li>
+                    <li>Cliente web envía petición POST a <code>/api/auth/login</code> con credenciales</li>
+                    <li>Microservicio verifica credenciales en la base de datos MariaDB</li>
+                    <li>Si las credenciales son válidas:
+                        <ul>
+                            <li>Genera access_token (expira en 5 minutos)</li>
+                            <li>Genera refresh_token (expira en 1 día)</li>
+                            <li>Guarda ambos tokens en Redis con expiración automática</li>
+                        </ul>
+                    </li>
+                    <li>Cliente web recibe los tokens y los almacena en localStorage</li>
+                    <li>Cliente web programa refresh automático del token cada 4 minutos</li>
+                </ol>
+
+                <h4>2. Acceso a Recursos Protegidos</h4>
+                <ol>
+                    <li>Cliente web envía petición a endpoint protegido con <code>Authorization: Bearer {access_token}</code></li>
+                    <li>Microservicio verifica el token en Redis (no debe estar revocado)</li>
+                    <li>Si el token es válido, procesa la petición y consulta la base de datos</li>
+                    <li>Retorna los datos solicitados al cliente</li>
+                </ol>
+
+                <h4>3. Refresh Automático de Tokens</h4>
+                <ol>
+                    <li>Timer se ejecuta automáticamente cada 4 minutos</li>
+                    <li>Cliente web envía refresh_token a <code>/api/auth/refresh</code></li>
+                    <li>Microservicio valida el refresh_token</li>
+                    <li>Genera nuevo access_token</li>
+                    <li>Cliente web actualiza el access_token en localStorage</li>
+                    <li>Programa el siguiente refresh automático</li>
+                </ol>
+
+                <h4>4. Logout y Revocación de Tokens</h4>
+                <ol>
+                    <li>Cliente web envía petición POST a <code>/api/auth/logout</code> con access_token</li>
+                    <li>Microservicio marca el token como revocado en Redis</li>
+                    <li>Cliente web limpia los tokens del localStorage</li>
+                    <li>Token revocado ya no puede ser usado para futuras peticiones</li>
+                </ol>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+
+                <!-- Grid de Opciones -->
+                <div class="menu-grid">
+                    <!-- Opción 1: Microservicio -->
+                    <a href="codigo_tarea7_microservicio.html" class="menu-card">
+                        <h3>Microservicio</h3>
+                        <p>Código fuente del microservicio con autenticación JWT y Redis</p>
+                        <div class="card-footer">
+                            <span class="arrow">→</span>
+                        </div>
+                    </a>
+
+                    <!-- Opción 2: Cliente Web -->
+                    <a href="codigo_tarea7_cliente.html" class="menu-card">
+                        <h3>Cliente Web</h3>
+                        <p>Código fuente del cliente web (HTML, CSS, JS)</p>
+                        <div class="card-footer">
+                            <span class="arrow">→</span>
+                        </div>
+                    </a>
+
+                    <!-- Opción 3: Script SQL -->
+                    <a href="codigo_tarea7_database.html" class="menu-card">
+                        <h3>Script SQL</h3>
+                        <p>Código de creación de tablas (users, books)</p>
+                        <div class="card-footer">
+                            <span class="arrow">→</span>
+                        </div>
+                    </a>
+
+                    <!-- Opción 4: README -->
+                    <a href="codigo_tarea7_readme.html" class="menu-card">
+                        <h3>README</h3>
+                        <p>README con instrucciones de despliegue y pruebas</p>
+                        <div class="card-footer">
+                            <span class="arrow">→</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/JWT Local vs Redis - Login.png" alt="Login de usuario" onclick="openImageModal(this.src)">
+                        <p>JWT Local vs JWT Redis: Login</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/JWT Local vs Redis - Logout.png" alt="Login de usuario" onclick="openImageModal(this.src)">
+                        <p>JWT Local vs JWT Redis: Logout</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Cliente - LogIn.png" alt="Login de usuario" onclick="openImageModal(this.src)">
+                        <p>Capturas de logs Cliente: Login de usuario</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Cliente - Libros - Recurso Protegido.png" alt="Dashboard con libros" onclick="openImageModal(this.src)">
+                        <p>Capturas de logs Cliente: Ver recurso protegido de libros</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Cliente - Agregar Libros - Recurso Protegido.png" alt="Agregar libros recurso protegido" onclick="openImageModal(this.src)">
+                        <p>Capturas de logs Cliente: Agregar libros recurso protegido</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Cliente - LogOut.png" alt="Proceso de logout" onclick="openImageModal(this.src)">
+                        <p>Capturas de logs Cliente: logout</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Logs Servidor.png" alt="Logs del servidor" onclick="openImageModal(this.src)">
+                        <p>Capturas de logs Servidor: Logs del servidor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Login y capturar tokens.png" alt="Tokens en Redis" onclick="openImageModal(this.src)">
+                        <p>1. Login y capturar tokens</p>
+                        <p># Login y extraer tokens</p>
+                        <p>LOGIN_RESPONSE=$(curl -s -X POST http://136.115.136.5:5003/api/auth/login \
+                            -H "Content-Type: application/json" \
+                            -d '{"username":"usuario1","password":"12345"}')</p>
+                            
+                        <p># Extraer tokens</p>
+                        <p>ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.access_token')
+                            REFRESH_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.refresh_token')
+                            
+                            echo "Access Token: $ACCESS_TOKEN"
+                            echo "Refresh Token: $REFRESH_TOKEN"</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Obtener lista de libros.png" alt="Obtener lista de libros" onclick="openImageModal(this.src)">
+                        <p>2. Obtener lista de libros</p>
+                        <p>curl -X GET http://136.115.136.5:5003/api/books \
+                            -H "Authorization: Bearer $ACCESS_TOKEN"</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Agregar nuevo libro.png" alt="Agregar nuevo libro" onclick="openImageModal(this.src)">
+                        <p>3. Agregar nuevo libro</p>
+                        <p>curl -X POST http://136.115.136.5:5003/api/books \
+                            -H "Authorization: Bearer $ACCESS_TOKEN" \
+                            -H "Content-Type: application/json" \
+                            -d '{"title":"El Quijote","author":"Miguel de Cervantes","published_year":1605}'</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Verificar token revocado.png" alt="Verificar token revocado" onclick="openImageModal(this.src)">
+                        <p>4. Refresh token</p>
+                        <p>curl -X POST http://136.115.136.5:5003/api/auth/refresh \
+                            -H "Authorization: Bearer $REFRESH_TOKEN"</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Refresh token.png" alt="Refresh automático de tokens" onclick="openImageModal(this.src)">
+                        <p>5. Logout</p>
+                        <p>curl -X POST http://136.115.136.5:5003/api/auth/logout \
+                            -H "Authorization: Bearer $ACCESS_TOKEN"</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/Tarea07/Logout.png" alt="Logout del servidor" onclick="openImageModal(this.src)">
+                        <p>6. Verificar token revocado</p>
+                        <p>curl -X GET http://136.115.136.5:5003/api/books \
+                            -H "Authorization: Bearer $ACCESS_TOKEN"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <p>Continuando con la tarea 6,complementado con la comparación de JWT local vs redis y con base en lo aprendido sobre JWT y Redis. Con esta tarea entendí cómo funcionan los microservicios y la seguridad en aplicaciones modernas. Implementar JWT permitió comprender el flujo de autenticación, desde el login y la generación de tokens de acceso y refresco hasta la revocación de tokens en Redis. Cada endpoint protegido valida la identidad del usuario y Redis guarda los tokens de forma centralizada, permitiendo revocar accesos de manera inmediata.</p>
+                
+                <p>Trabajar con Redis y MariaDB mostró la importancia de separar responsabilidades, con MariaDB para datos permanentes y Redis para información temporal, optimizando la seguridad y el rendimiento. Al integrar los tokens en el cliente web y manejar su renovación automática, se entiende cómo frontend y backend se comunican de manera segura.</p>
+                
+                <p>Comparando JWT local y Redis, los tokens se sincronizan entre cliente y servidor, cada token tiene un identificador único para revocación y auditoría, y los tokens de corta duración reducen riesgos. Redis actúa como una lista centralizada de tokens válidos, validando y expirando automáticamente, permitiendo revocación efectiva.</p>
+                
+                <p>En conclusión, combinar JWT en el cliente y Redis en el servidor asegura un sistema seguro, escalable y confiable.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

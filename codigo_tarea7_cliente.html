@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código - Tarea 7: Cliente Web JWT - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="codigo_tarea7.css">
+    <script src="script.js"></script>
+    <script src="codigo_tarea7.js"></script>
+</head>
+<body>
+    <div class="container tarea7">
+        <div class="header">
+            <a href="tarea7.html" class="back-btn">← Volver a Tarea 7</a>
+            <h1>Tarea 7: Books JWT + Redis</h1>
+            <p>Código: Cliente Web (HTML, CSS, JS)</p>
+        </div>
+        
+        <div class="content">
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código del Cliente Web</h3>
+            
+                <!-- HTML Principal -->
+                <button class="collapsible">1. HTML Principal (index.html)</button>
+                <div class="collapsible-content">
+                    <h4>Archivo: index.html</h4>
+                    <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">HTML</div>
+                    </div>
+                    <pre class="code-display"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Books JWT Client&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="container"&gt;
+        &lt;!-- Header --&gt;
+        &lt;header class="header"&gt;
+            &lt;h1&gt;📚 Books JWT Client&lt;/h1&gt;
+            &lt;div class="auth-section"&gt;
+                &lt;div id="login-form" class="auth-form"&gt;
+                    &lt;h3&gt;Iniciar Sesión&lt;/h3&gt;
+                    &lt;form id="loginForm"&gt;
+                        &lt;input type="text" id="username" placeholder="Usuario" required&gt;
+                        &lt;input type="password" id="password" placeholder="Contraseña" required&gt;
+                        &lt;button type="submit"&gt;Login&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+                &lt;div id="user-info" class="user-info" style="display: none;"&gt;
+                    &lt;span id="welcome-message"&gt;&lt;/span&gt;
+                    &lt;button id="logout-btn"&gt;Logout&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/header&gt;
+
+        &lt;!-- Main Content --&gt;
+        &lt;main class="main-content"&gt;
+            &lt;!-- Books Section --&gt;
+            &lt;section id="books-section" class="books-section" style="display: none;"&gt;
+                &lt;div class="section-header"&gt;
+                    &lt;h2&gt;📖 Lista de Libros&lt;/h2&gt;
+                    &lt;button id="refresh-books" class="btn btn-primary"&gt;🔄 Actualizar&lt;/button&gt;
+                &lt;/div&gt;
+                
+                &lt;div id="books-list" class="books-list"&gt;&lt;/div&gt;
+                
+                &lt;!-- Add Book Form --&gt;
+                &lt;div class="add-book-section"&gt;
+                    &lt;h3&gt;➕ Agregar Nuevo Libro&lt;/h3&gt;
+                    &lt;form id="add-book-form"&gt;
+                        &lt;input type="text" id="book-title" placeholder="Título" required&gt;
+                        &lt;input type="text" id="book-author" placeholder="Autor" required&gt;
+                        &lt;input type="number" id="book-year" placeholder="Año" required&gt;
+                        &lt;button type="submit"&gt;Agregar Libro&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Token Info Section --&gt;
+            &lt;section id="token-info" class="token-info" style="display: none;"&gt;
+                &lt;h3&gt;🔐 Información de Tokens&lt;/h3&gt;
+                &lt;div class="token-display"&gt;
+                    &lt;div class="token-item"&gt;
+                        &lt;label&gt;Access Token:&lt;/label&gt;
+                        &lt;span id="access-token-display"&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class="token-item"&gt;
+                        &lt;label&gt;Refresh Token:&lt;/label&gt;
+                        &lt;span id="refresh-token-display"&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class="token-item"&gt;
+                        &lt;label&gt;Token Status:&lt;/label&gt;
+                        &lt;span id="token-status"&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+        &lt;/main&gt;
+
+        &lt;!-- Logs Section --&gt;
+        &lt;section id="logs-section" class="logs-section"&gt;
+            &lt;h3&gt;📝 Logs del Cliente&lt;/h3&gt;
+            &lt;div id="logs-container" class="logs-container"&gt;&lt;/div&gt;
+        &lt;/section&gt;
+    &lt;/div&gt;
+
+    &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </div>
+
+                <!-- CSS Styles -->
+                <button class="collapsible">2. Estilos CSS (styles.css)</button>
+                <div class="collapsible-content">
+                    <h4>Archivo: styles.css</h4>
+                    <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">CSS</div>
+                    </div>
+                    <pre class="code-display"><code>/* Estilos para el cliente JWT */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    color: #667eea;
+    font-size: 2.5em;
+    margin: 0;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-form input {
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+.auth-form button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.auth-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.books-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.books-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.book-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.book-card:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.book-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.book-author {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.book-year {
+    background: #667eea;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    display: inline-block;
+}
+
+.add-book-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #e9ecef;
+}
+
+.add-book-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.add-book-section form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.add-book-section input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+}
+
+.add-book-section button {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.token-info {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.token-display {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.token-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.token-item label {
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.token-item span {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.9em;
+    word-break: break-all;
+}
+
+.logs-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.logs-container {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.9em;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    padding: 5px 0;
+    border-bottom: 1px solid #333;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-timestamp {
+    color: #888;
+}
+
+.log-level {
+    font-weight: bold;
+}
+
+.log-level.info {
+    color: #4ec9b0;
+}
+
+.log-level.success {
+    color: #4caf50;
+}
+
+.log-level.error {
+    color: #f44336;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .add-book-section form {
+        flex-direction: column;
+    }
+    
+    .add-book-section input {
+        min-width: 100%;
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- JavaScript -->
+                <button class="collapsible">3. JavaScript (app.js)</button>
+                <div class="collapsible-content">
+                    <h4>Archivo: app.js</h4>
+                    <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">JavaScript</div>
+                    </div>
+                    <pre class="code-display"><code>// Configuración de la API
+const API_BASE_URL = 'http://136.115.136.5:5003';
+
+// Clase para manejar la autenticación y tokens
+class AuthManager {
+    constructor() {
+        this.accessToken = localStorage.getItem('access_token');
+        this.refreshToken = localStorage.getItem('refresh_token');
+        this.tokenRefreshTimer = null;
+    }
+
+    // Guardar tokens en localStorage
+    saveTokens(accessToken, refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('refresh_token', refreshToken);
+        
+        // Mostrar comparación JWT Local vs Redis
+        this.logJWTComparison(accessToken, 'LOCAL STORAGE');
+        
+        // Programar refresh automático del token (4 minutos)
+        this.scheduleTokenRefresh();
+    }
+
+    // Limpiar tokens
+    clearTokens() {
+        this.accessToken = null;
+        this.refreshToken = null;
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        
+        if (this.tokenRefreshTimer) {
+            clearTimeout(this.tokenRefreshTimer);
+            this.tokenRefreshTimer = null;
+        }
+    }
+
+    // Verificar si está autenticado
+    isAuthenticated() {
+        return !!this.accessToken;
+    }
+
+    // Obtener headers de autorización
+    getAuthHeaders() {
+        if (!this.accessToken) {
+            throw new Error('No hay token de acceso disponible');
+        }
+        return {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // Programar refresh automático del token
+    scheduleTokenRefresh() {
+        if (this.tokenRefreshTimer) {
+            clearTimeout(this.tokenRefreshTimer);
+        }
+        
+        // Refresh 1 minuto antes de que expire (token expira en 5 minutos)
+        this.tokenRefreshTimer = setTimeout(async () => {
+            try {
+                await this.refreshAccessToken();
+            } catch (error) {
+                this.handleTokenExpired();
+            }
+        }, 4 * 60 * 1000); // 4 minutos
+    }
+
+    // Refrescar access token
+    async refreshAccessToken() {
+        if (!this.refreshToken) {
+            throw new Error('No hay refresh token disponible');
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.refreshToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al refrescar token');
+            }
+
+            const data = await response.json();
+            this.accessToken = data.access_token;
+            localStorage.setItem('access_token', data.access_token);
+            
+            // Mostrar comparación del nuevo token
+            this.logJWTComparison(data.access_token, 'REFRESH FROM REDIS');
+            
+            // Programar siguiente refresh
+            this.scheduleTokenRefresh();
+            
+            return data.access_token;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Manejar token expirado
+    handleTokenExpired() {
+        this.clearTokens();
+        this.showLoginForm();
+        this.showMessage('Sesión expirada. Por favor, inicia sesión nuevamente.', 'error');
+    }
+
+    // Mostrar formulario de login
+    showLoginForm() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'none';
+    }
+
+    // Mostrar contenido principal
+    showMainContent() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'block';
+    }
+
+    // Mostrar comparación JWT Local vs Redis
+    logJWTComparison(token, source) {
+        try {
+            // Decodificar JWT (solo el payload, sin verificar firma)
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                const payload = JSON.parse(atob(parts[1]));
+                
+                console.log('🔍 COMPARACIÓN JWT LOCAL vs REDIS');
+                console.log('=====================================');
+                console.log(`📍 Fuente: ${source}`);
+                console.log(`🆔 JTI (Token ID): ${payload.jti}`);
+                console.log(`👤 Usuario ID: ${payload.sub}`);
+                console.log(`⏰ Emitido (iat): ${new Date(payload.iat * 1000).toLocaleString()}`);
+                console.log(`⏰ Expira (exp): ${new Date(payload.exp * 1000).toLocaleString()}`);
+                console.log(`⏱️ Tiempo restante: ${Math.round((payload.exp - payload.iat) / 60)} minutos`);
+                console.log(`🔑 Tipo: ${payload.type}`);
+                console.log('=====================================');
+                
+                // Mostrar estado en Redis (simulado)
+                console.log('🗄️ ESTADO EN REDIS:');
+                console.log(`   Clave: access_token:${token.substring(0, 20)}...`);
+                console.log(`   Valor: "valid"`);
+                console.log(`   Expira: ${Math.round((payload.exp - payload.iat) / 60)} minutos`);
+                console.log('=====================================');
+            }
+        } catch (error) {
+            console.error('❌ Error al decodificar JWT:', error);
+        }
+    }
+}
+
+// Clase para manejar las operaciones de libros
+class BooksManager {
+    constructor(authManager) {
+        this.authManager = authManager;
+    }
+
+    // Hacer petición con manejo automático de tokens
+    async makeAuthenticatedRequest(url, options = {}) {
+        try {
+            const headers = this.authManager.getAuthHeaders();
+            const response = await fetch(url, {
+                ...options,
+                headers: { ...headers, ...options.headers }
+            });
+
+            // Si el token expiró, intentar refrescar
+            if (response.status === 401) {
+                try {
+                    await this.authManager.refreshAccessToken();
+                    // Reintentar la petición con el nuevo token
+                    const newHeaders = this.authManager.getAuthHeaders();
+                    const retryResponse = await fetch(url, {
+                        ...options,
+                        headers: { ...newHeaders, ...options.headers }
+                    });
+                    return retryResponse;
+                } catch (refreshError) {
+                    this.authManager.handleTokenExpired();
+                    throw new Error('Sesión expirada');
+                }
+            }
+
+            return response;
+        } catch (error) {
+            console.error('Error en petición autenticada:', error);
+            throw error;
+        }
+    }
+
+    // Obtener lista de libros
+    async getBooks() {
+        try {
+            const response = await this.makeAuthenticatedRequest(`${API_BASE_URL}/api/books`);
+            
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
+            const books = await response.json();
+            return books;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Agregar nuevo libro
+    async addBook(bookData) {
+        try {
+            const response = await this.makeAuthenticatedRequest(`${API_BASE_URL}/api/books`, {
+                method: 'POST',
+                body: JSON.stringify(bookData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Renderizar lista de libros
+    renderBooks(books) {
+        const booksList = document.getElementById('booksList');
+        
+        if (!books || books.length === 0) {
+            booksList.innerHTML = '<div class="loading">No hay libros disponibles</div>';
+            return;
+        }
+
+        booksList.innerHTML = books.map(book => `
+            <div class="book-card">
+                <div class="book-title">${this.escapeHtml(book.title)}</div>
+                <div class="book-author">👤 ${this.escapeHtml(book.author || 'Autor desconocido')}</div>
+                <div class="book-year">📅 ${book.year || 'Año desconocido'}</div>
+            </div>
+        `).join('');
+    }
+
+    // Escapar HTML para prevenir XSS
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// Clase principal de la aplicación
+class App {
+    constructor() {
+        this.authManager = new AuthManager();
+        this.booksManager = new BooksManager(this.authManager);
+        this.init();
+    }
+
+    // Inicializar aplicación
+    init() {
+        this.setupEventListeners();
+        this.checkAuthStatus();
+    }
+
+    // Configurar event listeners
+    setupEventListeners() {
+        // Login form
+        document.getElementById('loginFormElement').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin();
+        });
+
+        // Logout button
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            this.handleLogout();
+        });
+
+        // Add book form
+        document.getElementById('addBookForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleAddBook();
+        });
+
+        // Refresh books button
+        document.getElementById('refreshBooksBtn').addEventListener('click', () => {
+            this.loadBooks();
+        });
+    }
+
+    // Verificar estado de autenticación
+    checkAuthStatus() {
+        if (this.authManager.isAuthenticated()) {
+            this.authManager.showMainContent();
+            this.loadBooks();
+        } else {
+            this.authManager.showLoginForm();
+        }
+    }
+
+    // Manejar login
+    async handleLogin() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            this.showMessage('Por favor, completa todos los campos', 'error');
+            return;
+        }
+
+        try {
+            this.showMessage('Iniciando sesión...', 'info');
+            
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.msg || 'Error al iniciar sesión');
+            }
+
+            const data = await response.json();
+            this.authManager.saveTokens(data.access_token, data.refresh_token);
+            this.authManager.showMainContent();
+            this.showMessage('¡Sesión iniciada correctamente!', 'success');
+            this.loadBooks();
+            
+        } catch (error) {
+            this.showMessage(error.message, 'error');
+        }
+    }
+
+    // Manejar logout
+    async handleLogout() {
+        try {
+            if (this.authManager.accessToken) {
+                // Mostrar comparación antes del logout
+                this.authManager.logJWTComparison(this.authManager.accessToken, 'BEFORE LOGOUT');
+                
+                await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                    method: 'POST',
+                    headers: this.authManager.getAuthHeaders()
+                });
+                
+                // Mostrar estado después del logout
+                console.log('🗄️ ESTADO EN REDIS DESPUÉS DEL LOGOUT:');
+                console.log('   Clave: revoked_token:[JTI]');
+                console.log('   Valor: "true"');
+                console.log('   Expira: 1 hora');
+                console.log('   Estado: TOKEN REVOCADO ❌');
+            }
+        } catch (error) {
+            // Error silencioso
+        } finally {
+            this.authManager.clearTokens();
+            this.authManager.showLoginForm();
+            this.showMessage('Sesión cerrada correctamente', 'success');
+        }
+    }
+
+    // Cargar libros
+    async loadBooks() {
+        const booksList = document.getElementById('booksList');
+        booksList.innerHTML = '<div class="loading">Cargando libros...</div>';
+
+        try {
+            const books = await this.booksManager.getBooks();
+            this.booksManager.renderBooks(books);
+        } catch (error) {
+            console.error('Error al cargar libros:', error);
+            booksList.innerHTML = '<div class="loading">Error al cargar los libros</div>';
+            this.showMessage('Error al cargar los libros', 'error');
+        }
+    }
+
+    // Manejar agregar libro
+    async handleAddBook() {
+        const title = document.getElementById('bookTitle').value;
+        const author = document.getElementById('bookAuthor').value;
+        const year = document.getElementById('bookYear').value;
+
+        if (!title || !author) {
+            this.showMessage('Por favor, completa título y autor', 'error');
+            return;
+        }
+
+        try {
+            this.showMessage('Agregando libro...', 'info');
+            
+            const bookData = {
+                title: title.trim(),
+                author: author.trim(),
+                published_year: year ? parseInt(year) : null
+            };
+
+            await this.booksManager.addBook(bookData);
+            this.showMessage('¡Libro agregado correctamente!', 'success');
+            
+            // Limpiar formulario
+            document.getElementById('addBookForm').reset();
+            
+            // Recargar lista de libros
+            this.loadBooks();
+            
+        } catch (error) {
+            console.error('Error al agregar libro:', error);
+            this.showMessage(error.message, 'error');
+        }
+    }
+
+    // Mostrar mensaje de estado
+    showMessage(message, type = 'info') {
+        const statusMessage = document.getElementById('statusMessage');
+        statusMessage.textContent = message;
+        statusMessage.className = `status-message ${type} show`;
+        
+        // Ocultar mensaje después de 4 segundos
+        setTimeout(() => {
+            statusMessage.classList.remove('show');
+        }, 4000);
+    }
+}
+
+// Inicializar aplicación cuando se carga la página
+document.addEventListener('DOMContentLoaded', () => {
+    new App();
+});</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

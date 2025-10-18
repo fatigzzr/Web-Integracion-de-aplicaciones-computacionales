@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT + Redis Books API</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📚 JWT + Redis Books API</h1>
+            <div class="config-section">
+                <button id="configBtn" class="config-btn" onclick="document.getElementById('configModal').style.display='flex'; document.getElementById('configModal').classList.add('show');">⚙️ Configurar Servicio</button>
+                <button id="logoutBtn" class="logout-btn">🚪 Cerrar Sesión</button>
+                <div id="status" class="status">❌ No Logueado</div>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <main class="main-grid">
+            <!-- Register Section -->
+            <section class="grid-item register-section">
+                <h2>📝 Registrar Usuario</h2>
+                <div id="registerMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="regUsername">Usuario:</label>
+                            <input type="text" id="regUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail">Email:</label>
+                            <input type="email" id="regEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">Contraseña:</label>
+                            <input type="password" id="regPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Registrar</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Login Section -->
+            <section class="grid-item login-section">
+                <h2>🔐 Iniciar Sesión</h2>
+                <div id="loginMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginUsername">Usuario/Email:</label>
+                            <input type="text" id="loginUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Contraseña:</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Refresh Token Section -->
+            <section class="grid-item refresh-section">
+                <h2>🔄 Refrescar Token</h2>
+                <div id="refreshMessages" class="grid-messages"></div>
+                <div class="form-container">
+                    <button id="refreshTokenBtn" class="btn btn-warning">🔄 Refrescar Token</button>
+                    <div id="tokenInfo" class="token-info">
+                        <p><strong>Access Token:</strong> <span id="accessTokenDisplay">No disponible</span></p>
+                        <p><strong>Refresh Token:</strong> <span id="refreshTokenDisplay">No disponible</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Books Management Section -->
+            <section class="grid-item books-section">
+                <h2>📚 Gestión de Libros</h2>
+                <div id="booksMessages" class="grid-messages"></div>
+                
+                <!-- Book Actions -->
+                <div class="form-container">
+                    <h3>Acciones de Libros</h3>
+                    <div class="button-group">
+                        <button id="getAllBooksBtn" class="btn btn-info">📖 Todos los Libros</button>
+                        <button id="getFormatsBtn" class="btn btn-secondary">📋 Formatos</button>
+                        <button id="getGenresBtn" class="btn btn-secondary">📚 Géneros</button>
+                    </div>
+                    
+                    <!-- Search by ISBN -->
+                    <div class="form-group">
+                        <label for="searchIsbn">Buscar por ISBN:</label>
+                        <div class="input-group">
+                            <input type="text" id="searchIsbn" placeholder="978-0-7475-3269-9">
+                            <button id="searchIsbnBtn" class="btn btn-primary">🔍 Buscar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Search by Format -->
+                    <div class="form-group">
+                        <label for="searchFormat">Buscar por Formato:</label>
+                        <div class="input-group">
+                            <select id="searchFormat">
+                                <option value="">Seleccionar formato...</option>
+                            </select>
+                            <button id="searchFormatBtn" class="btn btn-primary">🔍 Buscar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Search by Author -->
+                    <div class="form-group">
+                        <label for="searchAuthor">Buscar por Autor:</label>
+                        <div class="input-group">
+                            <input type="text" id="searchAuthor" placeholder="John Green">
+                            <button id="searchAuthorBtn" class="btn btn-primary">🔍 Buscar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Book Creation -->
+                <div class="form-container">
+                    <h3>Crear/Actualizar Libro</h3>
+                    <form id="createBookForm">
+                        <div class="form-group">
+                            <label for="bookIsbn">ISBN:</label>
+                            <input type="text" id="bookIsbn" required placeholder="978-0-123456-78-9">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookTitle">Título:</label>
+                            <input type="text" id="bookTitle" required placeholder="Título del libro">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookAuthor">Autor(es):</label>
+                            <input type="text" id="bookAuthor" required placeholder="Autor1, Autor2">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookYear">Año de Publicación:</label>
+                            <input type="number" id="bookYear" required placeholder="2023">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookGenre">Género:</label>
+                            <select id="bookGenre" required>
+                                <option value="">Seleccionar género...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookPrice">Precio:</label>
+                            <input type="number" id="bookPrice" step="0.01" required placeholder="19.99">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookStock">En Stock:</label>
+                            <select id="bookStock">
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookFormat">Formato:</label>
+                            <select id="bookFormat">
+                                <option value="">Seleccionar formato...</option>
+                            </select>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-success">📚 Crear Libro</button>
+                            <button type="button" id="updateBookBtn" class="btn btn-warning">✏️ Actualizar Libro</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Book Deletion -->
+                <div class="form-container">
+                    <h3>Eliminar Libro</h3>
+                    <div class="form-group">
+                        <label for="deleteIsbn">ISBN a Eliminar:</label>
+                        <div class="input-group">
+                            <input type="text" id="deleteIsbn" placeholder="978-0-123456-78-9">
+                            <button id="deleteBookBtn" class="btn btn-danger">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="grid-item results-section">
+                <h2>📊 Resultados</h2>
+                <div id="resultsContainer" class="results-container">
+                    <p>Los resultados aparecerán aquí...</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Configuration Modal -->
+        <div id="configModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>⚙️ Configuración del Servicio</h2>
+                <div id="modalMessages" class="modal-messages"></div>
+                <form id="configForm">
+                    <div class="form-group">
+                        <label for="serviceIP">IP del Servicio:</label>
+                        <input type="text" id="serviceIP" value="136.115.136.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="servicePort">Puerto:</label>
+                        <input type="number" id="servicePort" value="5003" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceProtocol">Protocolo:</label>
+                        <select id="serviceProtocol">
+                            <option value="http">HTTP</option>
+                            <option value="https">HTTPS</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">💾 Guardar Configuración</button>
+                        <button type="button" id="testConnectionBtn" class="btn btn-info" onclick="testConnectionDirect()">🔍 Probar Conexión</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

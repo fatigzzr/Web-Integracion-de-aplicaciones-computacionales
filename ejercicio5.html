@@ -1413,8 +1413,13 @@ body {
             <div class="reflection-section">
                 <h3>Reflexión</h3>
                 <div class="reflection-content">
-                    <!-- Aquí irá la reflexión del ejercicio 5 -->
-                    <p>Reflexión sobre el uso de JWT en microservicios y la integración con frontend...</p>
+                    <p>En este ejercicio guiado, al aplicar la teoría de JWT (JSON Web Token), pude comprender de una forma mucho más clara cómo funcionan las aplicaciones reales en cuanto a autenticación y manejo de sesiones. Antes tenía una idea general de que, en algunos sitios web, no era necesario iniciar sesión cada vez que se accedía, mientras que en otros sí se pedía hacerlo con frecuencia. Sin embargo, no entendía exactamente por qué ocurría esto ni cómo funcionaba internamente. Gracias a este ejercicio, entendí que con JWT se almacena un token de acceso en mi computadora (por ejemplo, en el local storage o en las cookies), y ese token sirve para que el servidor reconozca que ya he iniciado sesión y pueda autorizarme para acceder a los diferentes servicios del sitio web sin necesidad de volver a autenticarme constantemente.</p>
+                    
+                    <p>Durante la práctica, realicé todo el flujo de autenticación completo, que incluye el registro de un usuario nuevo, el inicio de sesión, la obtención del refresh token, y la consulta de información específica del perfil de un usuario. Este proceso me ayudó a comprender de manera más profunda cómo funcionan los distintos flujos relacionados con los tokens. Primero se debe generar el token al registrarse o iniciar sesión, y después, con ese token, se pueden consumir los servicios que requieren autenticación, como solicitar un nuevo token de actualización (refresh token), obtener el perfil de usuario o agregar ítems personalizados.</p>
+                    
+                    <p>Además, al trabajar en la parte del frontend, aprendí sobre los diferentes tipos de vistas y cómo se pueden implementar: una vista normal que muestra listas de datos, una vista tipo Single Page Application (SPA) donde el contenido se actualiza dinámicamente dentro de un solo contenedor, vistas tipo grid que redirigen a endpoints específicos, y ventanas emergentes (pop-ups) que pueden utilizarse para configuraciones puntuales, como la IP o los endpoints. Esta última la implementé en el ejercicio para manejar el local storage de configuración, lo cual me pareció una solución práctica y funcional.</p>
+                    
+                    <p>En conclusión, este ejercicio me permitió integrar la teoría con la práctica, entender mejor el funcionamiento de JWT en aplicaciones reales y reforzar mis conocimientos tanto en el backend como en el frontend.</p>
                 </div>
             </div>
         </div>

@@ -975,3 +975,268 @@
     text-decoration: none !important;
     background: #333 !important;
 }
+
+/* Estilos específicos para ejercicio6 (#d4a574) */
+.ejercicio6 .header h1 {
+    color: #d4a574;
+}
+
+.ejercicio6 .exercise-info h3,
+.ejercicio6 .screenshots-section h3,
+.ejercicio6 .reflection-section h3,
+.ejercicio6 .code-section h3 {
+    border-bottom: 2px solid #d4a574;
+    text-align: left;
+}
+
+.ejercicio6 .image-modal-close:hover {
+    color: #d4a574;
+}
+
+.ejercicio6 a {
+    color: #d4a574;
+    text-decoration: underline;
+}
+
+.ejercicio6 a:hover {
+    color: #c1955f;
+    text-decoration: underline;
+}
+
+.ejercicio6 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio6 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para ejercicio7 (#f4a460) */
+.ejercicio7 .header h1 {
+    color: #f4a460;
+}
+
+.ejercicio7 .exercise-info h3,
+.ejercicio7 .screenshots-section h3,
+.ejercicio7 .reflection-section h3,
+.ejercicio7 .code-section h3 {
+    border-bottom: 2px solid #f4a460;
+    text-align: left;
+}
+
+.ejercicio7 .image-modal-close:hover {
+    color: #f4a460;
+}
+
+.ejercicio7 a {
+    color: #f4a460;
+    text-decoration: underline;
+}
+
+.ejercicio7 a:hover {
+    color: #e6954a;
+    text-decoration: underline;
+}
+
+.ejercicio7 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio7 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para ejercicio8 (#8B5A8C) */
+.ejercicio8 .header h1 {
+    color: #8B5A8C;
+}
+
+.ejercicio8 .exercise-info h3,
+.ejercicio8 .screenshots-section h3,
+.ejercicio8 .reflection-section h3,
+.ejercicio8 .code-section h3 {
+    border-bottom: 2px solid #8B5A8C;
+    text-align: left;
+}
+
+.ejercicio8 .image-modal-close:hover {
+    color: #8B5A8C;
+}
+
+.ejercicio8 a {
+    color: #8B5A8C;
+    text-decoration: underline;
+}
+
+.ejercicio8 a:hover {
+    color: #7a4f7a;
+    text-decoration: underline;
+}
+
+.ejercicio8 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio8 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para ejercicio9 (#CD5C5C) - Soft Autumn Red */
+.ejercicio9 .header h1 {
+    color: #CD5C5C;
+}
+
+.ejercicio9 .exercise-info h3,
+.ejercicio9 .screenshots-section h3,
+.ejercicio9 .reflection-section h3,
+.ejercicio9 .code-section h3 {
+    border-bottom: 2px solid #CD5C5C;
+    text-align: left;
+}
+
+.ejercicio9 .image-modal-close:hover {
+    color: #CD5C5C;
+}
+
+.ejercicio9 a {
+    color: #CD5C5C;
+    text-decoration: underline;
+}
+
+.ejercicio9 a:hover {
+    color: #A0522D;
+    text-decoration: underline;
+}
+
+.ejercicio9 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio9 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para tarea6 (#9f9ff6) - Cold Purple */
+.tarea6 .header h1 {
+    color: #9f9ff6;
+}
+
+.tarea6 .exercise-info h3,
+.tarea6 .screenshots-section h3,
+.tarea6 .file-preview h3,
+.tarea6 .reflection-section h3,
+.tarea6 .code-section h3 {
+    border-bottom: 2px solid #9f9ff6;
+    text-align: left;
+}
+
+.tarea6 .image-modal-close:hover {
+    color: #9f9ff6;
+}
+
+.tarea6 a {
+    color: #9f9ff6;
+    text-decoration: underline;
+}
+
+.tarea6 a:hover {
+    color: #7b7be6;
+    text-decoration: underline;
+}
+
+.tarea6 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea6 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos específicos para tarea7 (#A8E6CF) - Mint Green */
+.tarea7 .header h1 {
+    color: #A8E6CF;
+}
+
+.tarea7 .exercise-info h3,
+.tarea7 .screenshots-section h3,
+.tarea7 .file-preview h3,
+.tarea7 .reflection-section h3,
+.tarea7 .code-section h3 {
+    border-bottom: 2px solid #A8E6CF;
+    text-align: left;
+}
+
+.tarea7 .image-modal-close:hover {
+    color: #A8E6CF;
+}
+
+.tarea7 a {
+    color: #A8E6CF;
+    text-decoration: underline;
+}
+
+.tarea7 a:hover {
+    color: #88D8A3;
+    text-decoration: underline;
+}
+
+.tarea7 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea7 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+/* Estilos para las tarjetas del grid dentro de tarea7 */
+.tarea7 .menu-grid .menu-card {
+    border-color: #A8E6CF;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.tarea7 .menu-grid .menu-card h3 {
+    color: #A8E6CF;
+}
+
+.tarea7 .menu-grid .menu-card .arrow {
+    color: #A8E6CF;
+}
+
+.tarea7 .menu-grid .menu-card:hover {
+    box-shadow: 0 8px 25px rgba(168, 230, 207, 0.3);
+    text-decoration: none !important;
+    color: inherit;
+}
+
+/* Estilo para el highlighter de tarea7 */
+.tarea7 mark {
+    background-color: #A8E6CF;
+    color: #333;
+    padding: 2px 4px;
+    border-radius: 3px;
+}

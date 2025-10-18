@@ -1,0 +1,2960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 6: JWT + Redis - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio6">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 6: JWT + Redis</h1>
+            <p>Autenticación JWT con Redis en el Microservicio de Libros</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Diseñar y desplegar un microservicio de Libros (Books API) donde todas las rutas estén protegidas por JWT y donde Redis sea la capa de soporte para:</p>
+                <ul>
+                    <li>Gestión de sesiones y tokens (allowlist/denylist).</li>
+                    <li>Revocación de tokens.</li>
+                    <li>Refresh de Access Tokens.</li>
+                    <li>(Opcional) Rate limiting por usuario/endpoint.</li>
+                        </ul>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <p>Partiendo del ejercicio guiado de autenticación con Flask + MariaDB + JWT + Cliente Web, deberás migrar/ajustar la autenticación para que se gestione mediante Redis, y aplicarla a todos los endpoints del microservicio de Libros construido en sesiones previas.</p>
+                
+                <p>Debes implementar los siguientes endpoints ya definidos en sesiones pasadas, ahora todos protegidos con JWT:</p>
+                <ul>
+                    <li>GET /api/books → muestra todos los libros en formato XML.</li>
+                    <li>GET /api/books/ISBN → muestra un libro si se manda el ISBN.</li>
+                    <li>GET /api/books/format/digital → muestra todos los libros con el formato digital.</li>
+                    <li>GET /api/books/autor/ → muestra todos los libros de un autor.</li>
+                    <li>POST /api/books/create → inserta un nuevo libro.</li>
+                    <li>PUT /api/books/update → actualiza un libro.</li>
+                    <li>DELETE /api/books/delete → elimina un libro si se manda el ISBN.</li>
+                        </ul>
+                
+                <p>Requisito: Todos estos endpoints deben rechazar peticiones sin JWT o con tokens inválidos/expirados (responder con 401/403).</p>
+                
+                <br>
+                <p>Endpoints de autenticación con JWT + Redis<p>
+                <p>Debes incluir también los endpoints de autenticación:</p>
+                <ul>
+                    <li>POST /auth/register → registra usuario (hash de contraseña).</li>
+                    <li>POST /auth/login → devuelve access_token y refresh_token.</li>
+                    <li>POST /auth/refresh → emite un nuevo access token usando refresh válido.</li>
+                    <li>POST /auth/logout → revoca el token actual (denylist en Redis).</li>
+                        </ul>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>Microservicio Flask con JWT + Redis (micro.py)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code>import os
+import logging
+import json
+import hashlib
+from datetime import datetime, timedelta
+from functools import wraps
+
+from flask import Flask, request, jsonify, g, Response
+from flask_cors import CORS
+import pymysql
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt  # PyJWT
+import redis
+
+# ---------- CONFIG ----------
+app = Flask(__name__)
+CORS(app, 
+     origins=['*'],
+     allow_headers=['Content-Type', 'Authorization', 'Accept'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     supports_credentials=True)
+
+# Configuración MySQL (configuración directa)
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'libros_user',
+    'password': '666',
+    'database': 'Libros',
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
+# JWT settings
+JWT_SECRET = 'cambia_esta_clave_secreta'
+JWT_ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRES_MINUTES = 15
+REFRESH_TOKEN_EXPIRES_DAYS = 7
+
+# Redis settings
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_PASSWORD = None
+
+# ---------- REDIS CONNECTION ----------
+try:
+    redis_client = redis.Redis(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        db=REDIS_DB,
+        password=REDIS_PASSWORD,
+        decode_responses=True,
+        socket_connect_timeout=5,
+        socket_timeout=5
+    )
+    # Test connection
+    redis_client.ping()
+    logger = logging.getLogger('auth_service')
+    logger.info("Redis connection established successfully")
+except Exception as e:
+    logger = logging.getLogger('auth_service')
+    logger.error(f"Failed to connect to Redis: {e}")
+    redis_client = None
+
+# ---------- LOGGING ----------
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+
+# Log every incoming request (method, path, ip, body if json)
+@app.before_request
+def log_request_info():
+    try:
+        body = request.get_json(silent=True)
+    except Exception:
+        body = None
+    logger.info("Incoming request: %s %s from %s body=%s",
+                request.method, request.path, request.remote_addr, body)
+
+# ---------- REDIS HELPERS ----------
+def get_redis():
+    """Get Redis client with error handling"""
+    if not redis_client:
+        raise Exception("Redis not available")
+    return redis_client
+
+def redis_available():
+    """Check if Redis is available"""
+    try:
+        get_redis().ping()
+        return True
+    except:
+        return False
+
+def hash_token(token):
+    """Create a hash of the token for storage"""
+    return hashlib.sha256(token.encode()).hexdigest()
+
+# ---------- REDIS TOKEN MANAGEMENT ----------
+def add_token_to_allowlist(token, user_id, token_type, expires_at):
+    """Add token to Redis allowlist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"allowlist:{token_hash}"
+        
+        token_data = {
+            'user_id': user_id,
+            'type': token_type,
+            'created_at': datetime.utcnow().isoformat(),
+            'expires_at': expires_at.isoformat()
+        }
+        
+        # Set with expiration
+        ttl = int((expires_at - datetime.utcnow()).total_seconds())
+        r.setex(key, ttl, json.dumps(token_data))
+        
+        # Also add to user's token set for easy cleanup
+        user_tokens_key = f"user_tokens:{user_id}:{token_type}"
+        r.sadd(user_tokens_key, token_hash)
+        r.expire(user_tokens_key, ttl)
+        
+        logger.info("Token added to allowlist: user_id=%s type=%s", user_id, token_type)
+        return True
+    except Exception as e:
+        logger.error("Failed to add token to allowlist: %s", e)
+        return False
+
+def add_token_to_denylist(token, user_id=None):
+    """Add token to Redis denylist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"denylist:{token_hash}"
+        
+        denylist_data = {
+            'user_id': user_id,
+            'revoked_at': datetime.utcnow().isoformat()
+        }
+        
+        # Set with long expiration (24 hours)
+        r.setex(key, 86400, json.dumps(denylist_data))
+        
+        logger.info("Token added to denylist: user_id=%s", user_id)
+        return True
+    except Exception as e:
+        logger.error("Failed to add token to denylist: %s", e)
+        return False
+
+def is_token_in_denylist(token):
+    """Check if token is in denylist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"denylist:{token_hash}"
+        return r.exists(key)
+    except Exception as e:
+        logger.error("Failed to check denylist: %s", e)
+        return False
+
+def is_token_in_allowlist(token):
+    """Check if token is in allowlist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"allowlist:{token_hash}"
+        return r.exists(key)
+    except Exception as e:
+        logger.error("Failed to check allowlist: %s", e)
+        return False
+
+def revoke_user_tokens(user_id, token_type=None):
+    """Revoke all tokens for a user"""
+    try:
+        r = get_redis()
+        
+        if token_type:
+            # Revoke specific token type
+            user_tokens_key = f"user_tokens:{user_id}:{token_type}"
+            token_hashes = r.smembers(user_tokens_key)
+            
+            for token_hash in token_hashes:
+                # Move from allowlist to denylist
+                allowlist_key = f"allowlist:{token_hash}"
+                token_data = r.get(allowlist_key)
+                if token_data:
+                    r.delete(allowlist_key)
+                    denylist_key = f"denylist:{token_hash}"
+                    r.setex(denylist_key, 86400, token_data)
+            
+            r.delete(user_tokens_key)
+        else:
+            # Revoke all token types
+            for t_type in ['access', 'refresh']:
+                revoke_user_tokens(user_id, t_type)
+        
+        logger.info("All tokens revoked for user_id=%s", user_id)
+        return True
+    except Exception as e:
+        logger.error("Failed to revoke user tokens: %s", e)
+        return False
+
+# ---------- RATE LIMITING ----------
+def check_rate_limit(user_id, endpoint, max_requests=100, window_minutes=60):
+    """Check rate limit for user/endpoint"""
+    try:
+        r = get_redis()
+        key = f"rate_limit:{user_id}:{endpoint}"
+        
+        # Get current count
+        current = r.get(key)
+        if current is None:
+            # First request in window
+            r.setex(key, window_minutes * 60, 1)
+            return True
+        elif int(current) < max_requests:
+            # Increment counter
+            r.incr(key)
+            return True
+        else:
+            # Rate limit exceeded
+            return False
+    except Exception as e:
+        logger.error("Rate limit check failed: %s", e)
+        return True  # Allow on error
+
+def check_rate_limit_by_ip(ip, endpoint, max_requests=100, window_minutes=60):
+    """Check rate limit for IP/endpoint"""
+    try:
+        r = get_redis()
+        key = f"rate_limit_ip:{ip}:{endpoint}"
+        
+        # Get current count
+        current = r.get(key)
+        if current is None:
+            # First request in window
+            r.setex(key, window_minutes * 60, 1)
+            return True
+        elif int(current) < max_requests:
+            # Increment counter
+            r.incr(key)
+            return True
+        else:
+            # Rate limit exceeded
+            return False
+    except Exception as e:
+        logger.error("Rate limit check failed: %s", e)
+        return True  # Allow request if Redis is down
+
+# ---------- DATABASE HELPERS ----------
+def query_db(query, args=(), one=False):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, args)
+            rv = cursor.fetchall()
+            return (rv[0] if rv else None) if one else rv
+    finally:
+        connection.close()
+
+def execute_db(query, args=()):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, args)
+            connection.commit()
+            return cursor.lastrowid
+    finally:
+        connection.close()
+
+# ---------- JWT HELPERS ----------
+def create_access_token(payload: dict):
+    exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+    token_payload = {**payload, "exp": exp, "type": "access"}
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    # Add to Redis allowlist
+    if redis_available():
+        add_token_to_allowlist(token, payload.get('user_id'), 'access', exp)
+    
+    logger.info("Access token created for user_id=%s exp=%s", payload.get('user_id'), exp)
+    return token
+
+def create_refresh_token(payload: dict):
+    exp = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRES_DAYS)
+    token_payload = {**payload, "exp": exp, "type": "refresh"}
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    # Add to Redis allowlist
+    if redis_available():
+        add_token_to_allowlist(token, payload.get('user_id'), 'refresh', exp)
+    
+    logger.info("Refresh token created for user_id=%s exp=%s", payload.get('user_id'), exp)
+    return token, exp
+
+def decode_token(token):
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        logger.info("Token decoded: user_id=%s type=%s", decoded.get('user_id'), decoded.get('type'))
+        return decoded
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token expired.")
+        raise
+    except jwt.InvalidTokenError as e:
+        logger.warning("Invalid token: %s", e)
+        raise
+
+# ---------- AUTHENTICATION DECORATOR ----------
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Check rate limit (using IP as identifier) - TEMPORARILY DISABLED FOR TESTING
+        # if redis_available():
+        #     client_ip = request.remote_addr
+        #     # Use IP-based rate limiting for unauthenticated requests
+        #     if not check_rate_limit_by_ip(client_ip, 'auth', max_requests=50, window_minutes=15):
+        #         logger.warning("Rate limit exceeded for IP: %s", client_ip)
+        #         return jsonify({"msg": "Rate limit exceeded"}), 429
+        
+        auth_header = request.headers.get('Authorization', None)
+        if not auth_header:
+            logger.warning("Authorization header missing")
+            return jsonify({"msg": "Missing Authorization Header"}), 401
+        
+        parts = auth_header.split()
+        if parts[0].lower() != 'bearer' or len(parts) != 2:
+            logger.warning("Authorization header malformed")
+            return jsonify({"msg": "Bad Authorization header"}), 401
+        
+        token = parts[1]
+        
+        try:
+            logger.info("🔍 Validating token for endpoint: %s", request.endpoint)
+            
+            # Check if token is in denylist (Redis)
+            if redis_available() and is_token_in_denylist(token):
+                logger.warning("Token found in denylist")
+                return jsonify({"msg": "Token has been revoked"}), 401
+            
+            # Check if token is in allowlist (Redis) - optional extra security
+            # Note: Allowlist check is optional for backward compatibility
+            # if redis_available() and not is_token_in_allowlist(token):
+            #     logger.warning("Token not found in allowlist")
+            #     return jsonify({"msg": "Token not recognized"}), 401
+            
+            data = decode_token(token)
+            logger.info("✅ Token decoded successfully: user_id=%s type=%s", data.get('user_id'), data.get('type'))
+            
+            if data.get('type') != 'access':
+                logger.warning("Token used is not access token")
+                return jsonify({"msg": "Invalid token type"}), 401
+            
+            user = query_db("SELECT id, username, email, created_at FROM users WHERE id = %s", (data['user_id'],), one=True)
+            if not user:
+                logger.warning("User id in token not found: %s", data.get('user_id'))
+                return jsonify({"msg": "User not found"}), 404
+            
+            logger.info("✅ User found: %s", user.get('username'))
+            g.current_user = user
+            return f(*args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({"msg": "Token expired"}), 401
+        except Exception as e:
+            logger.exception("Token verification failed")
+            return jsonify({"msg": "Invalid token"}), 401
+    return decorated
+
+# ---------- CORS HANDLER ----------
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,Accept")
+        response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+        return response
+
+# ---------- HEALTHCHECK ----------
+@app.route('/api/health', methods=['GET'])
+def health():
+    """Enhanced health endpoint: checks DB and Redis connectivity"""
+    db_ok = False
+    redis_ok = False
+    
+    # Check MySQL
+    try:
+        connection = pymysql.connect(**DB_CONFIG)
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+        connection.close()
+        db_ok = True
+        logger.info("Health check OK: DB reachable")
+    except Exception as e:
+        logger.exception("Health check failed: DB not reachable")
+        db_ok = False
+    
+    # Check Redis
+    if redis_available():
+        try:
+            get_redis().ping()
+            redis_ok = True
+            logger.info("Health check OK: Redis reachable")
+        except Exception as e:
+            logger.exception("Health check failed: Redis not reachable")
+            redis_ok = False
+    else:
+        redis_ok = False
+        logger.warning("Redis not configured")
+
+    status = "ok" if (db_ok and redis_ok) else "degraded" if db_ok else "error"
+    return jsonify({
+        "status": status,
+        "db": "ok" if db_ok else "error",
+        "redis": "ok" if redis_ok else "error",
+        "time": datetime.utcnow().isoformat() + "Z"
+    }), (200 if db_ok else 500)
+
+# ---------- AUTH ENDPOINTS ----------
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    # Rate limiting
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, 'register', max_requests=5, window_minutes=60):
+            return jsonify({"msg": "Registration rate limit exceeded"}), 429
+    
+    data = request.get_json() or {}
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not username or not email or not password:
+        logger.warning("Register attempt with missing fields: %s", data)
+        return jsonify({"msg": "username, email and password are required"}), 400
+
+    exists = query_db("SELECT id FROM users WHERE username = %s OR email = %s", (username, email), one=True)
+    if exists:
+        logger.info("Register failed - user exists username/email: %s/%s", username, email)
+        return jsonify({"msg": "User with that username or email already exists"}), 409
+    
+    pw_hash = generate_password_hash(password)
+    user_id = execute_db("INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
+                         (username, email, pw_hash))
+    logger.info("New user registered id=%s username=%s", user_id, username)
+    return jsonify({"msg": "User created", "user_id": user_id}), 201
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    # Rate limiting
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, 'login', max_requests=10, window_minutes=15):
+            return jsonify({"msg": "Login rate limit exceeded"}), 429
+    
+    data = request.get_json() or {}
+    identifier = data.get('username') or data.get('email')
+    password = data.get('password')
+
+    if not identifier or not password:
+        logger.warning("Login attempt missing identifier/password")
+        return jsonify({"msg": "username/email and password required"}), 400
+
+    user = query_db("SELECT id, username, email, password_hash FROM users WHERE username = %s OR email = %s",
+                    (identifier, identifier), one=True)
+    if not user:
+        logger.info("Login failed - user not found: %s", identifier)
+        return jsonify({"msg": "Invalid credentials"}), 401
+
+    if not check_password_hash(user['password_hash'], password):
+        logger.info("Login failed - wrong password for user_id=%s", user['id'])
+        return jsonify({"msg": "Invalid credentials"}), 401
+
+    # Revoke any existing tokens for this user
+    if redis_available():
+        revoke_user_tokens(user['id'])
+
+    payload = {"user_id": user['id']}
+    access_token = create_access_token(payload)
+    refresh_token, refresh_exp = create_refresh_token(payload)
+
+    # Add tokens to Redis allowlist
+    if redis_available():
+        access_exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+        add_token_to_allowlist(access_token, user['id'], 'access', access_exp)
+        add_token_to_allowlist(refresh_token, user['id'], 'refresh', refresh_exp)
+        logger.info("Tokens added to allowlist for user_id=%s", user['id'])
+
+    # Store refresh token in MySQL (for backward compatibility)
+    execute_db("INSERT INTO refresh_tokens (user_id, refresh_token, expires_at) VALUES (%s, %s, %s)",
+               (user['id'], refresh_token, refresh_exp.strftime('%Y-%m-%d %H:%M:%S')))
+    
+    logger.info("Login success for user_id=%s - tokens issued", user['id'])
+
+    return jsonify({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "expires_in_minutes": ACCESS_TOKEN_EXPIRES_MINUTES
+    }), 200
+
+@app.route('/api/auth/refresh', methods=['POST'])
+def refresh():
+    # Rate limiting
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, 'refresh', max_requests=20, window_minutes=15):
+            return jsonify({"msg": "Refresh rate limit exceeded"}), 429
+    
+    data = request.get_json() or {}
+    refresh_token = data.get('refresh_token')
+    if not refresh_token:
+        auth_header = request.headers.get('Authorization', '')
+        parts = auth_header.split()
+        if len(parts) == 2 and parts[0].lower() == 'bearer':
+            refresh_token = parts[1]
+
+    if not refresh_token:
+        logger.warning("Refresh attempted without refresh_token")
+        return jsonify({"msg": "refresh_token is required"}), 400
+
+    try:
+        # Check if refresh token is in denylist
+        if redis_available() and is_token_in_denylist(refresh_token):
+            logger.warning("Refresh token found in denylist")
+            return jsonify({"msg": "Refresh token has been revoked"}), 401
+        
+        decoded = decode_token(refresh_token)
+        if decoded.get('type') != 'refresh':
+            logger.warning("Provided token to refresh is not refresh type")
+            return jsonify({"msg": "Invalid token type"}), 401
+        
+        user_id = decoded['user_id']
+        
+        # Check in MySQL for backward compatibility
+        row = query_db("SELECT id, revoked, expires_at FROM refresh_tokens WHERE user_id = %s AND refresh_token = %s",
+                       (user_id, refresh_token), one=True)
+        if not row:
+            logger.warning("Refresh token not found in DB for user_id=%s", user_id)
+            return jsonify({"msg": "Refresh token not recognized"}), 401
+        if row['revoked']:
+            logger.warning("Attempt to use revoked refresh token id=%s", row['id'])
+            return jsonify({"msg": "Refresh token revoked"}), 401
+
+        # Create new access token
+        access_token = create_access_token({"user_id": user_id})
+        
+        # Add new access token to Redis allowlist
+        if redis_available():
+            access_exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+            add_token_to_allowlist(access_token, user_id, 'access', access_exp)
+            logger.info("New access token added to allowlist for user_id=%s", user_id)
+        
+        logger.info("Access token refreshed for user_id=%s", user_id)
+        return jsonify({"access_token": access_token, "token_type": "bearer", "expires_in_minutes": ACCESS_TOKEN_EXPIRES_MINUTES}), 200
+    except jwt.ExpiredSignatureError:
+        logger.warning("Refresh token expired")
+        return jsonify({"msg": "Refresh token expired"}), 401
+    except Exception as e:
+        logger.exception("Error processing refresh token")
+        return jsonify({"msg": "Invalid refresh token"}), 401
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    data = request.get_json() or {}
+    refresh_token = data.get('refresh_token')
+    access_token = data.get('access_token')
+    
+    if not refresh_token and not access_token:
+        return jsonify({"msg": "refresh_token or access_token required"}), 400
+
+    try:
+        # Add tokens to denylist
+        if redis_available():
+            if access_token:
+                # Decode to get user_id
+                try:
+                    decoded = decode_token(access_token)
+                    user_id = decoded.get('user_id')
+                    add_token_to_denylist(access_token, user_id)
+                except:
+                    pass  # Token might be invalid, but we still want to denylist it
+            
+            if refresh_token:
+                # Try to get user_id from refresh token
+                try:
+                    decoded = decode_token(refresh_token)
+                    user_id = decoded.get('user_id')
+                    add_token_to_denylist(refresh_token, user_id)
+                except:
+                    pass
+        
+        # Also revoke in MySQL for backward compatibility
+        if refresh_token:
+            execute_db("UPDATE refresh_tokens SET revoked = 1 WHERE refresh_token = %s", (refresh_token,))
+        
+        logger.info("Logout requested - tokens revoked")
+        return jsonify({"msg": "Tokens revoked successfully"}), 200
+    except Exception as e:
+        logger.exception("Error during logout")
+        return jsonify({"msg": "Logout failed"}), 500
+
+@app.route('/api/auth/revoke-all', methods=['POST'])
+@login_required
+def revoke_all_tokens():
+    """Revoke all tokens for the current user"""
+    user = g.current_user
+    
+    try:
+        if redis_available():
+            revoke_user_tokens(user['id'])
+        
+        # Also revoke in MySQL
+        execute_db("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = %s", (user['id'],))
+        
+        logger.info("All tokens revoked for user_id=%s", user['id'])
+        return jsonify({"msg": "All tokens revoked successfully"}), 200
+    except Exception as e:
+        logger.exception("Error revoking all tokens")
+        return jsonify({"msg": "Failed to revoke tokens"}), 500
+
+# ---------- PROTECTED API ENDPOINTS (BOOKS) ----------
+import xml.etree.ElementTree as ET
+
+def dict_to_xml_book(row):
+    book = ET.Element("book", isbn=row['isbn'])
+    ET.SubElement(book, "title").text = row['title']
+    ET.SubElement(book, "author").text = row['author_names']
+    ET.SubElement(book, "publication_year").text = str(row['publication_year'])
+    ET.SubElement(book, "genre").text = row['genre']
+    ET.SubElement(book, "price").text = str(row['price'])
+    ET.SubElement(book, "stock").text = str(row['stock']).lower()
+    ET.SubElement(book, "format").text = row['format']
+    return book
+
+def query_books(sql, params=None):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params or ())
+            rows = cursor.fetchall()
+            return rows
+    finally:
+        connection.close()
+
+def books_to_xml(books):
+    library = ET.Element("library")
+    for b in books:
+        library.append(dict_to_xml_book(b))
+    return ET.tostring(library, encoding="utf-8", xml_declaration=True)
+
+@app.route("/api/books", methods=["GET"])
+@login_required
+def get_all_books():
+    """GET /api/books → muestra todos los libros en formato XML"""
+    sql = """
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR ', ') AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        GROUP BY b.book_id
+    """
+    books = query_books(sql)
+    return Response(books_to_xml(books), mimetype="application/xml")
+
+@app.route("/api/books/<isbn>", methods=["GET"])
+@login_required
+def get_book_by_isbn(isbn):
+    """GET /api/books/ISBN → muestra un libro si se manda el ISBN"""
+    sql = """
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR ', ') AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        WHERE b.isbn=%s
+        GROUP BY b.book_id
+    """
+    books = query_books(sql, (isbn,))
+    return Response(books_to_xml(books), mimetype="application/xml")
+
+@app.route("/api/books/format/<format_name>", methods=["GET"])
+@login_required
+def get_books_by_format(format_name):
+    """GET /api/books/format/digital → muestra todos los libros con el formato digital"""
+    sql = """
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR ', ') AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        WHERE f.name=%s
+        GROUP BY b.book_id
+    """
+    books = query_books(sql, (format_name,))
+    return Response(books_to_xml(books), mimetype="application/xml")
+
+@app.route("/api/books/author/<author_name>", methods=["GET"])
+@login_required
+def get_books_by_author(author_name):
+    """GET /api/books/author/ → muestra todos los libros de un autor"""
+    sql = """
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR ', ') AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        WHERE a.name LIKE %s
+        GROUP BY b.book_id
+    """
+    books = query_books(sql, ("%" + author_name + "%",))
+    return Response(books_to_xml(books), mimetype="application/xml")
+
+@app.route("/api/books/insert", methods=["POST"])
+@login_required
+def insert_book():
+    """POST /api/books/insert → inserta un nuevo libro"""
+    logger.info("📚 Insert book endpoint called - Headers: %s", dict(request.headers))
+    
+    # Get user from decorator validation
+    user = g.current_user
+    logger.info("✅ User authenticated: %s", user.get('username'))
+    
+    # Now process the XML data
+    data = request.data
+    root = ET.fromstring(data)
+    
+    isbn = root.attrib['isbn']
+    title = root.find("title").text
+    authors = [a.strip() for a in root.find("author").text.split(",")]
+    pub_year = int(root.find("publication_year").text)
+    genre = root.find("genre").text
+    price = float(root.find("price").text)
+    stock = root.find("stock").text.lower() == "true"
+    fmt = root.find("format").text
+    
+    logger.info("📚 Processing book: ISBN=%s, Title=%s, Genre=%s, Format=%s", isbn, title, genre, fmt)
+    
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            # Insert Genre
+            logger.info("🔍 Inserting genre: %s", genre)
+            cursor.execute("INSERT INTO Genre(name) VALUES(%s) ON DUPLICATE KEY UPDATE name=name", (genre,))
+            cursor.execute("SELECT genre_id FROM Genre WHERE name=%s", (genre,))
+            genre_result = cursor.fetchone()
+            logger.info("🔍 Genre result: %s", genre_result)
+            if not genre_result:
+                raise ValueError(f"Failed to create or find genre '{genre}'")
+            genre_id = genre_result[0]
+            logger.info("✅ Genre ID: %s", genre_id)
+            
+            # Insert Format
+            cursor.execute("INSERT INTO Format(name) VALUES(%s) ON DUPLICATE KEY UPDATE name=name", (fmt,))
+            cursor.execute("SELECT format_id FROM Format WHERE name=%s", (fmt,))
+            format_result = cursor.fetchone()
+            if not format_result:
+                raise ValueError(f"Failed to create or find format '{fmt}'")
+            format_id = format_result[0]
+            
+            # Insert Book
+            cursor.execute("""
+                INSERT INTO Book(isbn, title, publication_year, price, stock, genre_id, format_id)
+                VALUES(%s,%s,%s,%s,%s,%s,%s)
+                ON DUPLICATE KEY UPDATE title=VALUES(title), publication_year=VALUES(publication_year),
+                price=VALUES(price), stock=VALUES(stock), genre_id=VALUES(genre_id), format_id=VALUES(format_id)
+            """, (isbn, title, pub_year, price, stock, genre_id, format_id))
+            
+            # Book ID
+            cursor.execute("SELECT book_id FROM Book WHERE isbn=%s", (isbn,))
+            book_result = cursor.fetchone()
+            if not book_result:
+                raise ValueError(f"Failed to create or find book with ISBN '{isbn}'")
+            book_id = book_result[0]
+            
+            # Insert Authors
+            for a in authors:
+                cursor.execute("INSERT INTO Author(name) VALUES(%s) ON DUPLICATE KEY UPDATE name=name", (a,))
+                cursor.execute("SELECT author_id FROM Author WHERE name=%s", (a,))
+                author_result = cursor.fetchone()
+                if not author_result:
+                    raise ValueError(f"Failed to create or find author '{a}'")
+                author_id = author_result[0]
+                # Insert into BookAuthor
+                cursor.execute("INSERT IGNORE INTO BookAuthor(book_id, author_id) VALUES(%s,%s)", (book_id, author_id))
+            
+            connection.commit()
+    except ValueError as e:
+        logger.warning("Validation error inserting book: %s", str(e))
+        response = ET.Element("response")
+        ET.SubElement(response, "status").text = "error"
+        ET.SubElement(response, "message").text = str(e)
+        return Response(ET.tostring(response, encoding="utf-8", xml_declaration=True), mimetype="application/xml"), 400
+    except Exception as e:
+        logger.exception("Unexpected error inserting book: %s", str(e))
+        response = ET.Element("response")
+        ET.SubElement(response, "status").text = "error"
+        ET.SubElement(response, "message").text = f"Database error: {str(e)}"
+        return Response(ET.tostring(response, encoding="utf-8", xml_declaration=True), mimetype="application/xml"), 500
+    finally:
+        connection.close()
+    
+    response = ET.Element("response")
+    ET.SubElement(response, "status").text = "success"
+    return Response(ET.tostring(response, encoding="utf-8", xml_declaration=True), mimetype="application/xml")
+
+@app.route("/api/books/update", methods=["POST"])
+@login_required
+def update_book():
+    """POST /api/books/update → actualiza un libro"""
+    return insert_book()  # misma lógica de insert ya maneja ON DUPLICATE KEY UPDATE
+
+@app.route("/api/books/delete", methods=["POST"])
+@login_required
+def delete_books():
+    """POST /api/books/delete → elimina libros por ISBN"""
+    # Get user from decorator validation
+    user = g.current_user
+    logger.info("✅ User authenticated for delete: %s", user.get('username'))
+    
+    # Now process the XML data
+    data = request.data
+    root = ET.fromstring(data)
+    isbns = [i.text for i in root.findall("isbn")]
+    
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            for isbn in isbns:
+                # Obtener book_id
+                cursor.execute("SELECT book_id FROM Book WHERE isbn=%s", (isbn,))
+                res = cursor.fetchone()
+                if res:
+                    book_id = res[0]
+                    cursor.execute("DELETE FROM BookAuthor WHERE book_id=%s", (book_id,))
+                    cursor.execute("DELETE FROM Book WHERE book_id=%s", (book_id,))
+            
+            connection.commit()
+    finally:
+        connection.close()
+    
+    response = ET.Element("response")
+    ET.SubElement(response, "status").text = "deleted"
+    return Response(ET.tostring(response, encoding="utf-8", xml_declaration=True), mimetype="application/xml")
+
+@app.route("/api/formats", methods=["GET"])
+@login_required
+def get_formats():
+    """GET /api/formats → obtiene los formatos disponibles"""
+    sql = "SELECT format_id, name FROM Format"
+    formats = query_books(sql)
+    root = ET.Element("formats")
+    for f in formats:
+        f_el = ET.SubElement(root, "format")
+        ET.SubElement(f_el, "id").text = str(f["format_id"])
+        ET.SubElement(f_el, "name").text = f["name"]
+    return Response(ET.tostring(root), mimetype="application/xml")
+
+@app.route("/api/genres", methods=["GET"])
+@login_required
+def get_genres():
+    """GET /api/genres → obtiene los géneros disponibles"""
+    sql = "SELECT genre_id, name FROM Genre"
+    genres = query_books(sql)
+    root = ET.Element("genres")
+    for g in genres:
+        g_el = ET.SubElement(root, "genre")
+        ET.SubElement(g_el, "id").text = str(g["genre_id"])
+        ET.SubElement(g_el, "name").text = g["name"]
+    return Response(ET.tostring(root), mimetype="application/xml")
+
+# ---------- ADMIN ENDPOINTS ----------
+@app.route('/api/admin/redis-status', methods=['GET'])
+@login_required
+def redis_status():
+    """Check Redis status and statistics"""
+    user = g.current_user
+    
+    # Simple admin check (you might want to implement proper admin roles)
+    if user['id'] != 1:  # Assuming user_id 1 is admin
+        return jsonify({"msg": "Admin access required"}), 403
+    
+    try:
+        r = get_redis()
+        info = r.info()
+        
+        return jsonify({
+            "redis_connected": True,
+            "redis_version": info.get('redis_version'),
+            "used_memory": info.get('used_memory_human'),
+            "connected_clients": info.get('connected_clients'),
+            "total_commands_processed": info.get('total_commands_processed')
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "redis_connected": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/admin/clear-rate-limits', methods=['POST'])
+def clear_rate_limits():
+    """Clear all rate limit keys from Redis"""
+    if not redis_available():
+        return jsonify({"msg": "Redis not available"}), 503
+    
+    try:
+        r = get_redis()
+        # Clear all rate limit keys
+        keys = r.keys("rate_limit*")
+        if keys:
+            r.delete(*keys)
+            return jsonify({"msg": f"Cleared {len(keys)} rate limit keys"})
+        else:
+            return jsonify({"msg": "No rate limit keys found"})
+    except Exception as e:
+        return jsonify({"msg": f"Error clearing rate limits: {str(e)}"}), 500
+
+# ---------- RUN ----------
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5003, debug=True)</code></pre>
+                </div>
+            </div>
+
+            <h4>Cliente Web (index.html)</h4>
+            <div class="code-preview">
+                <div class="code-header-bar">
+                    <div class="code-language">HTML</div>
+                </div>
+                <pre class="code-display"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;JWT + Redis Books API&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="container"&gt;
+        &lt;!-- Header --&gt;
+        &lt;header class="header"&gt;
+            &lt;h1&gt;📚 JWT + Redis Books API&lt;/h1&gt;
+            &lt;div class="config-section"&gt;
+                &lt;button id="configBtn" class="config-btn" onclick="document.getElementById('configModal').style.display='flex'; document.getElementById('configModal').classList.add('show');"&gt;⚙️ Configurar Servicio&lt;/button&gt;
+                &lt;button id="logoutBtn" class="logout-btn"&gt;🚪 Cerrar Sesión&lt;/button&gt;
+                &lt;div id="status" class="status"&gt;❌ No Logueado&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/header&gt;
+
+        &lt;!-- Main Grid Layout --&gt;
+        &lt;main class="main-grid"&gt;
+            &lt;!-- Register Section --&gt;
+            &lt;section class="grid-item register-section"&gt;
+                &lt;h2&gt;📝 Registrar Usuario&lt;/h2&gt;
+                &lt;div id="registerMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;form id="registerForm"&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="regUsername"&gt;Usuario:&lt;/label&gt;
+                            &lt;input type="text" id="regUsername" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="regEmail"&gt;Email:&lt;/label&gt;
+                            &lt;input type="email" id="regEmail" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="regPassword"&gt;Contraseña:&lt;/label&gt;
+                            &lt;input type="password" id="regPassword" required&gt;
+                        &lt;/div&gt;
+                        &lt;button type="submit" class="btn btn-success"&gt;Registrar&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Login Section --&gt;
+            &lt;section class="grid-item login-section"&gt;
+                &lt;h2&gt;🔐 Iniciar Sesión&lt;/h2&gt;
+                &lt;div id="loginMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;form id="loginForm"&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="loginUsername"&gt;Usuario/Email:&lt;/label&gt;
+                            &lt;input type="text" id="loginUsername" required&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="loginPassword"&gt;Contraseña:&lt;/label&gt;
+                            &lt;input type="password" id="loginPassword" required&gt;
+                        &lt;/div&gt;
+                        &lt;button type="submit" class="btn btn-primary"&gt;Iniciar Sesión&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Refresh Token Section --&gt;
+            &lt;section class="grid-item refresh-section"&gt;
+                &lt;h2&gt;🔄 Refrescar Token&lt;/h2&gt;
+                &lt;div id="refreshMessages" class="grid-messages"&gt;&lt;/div&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;button id="refreshTokenBtn" class="btn btn-warning"&gt;🔄 Refrescar Token&lt;/button&gt;
+                    &lt;div id="tokenInfo" class="token-info"&gt;
+                        &lt;p&gt;&lt;strong&gt;Access Token:&lt;/strong&gt; &lt;span id="accessTokenDisplay"&gt;No disponible&lt;/span&gt;&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Refresh Token:&lt;/strong&gt; &lt;span id="refreshTokenDisplay"&gt;No disponible&lt;/span&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Books Management Section --&gt;
+            &lt;section class="grid-item books-section"&gt;
+                &lt;h2&gt;📚 Gestión de Libros&lt;/h2&gt;
+                &lt;div id="booksMessages" class="grid-messages"&gt;&lt;/div&gt;
+                
+                &lt;!-- Book Actions --&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;h3&gt;Acciones de Libros&lt;/h3&gt;
+                    &lt;div class="button-group"&gt;
+                        &lt;button id="getAllBooksBtn" class="btn btn-info"&gt;📖 Todos los Libros&lt;/button&gt;
+                        &lt;button id="getFormatsBtn" class="btn btn-secondary"&gt;📋 Formatos&lt;/button&gt;
+                        &lt;button id="getGenresBtn" class="btn btn-secondary"&gt;📚 Géneros&lt;/button&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;!-- Search by ISBN --&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="searchIsbn"&gt;Buscar por ISBN:&lt;/label&gt;
+                        &lt;div class="input-group"&gt;
+                            &lt;input type="text" id="searchIsbn" placeholder="978-0-7475-3269-9"&gt;
+                            &lt;button id="searchIsbnBtn" class="btn btn-primary"&gt;🔍 Buscar&lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;!-- Search by Format --&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="searchFormat"&gt;Buscar por Formato:&lt;/label&gt;
+                        &lt;div class="input-group"&gt;
+                            &lt;select id="searchFormat"&gt;
+                                &lt;option value=""&gt;Seleccionar formato...&lt;/option&gt;
+                            &lt;/select&gt;
+                            &lt;button id="searchFormatBtn" class="btn btn-primary"&gt;🔍 Buscar&lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;!-- Search by Author --&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="searchAuthor"&gt;Buscar por Autor:&lt;/label&gt;
+                        &lt;div class="input-group"&gt;
+                            &lt;input type="text" id="searchAuthor" placeholder="John Green"&gt;
+                            &lt;button id="searchAuthorBtn" class="btn btn-primary"&gt;🔍 Buscar&lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                
+                &lt;!-- Book Creation --&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;h3&gt;Crear/Actualizar Libro&lt;/h3&gt;
+                    &lt;form id="createBookForm"&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookIsbn"&gt;ISBN:&lt;/label&gt;
+                            &lt;input type="text" id="bookIsbn" required placeholder="978-0-123456-78-9"&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookTitle"&gt;Título:&lt;/label&gt;
+                            &lt;input type="text" id="bookTitle" required placeholder="Título del libro"&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookAuthor"&gt;Autor(es):&lt;/label&gt;
+                            &lt;input type="text" id="bookAuthor" required placeholder="Autor1, Autor2"&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookYear"&gt;Año de Publicación:&lt;/label&gt;
+                            &lt;input type="number" id="bookYear" required placeholder="2023"&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookGenre"&gt;Género:&lt;/label&gt;
+                            &lt;select id="bookGenre" required&gt;
+                                &lt;option value=""&gt;Seleccionar género...&lt;/option&gt;
+                            &lt;/select&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookPrice"&gt;Precio:&lt;/label&gt;
+                            &lt;input type="number" id="bookPrice" step="0.01" required placeholder="19.99"&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookStock"&gt;En Stock:&lt;/label&gt;
+                            &lt;select id="bookStock"&gt;
+                                &lt;option value="true"&gt;Sí&lt;/option&gt;
+                                &lt;option value="false"&gt;No&lt;/option&gt;
+                            &lt;/select&gt;
+                        &lt;/div&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="bookFormat"&gt;Formato:&lt;/label&gt;
+                            &lt;select id="bookFormat"&gt;
+                                &lt;option value=""&gt;Seleccionar formato...&lt;/option&gt;
+                            &lt;/select&gt;
+                        &lt;/div&gt;
+                        &lt;div class="button-group"&gt;
+                            &lt;button type="submit" class="btn btn-success"&gt;📚 Crear Libro&lt;/button&gt;
+                            &lt;button type="button" id="updateBookBtn" class="btn btn-warning"&gt;✏️ Actualizar Libro&lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+                
+                &lt;!-- Book Deletion --&gt;
+                &lt;div class="form-container"&gt;
+                    &lt;h3&gt;Eliminar Libro&lt;/h3&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="deleteIsbn"&gt;ISBN a Eliminar:&lt;/label&gt;
+                        &lt;div class="input-group"&gt;
+                            &lt;input type="text" id="deleteIsbn" placeholder="978-0-123456-78-9"&gt;
+                            &lt;button id="deleteBookBtn" class="btn btn-danger"&gt;🗑️ Eliminar&lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+
+            &lt;!-- Results Section --&gt;
+            &lt;section class="grid-item results-section"&gt;
+                &lt;h2&gt;📊 Resultados&lt;/h2&gt;
+                &lt;div id="resultsContainer" class="results-container"&gt;
+                    &lt;p&gt;Los resultados aparecerán aquí...&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+        &lt;/main&gt;
+
+        &lt;!-- Configuration Modal --&gt;
+        &lt;div id="configModal" class="modal"&gt;
+            &lt;div class="modal-content"&gt;
+                &lt;span class="close"&gt;&times;&lt;/span&gt;
+                &lt;h2&gt;⚙️ Configuración del Servicio&lt;/h2&gt;
+                &lt;div id="modalMessages" class="modal-messages"&gt;&lt;/div&gt;
+                &lt;form id="configForm"&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="serviceIP"&gt;IP del Servicio:&lt;/label&gt;
+                        &lt;input type="text" id="serviceIP" value="136.115.136.5" required&gt;
+                    &lt;/div&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="servicePort"&gt;Puerto:&lt;/label&gt;
+                        &lt;input type="number" id="servicePort" value="5003" required&gt;
+                    &lt;/div&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="serviceProtocol"&gt;Protocolo:&lt;/label&gt;
+                        &lt;select id="serviceProtocol"&gt;
+                            &lt;option value="http"&gt;HTTP&lt;/option&gt;
+                            &lt;option value="https"&gt;HTTPS&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    &lt;div class="button-group"&gt;
+                        &lt;button type="submit" class="btn btn-primary"&gt;💾 Guardar Configuración&lt;/button&gt;
+                        &lt;button type="button" id="testConnectionBtn" class="btn btn-info" onclick="testConnectionDirect()"&gt;🔍 Probar Conexión&lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+
+            <h4>JavaScript del Cliente (app.js)</h4>
+            <div class="code-preview">
+                <div class="code-header-bar">
+                    <div class="code-language">JavaScript</div>
+                </div>
+                <pre class="code-display"><code>// JWT + Redis Books API Frontend Application
+class JWTBooksApp {
+    constructor() {
+        this.baseURL = 'http://136.115.136.5:5003';
+        this.accessToken = localStorage.getItem('accessToken') || null;
+        this.refreshToken = localStorage.getItem('refreshToken') || null;
+        
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.updateTokenDisplay();
+        this.updateStatus();
+        this.loadConfig();
+        
+        // Only load formats and genres if user is authenticated
+        if (this.accessToken) {
+            this.loadFormats();
+            this.loadGenres();
+        }
+    }
+
+    setupEventListeners() {
+        // Form submissions
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        
+        const createBookForm = document.getElementById('createBookForm');
+        if (createBookForm) createBookForm.addEventListener('submit', (e) => this.handleCreateBook(e));
+
+        // Button clicks
+        const refreshTokenBtn = document.getElementById('refreshTokenBtn');
+        if (refreshTokenBtn) refreshTokenBtn.addEventListener('click', () => this.refreshAccessToken());
+
+        // Books buttons
+        const getAllBooksBtn = document.getElementById('getAllBooksBtn');
+        if (getAllBooksBtn) getAllBooksBtn.addEventListener('click', () => this.getAllBooks());
+        
+        const getFormatsBtn = document.getElementById('getFormatsBtn');
+        if (getFormatsBtn) getFormatsBtn.addEventListener('click', () => this.getFormats());
+        
+        const getGenresBtn = document.getElementById('getGenresBtn');
+        if (getGenresBtn) getGenresBtn.addEventListener('click', () => this.getGenres());
+        
+        const searchIsbnBtn = document.getElementById('searchIsbnBtn');
+        if (searchIsbnBtn) searchIsbnBtn.addEventListener('click', () => this.searchByIsbn());
+        
+        const searchFormatBtn = document.getElementById('searchFormatBtn');
+        if (searchFormatBtn) searchFormatBtn.addEventListener('click', () => this.searchByFormat());
+        
+        const searchAuthorBtn = document.getElementById('searchAuthorBtn');
+        if (searchAuthorBtn) searchAuthorBtn.addEventListener('click', () => this.searchByAuthor());
+        
+        const updateBookBtn = document.getElementById('updateBookBtn');
+        if (updateBookBtn) updateBookBtn.addEventListener('click', () => this.updateBook());
+        
+        const deleteBookBtn = document.getElementById('deleteBookBtn');
+        if (deleteBookBtn) deleteBookBtn.addEventListener('click', () => this.deleteBook());
+
+        // Header buttons
+        const configBtn = document.getElementById('configBtn');
+        if (configBtn) {
+            configBtn.addEventListener('click', () => {
+                console.log('🔧 Botón de configuración clickeado');
+                this.openConfigModal();
+            });
+        }
+        
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) logoutBtn.addEventListener('click', () => this.logout());
+
+        // Configuration modal
+        const configForm = document.getElementById('configForm');
+        if (configForm) configForm.addEventListener('submit', (e) => this.handleConfigSubmit(e));
+        
+        const testConnectionBtn = document.getElementById('testConnectionBtn');
+        if (testConnectionBtn) testConnectionBtn.addEventListener('click', () => this.testConnection());
+        
+        const closeBtn = document.querySelector('.close');
+        if (closeBtn) closeBtn.addEventListener('click', () => this.closeConfigModal());
+        
+        const configModal = document.getElementById('configModal');
+        if (configModal) {
+            configModal.addEventListener('click', (e) => {
+            if (e.target.id === 'configModal') this.closeConfigModal();
+        });
+        }
+    }
+
+    // API Helper Methods
+    async makeRequest(endpoint, options = {}) {
+        console.log('🚀 makeRequest iniciado:', endpoint);
+        const url = `${this.baseURL}${endpoint}`;
+        console.log('🌐 URL completa:', url);
+        
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        };
+
+        // Add Authorization header if we have an access token
+        if (this.accessToken && !options.skipAuth) {
+            defaultOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
+            console.log('🔑 Token de autorización agregado:', this.accessToken.substring(0, 20) + '...');
+        } else {
+            console.log('⚠️ Sin token de autorización - accessToken:', this.accessToken ? 'Presente' : 'Ausente', 'skipAuth:', options.skipAuth);
+        }
+
+        // Merge headers properly to preserve Authorization
+        const finalHeaders = { ...defaultOptions.headers, ...(options.headers || {}) };
+        const finalOptions = { 
+            ...defaultOptions, 
+            ...options,
+            headers: finalHeaders
+        };
+        console.log('📤 Headers finales:', finalHeaders);
+        console.log('📤 Opciones finales:', finalOptions);
+        
+        try {
+            console.log('📡 Enviando petición...');
+            const response = await fetch(url, finalOptions);
+            console.log('📨 Respuesta recibida:', response.status, response.statusText);
+            
+            // Handle XML responses
+            if (response.headers.get('content-type')?.includes('application/xml')) {
+                const xmlText = await response.text();
+                console.log('📊 Datos XML:', xmlText);
+                return { success: response.ok, status: response.status, data: xmlText };
+            } else {
+                const data = await response.json();
+                console.log('📊 Datos de respuesta:', data);
+            return { success: response.ok, status: response.status, data };
+            }
+        } catch (error) {
+            console.error('❌ Error en petición:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Authentication Methods
+    async handleLogin(e) {
+        e.preventDefault();
+        console.log('🔐 Iniciando login...');
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        console.log('👤 Usuario:', username);
+
+        const result = await this.makeRequest('/api/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+        console.log('📊 Resultado del login:', result);
+
+        if (result.success) {
+            this.accessToken = result.data.access_token;
+            this.refreshToken = result.data.refresh_token;
+            this.saveTokens();
+            this.updateTokenDisplay();
+            this.updateStatus();
+            this.showGridMessage('loginMessages', 'Login exitoso!', 'success');
+            document.getElementById('loginForm').reset();
+            
+            // Load formats and genres after successful login
+            this.loadFormats();
+            this.loadGenres();
+        } else {
+            this.showGridMessage('loginMessages', 'Error en login: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        const username = document.getElementById('regUsername').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+
+        const result = await this.makeRequest('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password })
+        });
+
+        if (result.success) {
+            this.showGridMessage('registerMessages', 'Usuario registrado exitosamente!', 'success');
+            document.getElementById('registerForm').reset();
+        } else {
+            this.showGridMessage('registerMessages', 'Error en registro: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async refreshAccessToken() {
+        if (!this.refreshToken) {
+            this.showGridMessage('refreshMessages', 'No hay refresh token disponible', 'error');
+            return;
+        }
+
+        try {
+            const result = await this.makeRequest('/api/auth/refresh', {
+                method: 'POST',
+                body: JSON.stringify({ refresh_token: this.refreshToken }),
+                skipAuth: true
+            });
+
+            if (result.success) {
+                this.accessToken = result.data.access_token;
+                this.saveTokens();
+                this.updateTokenDisplay();
+                this.showGridMessage('refreshMessages', 'Token refrescado exitosamente!', 'success');
+            } else {
+                this.showGridMessage('refreshMessages', 'Error al refrescar token: ' + (result.data?.msg || 'Error desconocido'), 'error');
+            }
+        } catch (error) {
+            console.error('Error en refresh token:', error);
+            this.showGridMessage('refreshMessages', 'Error de conexión: ' + error.message, 'error');
+        }
+    }
+
+    logout() {
+        if (this.accessToken || this.refreshToken) {
+            // Try to revoke tokens on server
+            this.makeRequest('/api/auth/logout', {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    access_token: this.accessToken,
+                    refresh_token: this.refreshToken 
+                })
+            }).catch(() => {
+                // Ignore errors on logout
+            });
+        }
+        
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.clearTokens();
+        this.updateTokenDisplay();
+        this.updateStatus();
+        this.showSuccess('Sesión cerrada exitosamente!');
+    }
+
+    // Profile Methods
+    async getProfile() {
+        console.log('🔍 Iniciando getProfile...');
+        const result = await this.makeRequest('/api/profile');
+        console.log('📊 Resultado del perfil:', result);
+        
+        if (result.success) {
+            const profile = result.data;
+            const profileHTML = `
+                <div class="profile-item-card">
+                    <h4>👤 Usuario</h4>
+                    <p>${profile.username}</p>
+                </div>
+                <div class="profile-item-card">
+                    <h4>📧 Email</h4>
+                    <p>${profile.email}</p>
+                </div>
+                <div class="profile-item-card">
+                    <h4>🆔 ID</h4>
+                    <p>${profile.id}</p>
+                </div>
+                <div class="profile-item-card">
+                    <h4>📅 Creado en</h4>
+                    <p>${new Date(profile.created_at).toLocaleDateString('es-ES', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}</p>
+                </div>
+            `;
+            document.getElementById('profileData').innerHTML = profileHTML;
+            this.showGridMessage('profileMessages', 'Perfil obtenido exitosamente!', 'success');
+        } else {
+            this.showGridMessage('profileMessages', 'Error al obtener perfil: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    // Books Methods
+    async getAllBooks() {
+        console.log('📚 Obteniendo todos los libros...');
+        console.log('🔑 Token actual:', this.accessToken ? 'Presente' : 'Ausente');
+        
+        const result = await this.makeRequest('/api/books');
+        console.log('📊 Resultado de getAllBooks:', result);
+        
+        if (result.success) {
+            this.displayBooksXML(result.data);
+            this.showGridMessage('booksMessages', 'Libros obtenidos exitosamente!', 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al obtener libros: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async searchByIsbn() {
+        const isbn = document.getElementById('searchIsbn').value;
+        if (!isbn) {
+            this.showGridMessage('booksMessages', 'Por favor ingresa un ISBN', 'error');
+            return;
+        }
+
+        const result = await this.makeRequest(`/api/books/${encodeURIComponent(isbn)}`);
+        
+        if (result.success) {
+            this.displayBooksXML(result.data);
+            this.showGridMessage('booksMessages', `Libro con ISBN ${isbn} encontrado!`, 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al buscar libro: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async searchByFormat() {
+        const format = document.getElementById('searchFormat').value;
+        if (!format) {
+            this.showGridMessage('booksMessages', 'Por favor selecciona un formato', 'error');
+            return;
+        }
+
+        const result = await this.makeRequest(`/api/books/format/${encodeURIComponent(format)}`);
+        
+        if (result.success) {
+            this.displayBooksXML(result.data);
+            this.showGridMessage('booksMessages', `Libros con formato ${format} encontrados!`, 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al buscar libros: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async searchByAuthor() {
+        const author = document.getElementById('searchAuthor').value;
+        if (!author) {
+            this.showGridMessage('booksMessages', 'Por favor ingresa un autor', 'error');
+            return;
+        }
+
+        const result = await this.makeRequest(`/api/books/author/${encodeURIComponent(author)}`);
+        
+        if (result.success) {
+            this.displayBooksXML(result.data);
+            this.showGridMessage('booksMessages', `Libros de ${author} encontrados!`, 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al buscar libros: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async getFormats() {
+        const result = await this.makeRequest('/api/formats');
+        
+        if (result.success) {
+            this.displayFormatsXML(result.data);
+            this.showGridMessage('booksMessages', 'Formatos obtenidos exitosamente!', 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al obtener formatos: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async getGenres() {
+        const result = await this.makeRequest('/api/genres');
+        
+        if (result.success) {
+            this.displayGenresXML(result.data);
+            this.showGridMessage('booksMessages', 'Géneros obtenidos exitosamente!', 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al obtener géneros: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async handleCreateBook(e) {
+        e.preventDefault();
+        console.log('📚 Creando libro...');
+        console.log('🔑 Token antes de crear libro:', this.accessToken ? 'Presente' : 'Ausente');
+        
+        const bookData = this.getBookFormData();
+        
+        const xmlData = this.createBookXML(bookData);
+        
+        const result = await this.makeRequest('/api/books/insert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/xml',
+            },
+            body: xmlData
+        });
+
+        if (result.success) {
+            this.showGridMessage('booksMessages', 'Libro creado exitosamente!', 'success');
+            document.getElementById('createBookForm').reset();
+        } else {
+            this.showGridMessage('booksMessages', 'Error al crear libro: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async updateBook() {
+        const bookData = this.getBookFormData();
+        
+        const xmlData = this.createBookXML(bookData);
+        
+        const result = await this.makeRequest('/api/books/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/xml',
+            },
+            body: xmlData
+        });
+
+        if (result.success) {
+            this.showGridMessage('booksMessages', 'Libro actualizado exitosamente!', 'success');
+        } else {
+            this.showGridMessage('booksMessages', 'Error al actualizar libro: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    async deleteBook() {
+        const isbn = document.getElementById('deleteIsbn').value;
+        if (!isbn) {
+            this.showGridMessage('booksMessages', 'Por favor ingresa un ISBN', 'error');
+            return;
+        }
+
+        const xmlData = `&lt;isbn&gt;${isbn}&lt;/isbn&gt;`;
+        
+        const result = await this.makeRequest('/api/books/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/xml',
+            },
+            body: xmlData
+        });
+        
+        if (result.success) {
+            this.showGridMessage('booksMessages', 'Libro eliminado exitosamente!', 'success');
+            document.getElementById('deleteIsbn').value = '';
+        } else {
+            this.showGridMessage('booksMessages', 'Error al eliminar libro: ' + (result.data?.msg || 'Error desconocido'), 'error');
+        }
+    }
+
+    // Helper Methods
+    getBookFormData() {
+        return {
+            isbn: document.getElementById('bookIsbn').value,
+            title: document.getElementById('bookTitle').value,
+            author: document.getElementById('bookAuthor').value,
+            year: document.getElementById('bookYear').value,
+            genre: document.getElementById('bookGenre').value,
+            price: document.getElementById('bookPrice').value,
+            stock: document.getElementById('bookStock').value,
+            format: document.getElementById('bookFormat').value
+        };
+    }
+
+    createBookXML(bookData) {
+        return `&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;book isbn="${bookData.isbn}"&gt;
+    &lt;title&gt;${bookData.title}&lt;/title&gt;
+    &lt;author&gt;${bookData.author}&lt;/author&gt;
+    &lt;publication_year&gt;${bookData.year}&lt;/publication_year&gt;
+    &lt;genre&gt;${bookData.genre}&lt;/genre&gt;
+    &lt;price&gt;${bookData.price}&lt;/price&gt;
+    &lt;stock&gt;${bookData.stock}&lt;/stock&gt;
+    &lt;format&gt;${bookData.format}&lt;/format&gt;
+&lt;/book&gt;`;
+    }
+
+    displayBooksXML(xmlData) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
+        const books = xmlDoc.querySelectorAll('book');
+        
+        let html = '&lt;div class="books-container"&gt;';
+        
+        if (books.length === 0) {
+            html += '&lt;p&gt;No se encontraron libros&lt;/p&gt;';
+            } else {
+            books.forEach(book => {
+                const isbn = book.getAttribute('isbn');
+                const title = book.querySelector('title')?.textContent || 'Sin título';
+                const author = book.querySelector('author')?.textContent || 'Sin autor';
+                const year = book.querySelector('publication_year')?.textContent || 'Sin año';
+                const genre = book.querySelector('genre')?.textContent || 'Sin género';
+                const price = book.querySelector('price')?.textContent || '0';
+                const stock = book.querySelector('stock')?.textContent === 'true' ? 'Disponible' : 'Agotado';
+                const format = book.querySelector('format')?.textContent || 'Sin formato';
+                
+                html += `
+                    &lt;div class="book-card"&gt;
+                        &lt;h4&gt;${title}&lt;/h4&gt;
+                        &lt;p&gt;&lt;strong&gt;ISBN:&lt;/strong&gt; ${isbn}&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Autor:&lt;/strong&gt; ${author}&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Año:&lt;/strong&gt; ${year}&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Género:&lt;/strong&gt; ${genre}&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Precio:&lt;/strong&gt; $${price}&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Stock:&lt;/strong&gt; ${stock}&lt;/p&gt;
+                        &lt;p&gt;&lt;strong&gt;Formato:&lt;/strong&gt; ${format}&lt;/p&gt;
+                    &lt;/div&gt;
+                `;
+            });
+        }
+        
+        html += '&lt;/div&gt;';
+        document.getElementById('resultsContainer').innerHTML = html;
+    }
+
+    displayFormatsXML(xmlData) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
+        const formats = xmlDoc.querySelectorAll('format');
+        
+        let html = '&lt;div class="formats-container"&gt;';
+        
+        if (formats.length === 0) {
+            html += '&lt;p&gt;No se encontraron formatos&lt;/p&gt;';
+        } else {
+            html += '&lt;h4&gt;Formatos disponibles:&lt;/h4&gt;&lt;ul&gt;';
+            formats.forEach(format => {
+                const id = format.querySelector('id')?.textContent;
+                const name = format.querySelector('name')?.textContent;
+                html += `&lt;li&gt;${name} (ID: ${id})&lt;/li&gt;`;
+            });
+            html += '&lt;/ul&gt;';
+        }
+        
+        html += '&lt;/div&gt;';
+        document.getElementById('resultsContainer').innerHTML = html;
+    }
+
+    displayGenresXML(xmlData) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
+        const genres = xmlDoc.querySelectorAll('genre');
+        
+        let html = '&lt;div class="genres-container"&gt;';
+        
+        if (genres.length === 0) {
+            html += '&lt;p&gt;No se encontraron géneros&lt;/p&gt;';
+        } else {
+            html += '&lt;h4&gt;Géneros disponibles:&lt;/h4&gt;&lt;ul&gt;';
+            genres.forEach(genre => {
+                const id = genre.querySelector('id')?.textContent;
+                const name = genre.querySelector('name')?.textContent;
+                html += `&lt;li&gt;${name} (ID: ${id})&lt;/li&gt;`;
+            });
+            html += '&lt;/ul&gt;';
+        }
+        
+        html += '&lt;/div&gt;';
+        document.getElementById('resultsContainer').innerHTML = html;
+    }
+
+    async loadFormats() {
+        console.log('📋 Cargando formatos...');
+        const result = await this.makeRequest('/api/formats');
+        
+        if (result.success) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(result.data, 'text/xml');
+            const formats = xmlDoc.querySelectorAll('format');
+            
+            const formatSelects = ['searchFormat', 'bookFormat'];
+            formatSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    // Clear existing options except first
+                    while (select.children.length > 1) {
+                        select.removeChild(select.lastChild);
+                    }
+                    
+                    formats.forEach(format => {
+                        const name = format.querySelector('name')?.textContent;
+                        if (name) {
+                            const option = document.createElement('option');
+                            option.value = name;
+                            option.textContent = name;
+                            select.appendChild(option);
+                        }
+                    });
+                    console.log(`✅ Formatos cargados en ${selectId}:`, select.children.length - 1, 'opciones');
+                }
+            });
+        }
+    }
+
+    async loadGenres() {
+        console.log('📚 Cargando géneros...');
+        const result = await this.makeRequest('/api/genres');
+        
+        if (result.success) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(result.data, 'text/xml');
+            const genres = xmlDoc.querySelectorAll('genre');
+            
+            const genreSelect = document.getElementById('bookGenre');
+            if (genreSelect) {
+                // Clear existing options except first
+                while (genreSelect.children.length > 1) {
+                    genreSelect.removeChild(genreSelect.lastChild);
+                }
+                
+                genres.forEach(genre => {
+                    const name = genre.querySelector('name')?.textContent;
+                    if (name) {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        genreSelect.appendChild(option);
+                    }
+                });
+                console.log('✅ Géneros cargados:', genreSelect.children.length - 1, 'opciones');
+            }
+        }
+    }
+
+    // Configuration Methods
+    openConfigModal() {
+        console.log('🔧 Abriendo modal de configuración...');
+        const modal = document.getElementById('configModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+            console.log('✅ Modal abierto correctamente');
+        } else {
+            console.error('❌ Modal no encontrado');
+        }
+    }
+
+    closeConfigModal() {
+        const modal = document.getElementById('configModal');
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+
+    async handleConfigSubmit(e) {
+        e.preventDefault();
+        const ip = document.getElementById('serviceIP').value;
+        const port = document.getElementById('servicePort').value;
+        const protocol = document.getElementById('serviceProtocol').value;
+        
+        this.baseURL = `${protocol}://${ip}:${port}`;
+        this.saveConfig();
+        this.updateStatus();
+        this.showModalMessage('Configuración guardada exitosamente!', 'success');
+    }
+
+    async testConnection() {
+        const ip = document.getElementById('serviceIP').value;
+        const port = document.getElementById('servicePort').value;
+        const protocol = document.getElementById('serviceProtocol').value;
+        const testURL = `${protocol}://${ip}:${port}`;
+        
+        const button = document.getElementById('testConnectionBtn');
+        const originalText = button.textContent;
+        button.textContent = '🔄 Probando...';
+        button.disabled = true;
+        
+        try {
+            const response = await fetch(`${testURL}/api/health`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                mode: 'cors'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.showModalMessage(`Conexión exitosa! Estado: ${data.status}`, 'success');
+            } else {
+                this.showModalMessage(`Servicio respondió con error: ${response.status}`, 'error');
+            }
+        } catch (error) {
+            this.showModalMessage(`Error de conexión: ${error.message}`, 'error');
+        } finally {
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    }
+
+    // Token Management
+    saveTokens() {
+        if (this.accessToken) {
+            localStorage.setItem('accessToken', this.accessToken);
+            console.log('💾 Access token guardado en localStorage');
+        }
+        if (this.refreshToken) {
+            localStorage.setItem('refreshToken', this.refreshToken);
+            console.log('💾 Refresh token guardado en localStorage');
+        }
+    }
+
+    clearTokens() {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+    }
+
+    updateTokenDisplay() {
+        const accessTokenDisplay = document.getElementById('accessTokenDisplay');
+        const refreshTokenDisplay = document.getElementById('refreshTokenDisplay');
+        
+        if (this.accessToken) {
+            accessTokenDisplay.textContent = this.accessToken.substring(0, 50) + '...';
+        } else {
+            accessTokenDisplay.textContent = 'No disponible';
+        }
+        
+        if (this.refreshToken) {
+            refreshTokenDisplay.textContent = this.refreshToken.substring(0, 50) + '...';
+        } else {
+            refreshTokenDisplay.textContent = 'No disponible';
+        }
+    }
+
+    updateStatus() {
+        const statusElement = document.getElementById('status');
+        if (this.accessToken) {
+            statusElement.textContent = '✅ Usuario Logueado';
+            statusElement.className = 'status connected';
+        } else {
+            statusElement.textContent = '❌ No Logueado';
+            statusElement.className = 'status disconnected';
+        }
+    }
+
+    // Configuration Management
+    saveConfig() {
+        const config = {
+            ip: document.getElementById('serviceIP').value,
+            port: document.getElementById('servicePort').value,
+            protocol: document.getElementById('serviceProtocol').value
+        };
+        localStorage.setItem('jwtConfig', JSON.stringify(config));
+    }
+
+    loadConfig() {
+        const savedConfig = localStorage.getItem('jwtConfig');
+        if (savedConfig) {
+            const config = JSON.parse(savedConfig);
+            document.getElementById('serviceIP').value = config.ip || '136.115.136.5';
+            document.getElementById('servicePort').value = config.port || '5003';
+            document.getElementById('serviceProtocol').value = config.protocol || 'http';
+            
+            this.baseURL = `${config.protocol}://${config.ip}:${config.port}`;
+        }
+    }
+
+    // UI Helper Methods
+    showSuccess(message) {
+        this.showMessage(message, 'success');
+    }
+
+    showError(message) {
+        this.showMessage(message, 'error');
+    }
+
+    showMessage(message, type) {
+        const existingMessages = document.querySelectorAll('.success-message, .error-message');
+        existingMessages.forEach(msg => msg.remove());
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `${type}-message`;
+        messageDiv.textContent = message;
+        
+        const container = document.querySelector('.container');
+        container.insertBefore(messageDiv, container.firstChild);
+        
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+
+    showModalMessage(message, type) {
+        const modalMessages = document.getElementById('modalMessages');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `modal-message ${type}`;
+        messageDiv.textContent = message;
+        
+        modalMessages.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+
+    showGridMessage(containerId, message, type) {
+        const container = document.getElementById(containerId);
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `grid-message ${type}`;
+        messageDiv.textContent = message;
+        
+        container.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Initialize the application when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new JWTBooksApp();
+});
+
+// Direct function for testing connection (bypass JavaScript issues)
+async function testConnectionDirect() {
+    console.log('🔍 Iniciando prueba de conexión directa...');
+    
+    const ip = document.getElementById('serviceIP').value;
+    const port = document.getElementById('servicePort').value;
+    const protocol = document.getElementById('serviceProtocol').value;
+    const testURL = `${protocol}://${ip}:${port}`;
+    
+    console.log('🌐 URL de prueba:', testURL);
+    
+    const button = document.getElementById('testConnectionBtn');
+    const originalText = button.textContent;
+    button.textContent = '🔄 Probando...';
+    button.disabled = true;
+    
+    try {
+        console.log('📡 Enviando petición a:', `${testURL}/api/health`);
+        const response = await fetch(`${testURL}/api/health`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            mode: 'cors'
+        });
+
+        console.log('📨 Respuesta recibida:', response.status, response.statusText);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Datos recibidos:', data);
+            showModalMessageDirect(`Conexión exitosa! Estado: ${data.status}`, 'success');
+        } else {
+            console.log('❌ Error HTTP:', response.status);
+            showModalMessageDirect(`Servicio respondió con error: ${response.status}`, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error de conexión:', error);
+        showModalMessageDirect(`Error de conexión: ${error.message}`, 'error');
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+    }
+}
+
+function showModalMessageDirect(message, type) {
+    console.log('💬 Mostrando mensaje:', message, type);
+    const modalMessages = document.getElementById('modalMessages');
+    
+    // Clear previous messages
+    modalMessages.innerHTML = '';
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `modal-message ${type}`;
+    messageDiv.textContent = message;
+    
+    modalMessages.appendChild(messageDiv);
+    
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.remove();
+        }
+    }, 5000);
+}</code></pre>
+            </div>
+
+            <h4>Estilos CSS (styles.css)</h4>
+            <div class="code-preview">
+                <div class="code-header-bar">
+                    <div class="code-language">CSS</div>
+                </div>
+                <pre class="code-display"><code>/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header h1 {
+    color: #2c3e50;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.config-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.config-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.config-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.status {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status.connected {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status.disconnected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Main Grid Layout */
+.main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.grid-item {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.grid-item h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+/* Grid Messages */
+.grid-messages {
+    margin-bottom: 15px;
+    min-height: 20px;
+}
+
+.grid-message {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease;
+}
+
+.grid-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.grid-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.grid-message.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Form Styles */
+.form-container {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.form-container h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Button Styles */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #229954;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* Token Info */
+.token-info {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.token-info p {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.token-info span {
+    font-family: 'Courier New', monospace;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    word-break: break-all;
+}
+
+/* Result Containers */
+.result-container {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.result-container h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+/* Profile Items - Same style as regular items */
+.profile-item-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 0 0 3px 0;
+}
+
+.profile-item-card h4 {
+    color: #495057;
+    margin-bottom: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.profile-item-card p {
+    color: #6c757d;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+/* Profile container - remove extra spacing */
+#profileData {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.result-container pre {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.result-container #itemsList {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Log Section */
+.log-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.log-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.log-container {
+    background: #2c3e50;
+    color: #ecf0f1;
+    border-radius: 8px;
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.log-container p {
+    margin-bottom: 8px;
+}
+
+.log-entry {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 4px solid #3498db;
+}
+
+.log-entry.success {
+    background: rgba(39, 174, 96, 0.1);
+    border-left-color: #27ae60;
+}
+
+.log-entry.error {
+    background: rgba(231, 76, 60, 0.1);
+    border-left-color: #e74c3c;
+}
+
+.log-entry.info {
+    background: rgba(52, 152, 219, 0.1);
+    border-left-color: #3498db;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: #3498db;
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.close:hover {
+    opacity: 0.7;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.modal-messages {
+    margin-bottom: 20px;
+}
+
+.modal-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+.modal-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.modal-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.modal-message.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.endpoints-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.endpoints-list code {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .main-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .grid-item {
+        padding: 20px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .grid-item {
+        padding: 15px;
+    }
+    
+    .form-container {
+        padding: 15px;
+    }
+    
+    .endpoints-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success/Error States */
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+/* Books specific styles */
+.books-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.book-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #3498db;
+}
+
+.book-card h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.book-card p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.formats-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.formats-container li {
+    background: #f8f9fa;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    border-left: 3px solid #28a745;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.input-group input,
+.input-group select {
+    flex: 1;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.button-group .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Full width sections */
+.books-section {
+    grid-column: 1 / -1;
+}
+
+.results-section {
+    grid-column: 1 / -1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .config-section {
+        margin-top: 15px;
+        justify-content: center;
+    }
+    
+    .books-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+}</code></pre>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/Registro.png" alt="Registro de Usuario" onclick="openImageModal(this.src)">
+                        <p>Registro de Usuario</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/IniciarSesion.png" alt="Iniciar Sesión" onclick="openImageModal(this.src)">
+                        <p>Iniciar Sesión</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/Refresh.png" alt="Refresh Token" onclick="openImageModal(this.src)">
+                        <p>Refresh Token</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/VerLibros.png" alt="Ver Libros" onclick="openImageModal(this.src)">
+                        <p>Ver Libros</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/FiltrarISBN.png" alt="Filtrar por ISBN" onclick="openImageModal(this.src)">
+                        <p>Filtrar por ISBN</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/FiltrarHardcover.png" alt="Filtrar por Formato" onclick="openImageModal(this.src)">
+                        <p>Filtrar por Formato</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/FiltrarAutorJRRTolkien.png" alt="Filtrar por Autor" onclick="openImageModal(this.src)">
+                        <p>Filtrar por Autor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/CrearActualizarLibro.png" alt="Crear/Actualizar Libro" onclick="openImageModal(this.src)">
+                        <p>Crear/Actualizar Libro</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado06/EleminarLibro.png" alt="Eliminar Libro" onclick="openImageModal(this.src)">
+                        <p>Eliminar Libro</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>En este ejercicio tuve que diseñar y desplegar un microservicio de Libros llamado Books API, en el que todas las rutas estuvieran protegidas con JWT y además se usara Redis como soporte para manejar las sesiones y los tokens. Al principio me pareció algo complicado, pero conforme lo fui haciendo, entendí mucho mejor cómo se aplican estos conceptos en proyectos reales.</p>
+                    
+                    <p>Lo que más me llamó la atención fue ver lo rápido que funciona Redis. Antes pensaba que todo el tema de validación de tokens y sesiones podía hacer que la aplicación se volviera más lenta, pero al usar Redis noté que todo se ejecuta casi al instante. Esto pasa porque Redis guarda los datos directamente en memoria, y no tiene que estar consultando una base de datos estructurada como MariaDB, que era la implementación original. Gracias a eso, el flujo de autenticación se siente más fluido y eficiente, ya que las operaciones de guardar, verificar o eliminar tokens se hacen mucho más rápido.</p>
+                    
+                    <p>También aprendí a usar Redis para controlar los tokens con listas de permitidos y no permitidos, conocidas como allowlist y denylist. Esto es muy útil porque se puede revocar un token cuando sea necesario, sin tener que esperar a que se venza por sí solo. Así, si un usuario cierra sesión o se detecta algún problema, se puede bloquear su acceso inmediatamente. Además, entendí mejor cómo funciona el refresh token, que sirve para obtener uno nuevo sin tener que volver a iniciar sesión cada vez.</p>
+                    
+                    <p>Trabajar con microservicios también fue una parte interesante del ejercicio, ya que cada componente del sistema funciona por separado, pero al mismo tiempo se conecta con los demás de manera segura gracias a los tokens.</p>
+                    
+                    <p>En resumen, este proyecto me ayudó a comprender cómo combinar JWT con Redis para crear un sistema más seguro, rápido y organizado. Siento que ahora tengo una mejor idea de cómo se manejan las sesiones en aplicaciones modernas y cómo se puede mejorar el rendimiento usando herramientas como Redis en lugar de depender solo de bases de datos estructuradas como MariaDB.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

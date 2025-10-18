@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jwtclient.controller.MainController">
+   <top>
+      <VBox spacing="10.0" style="-fx-background-color: #f0f0f0; -fx-padding: 10;">
+         <children>
+            <Text fill="#2c3e50" strokeType="OUTSIDE" strokeWidth="0.0" text="JWT Client - Microservicio Authentication" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Text>
+            
+            <!-- Configuración del Servidor -->
+            <HBox spacing="10.0" style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-background-radius: 5;">
+               <children>
+                  <Label text="IP del Servidor:" />
+                  <TextField fx:id="serverIpField" prefWidth="120.0" promptText="136.115.136.5" />
+                  <Label text="Puerto:" />
+                  <TextField fx:id="serverPortField" prefWidth="80.0" promptText="5003" />
+                  <Button fx:id="saveConfigButton" mnemonicParsing="false" onAction="#saveConfig" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Guardar Config" />
+               </children>
+            </HBox>
+            
+            <!-- Estado del Servidor -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-background-radius: 5;">
+               <children>
+                  <Circle fx:id="statusIndicator" fill="#e74c3c" radius="8.0" stroke="BLACK" strokeType="INSIDE" />
+                  <Label fx:id="statusLabel" text="Estado: Verificando..." />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </top>
+   
+   <center>
+      <SplitPane dividerPositions="0.5" orientation="HORIZONTAL">
+         <items>
+            <!-- Panel Izquierdo - Autenticación -->
+            <VBox spacing="10.0" style="-fx-padding: 10;">
+               <children>
+                  <!-- Login Section -->
+                  <VBox spacing="5.0" style="-fx-background-color: #e8f5e8; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Text fill="#27ae60" strokeType="OUTSIDE" strokeWidth="0.0" text="🔐 LOGIN">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Label text="Usuario:" />
+                              <TextField fx:id="loginUsernameField" prefWidth="120.0" promptText="username" />
+                           </children>
+                        </HBox>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Label text="Contraseña:" />
+                              <PasswordField fx:id="loginPasswordField" prefWidth="120.0" promptText="password" />
+                           </children>
+                        </HBox>
+                        <Button fx:id="loginButton" mnemonicParsing="false" onAction="#performLogin" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Login" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Register Section -->
+                  <VBox spacing="5.0" style="-fx-background-color: #e3f2fd; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Text fill="#2196f3" strokeType="OUTSIDE" strokeWidth="0.0" text="📝 REGISTRO">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Label text="Usuario:" />
+                              <TextField fx:id="registerUsernameField" prefWidth="120.0" promptText="new_user" />
+                           </children>
+                        </HBox>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Label text="Email:" />
+                              <TextField fx:id="registerEmailField" prefWidth="120.0" promptText="user@email.com" />
+                           </children>
+                        </HBox>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Label text="Contraseña:" />
+                              <PasswordField fx:id="registerPasswordField" prefWidth="120.0" promptText="password" />
+                           </children>
+                        </HBox>
+                        <Button fx:id="registerButton" mnemonicParsing="false" onAction="#performRegister" style="-fx-background-color: #2196f3; -fx-text-fill: white;" text="Registrar" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Token Management -->
+                  <VBox spacing="5.0" style="-fx-background-color: #fff3e0; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Text fill="#ff9800" strokeType="OUTSIDE" strokeWidth="0.0" text="🔄 GESTIÓN DE TOKENS">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Button fx:id="refreshTokenButton" mnemonicParsing="false" onAction="#performRefreshToken" style="-fx-background-color: #ff9800; -fx-text-fill: white;" text="Refresh Token" />
+                              <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#performLogout" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Logout" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Protected Endpoints -->
+                  <VBox spacing="5.0" style="-fx-background-color: #f3e5f5; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Text fill="#9c27b0" strokeType="OUTSIDE" strokeWidth="0.0" text="🔒 ENDPOINTS PROTEGIDOS">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                        <HBox spacing="5.0">
+                           <children>
+                              <Button fx:id="getProfileButton" mnemonicParsing="false" onAction="#getProfile" style="-fx-background-color: #9c27b0; -fx-text-fill: white;" text="Obtener Perfil" />
+                              <Button fx:id="getItemsButton" mnemonicParsing="false" onAction="#getItems" style="-fx-background-color: #9c27b0; -fx-text-fill: white;" text="Obtener Items" />
+                           </children>
+                        </HBox>
+                        
+                        <!-- Create Item -->
+                        <VBox spacing="5.0">
+                           <children>
+                              <HBox spacing="5.0">
+                                 <children>
+                                    <Label text="Título:" />
+                                    <TextField fx:id="itemTitleField" prefWidth="150.0" promptText="Título del item" />
+                                 </children>
+                              </HBox>
+                              <HBox spacing="5.0">
+                                 <children>
+                                    <Label text="Descripción:" />
+                                    <TextField fx:id="itemDescriptionField" prefWidth="150.0" promptText="Descripción del item" />
+                                 </children>
+                              </HBox>
+                              <Button fx:id="createItemButton" mnemonicParsing="false" onAction="#createItem" style="-fx-background-color: #9c27b0; -fx-text-fill: white;" text="Crear Item" />
+                           </children>
+                        </VBox>
+                        
+                        <!-- Profile Information Display -->
+                        <VBox spacing="5.0">
+                           <children>
+                              <Text fill="#9c27b0" strokeType="OUTSIDE" strokeWidth="0.0" text="👤 INFORMACIÓN DEL PERFIL">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Text>
+                              <TextArea fx:id="profileArea" editable="false" prefHeight="150.0" promptText="La información del perfil aparecerá aquí..." />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            
+            <!-- Panel Derecho - Respuestas y JWT -->
+            <VBox spacing="10.0" style="-fx-padding: 10;">
+               <children>
+                  <!-- JWT Display -->
+                  <VBox spacing="5.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Text fill="#6c757d" strokeType="OUTSIDE" strokeWidth="0.0" text="🔑 JWT TOKENS">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                        <TextArea fx:id="jwtArea" editable="false" prefHeight="120.0" promptText="Los tokens JWT aparecerán aquí después del login..." />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Response Display -->
+                  <VBox spacing="5.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Text fill="#6c757d" strokeType="OUTSIDE" strokeWidth="0.0" text="📡 RESPUESTAS DEL SERVIDOR">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                        <TextArea fx:id="responseArea" editable="false" prefHeight="300.0" promptText="Las respuestas del servidor aparecerán aquí..." />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </items>
+      </SplitPane>
+   </center>
+</BorderPane>

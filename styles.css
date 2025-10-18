@@ -235,6 +235,86 @@ li {
     box-shadow: 0 8px 25px rgba(255, 154, 139, 0.3) !important;
 }
 
+.menu-card[href="ejercicio6.html"],
+.exercises-section .menu-card[href="ejercicio6.html"] {
+    border-color: #d4a574 !important;
+}
+
+.menu-card[href="ejercicio6.html"] h3,
+.exercises-section .menu-card[href="ejercicio6.html"] h3 {
+    color: #d4a574 !important;
+}
+
+.menu-card[href="ejercicio6.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio6.html"] .arrow {
+    color: #d4a574 !important;
+}
+
+.menu-card[href="ejercicio6.html"]:hover,
+.exercises-section .menu-card[href="ejercicio6.html"]:hover {
+    box-shadow: 0 8px 25px rgba(212, 165, 116, 0.3) !important;
+}
+
+.menu-card[href="ejercicio7.html"],
+.exercises-section .menu-card[href="ejercicio7.html"] {
+    border-color: #f4a460 !important;
+}
+
+.menu-card[href="ejercicio7.html"] h3,
+.exercises-section .menu-card[href="ejercicio7.html"] h3 {
+    color: #f4a460 !important;
+}
+
+.menu-card[href="ejercicio7.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio7.html"] .arrow {
+    color: #f4a460 !important;
+}
+
+.menu-card[href="ejercicio7.html"]:hover,
+.exercises-section .menu-card[href="ejercicio7.html"]:hover {
+    box-shadow: 0 8px 25px rgba(244, 164, 96, 0.3) !important;
+}
+
+.menu-card[href="ejercicio8.html"],
+.exercises-section .menu-card[href="ejercicio8.html"] {
+    border-color: #8B5A8C !important;
+}
+
+.menu-card[href="ejercicio8.html"] h3,
+.exercises-section .menu-card[href="ejercicio8.html"] h3 {
+    color: #8B5A8C !important;
+}
+
+.menu-card[href="ejercicio8.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio8.html"] .arrow {
+    color: #8B5A8C !important;
+}
+
+.menu-card[href="ejercicio8.html"]:hover,
+.exercises-section .menu-card[href="ejercicio8.html"]:hover {
+    box-shadow: 0 8px 25px rgba(139, 90, 140, 0.3) !important;
+}
+
+.menu-card[href="ejercicio9.html"],
+.exercises-section .menu-card[href="ejercicio9.html"] {
+    border-color: #CD5C5C !important;
+}
+
+.menu-card[href="ejercicio9.html"] h3,
+.exercises-section .menu-card[href="ejercicio9.html"] h3 {
+    color: #CD5C5C !important;
+}
+
+.menu-card[href="ejercicio9.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio9.html"] .arrow {
+    color: #CD5C5C !important;
+}
+
+.menu-card[href="ejercicio9.html"]:hover,
+.exercises-section .menu-card[href="ejercicio9.html"]:hover {
+    box-shadow: 0 8px 25px rgba(205, 92, 92, 0.3) !important;
+}
+
 /* Colores para tareas */
 .menu-card[href="tarea1.html"] {
     border-color: #9ff4f6;
@@ -314,6 +394,104 @@ li {
 
 .menu-card[href="tarea5.html"]:hover {
     box-shadow: 0 8px 25px rgba(137, 138, 196, 0.3);
+}
+
+.menu-card[href="tarea6.html"] {
+    border-color: #9f9ff6;
+}
+
+.menu-card[href="tarea6.html"] h3 {
+    color: #9f9ff6;
+}
+
+.menu-card[href="tarea6.html"] .arrow {
+    color: #9f9ff6;
+}
+
+.menu-card[href="tarea6.html"]:hover {
+    box-shadow: 0 8px 25px rgba(159, 159, 246, 0.3);
+}
+
+/* Estilos para tarjetas de código de tarea6 */
+.menu-card[href="codigo_tarea6_microservicio.html"],
+.menu-card[href="codigo_tarea6_cliente.html"],
+.menu-card[href="codigo_tarea6_database.html"],
+.menu-card[href="codigo_tarea6_readme.html"] {
+    border-color: #9f9ff6;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.menu-card[href="codigo_tarea6_microservicio.html"] h3,
+.menu-card[href="codigo_tarea6_cliente.html"] h3,
+.menu-card[href="codigo_tarea6_database.html"] h3,
+.menu-card[href="codigo_tarea6_readme.html"] h3 {
+    color: #9f9ff6;
+}
+
+.menu-card[href="codigo_tarea6_microservicio.html"] .arrow,
+.menu-card[href="codigo_tarea6_cliente.html"] .arrow,
+.menu-card[href="codigo_tarea6_database.html"] .arrow,
+.menu-card[href="codigo_tarea6_readme.html"] .arrow {
+    color: #9f9ff6;
+}
+
+.menu-card[href="codigo_tarea6_microservicio.html"]:hover,
+.menu-card[href="codigo_tarea6_cliente.html"]:hover,
+.menu-card[href="codigo_tarea6_database.html"]:hover,
+.menu-card[href="codigo_tarea6_readme.html"]:hover {
+    box-shadow: 0 8px 25px rgba(159, 159, 246, 0.3);
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.menu-card[href="tarea7.html"] {
+    border-color: #A8E6CF;
+}
+
+.menu-card[href="tarea7.html"] h3 {
+    color: #A8E6CF;
+}
+
+.menu-card[href="tarea7.html"] .arrow {
+    color: #A8E6CF;
+}
+
+.menu-card[href="tarea7.html"]:hover {
+    box-shadow: 0 8px 25px rgba(168, 230, 207, 0.3);
+}
+
+/* Estilos para tarjetas de código de tarea7 */
+.menu-card[href="codigo_tarea7_microservicio.html"],
+.menu-card[href="codigo_tarea7_cliente.html"],
+.menu-card[href="codigo_tarea7_database.html"],
+.menu-card[href="codigo_tarea7_readme.html"] {
+    border-color: #A8E6CF;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.menu-card[href="codigo_tarea7_microservicio.html"] h3,
+.menu-card[href="codigo_tarea7_cliente.html"] h3,
+.menu-card[href="codigo_tarea7_database.html"] h3,
+.menu-card[href="codigo_tarea7_readme.html"] h3 {
+    color: #A8E6CF;
+}
+
+.menu-card[href="codigo_tarea7_microservicio.html"] .arrow,
+.menu-card[href="codigo_tarea7_cliente.html"] .arrow,
+.menu-card[href="codigo_tarea7_database.html"] .arrow,
+.menu-card[href="codigo_tarea7_readme.html"] .arrow {
+    color: #A8E6CF;
+}
+
+.menu-card[href="codigo_tarea7_microservicio.html"]:hover,
+.menu-card[href="codigo_tarea7_cliente.html"]:hover,
+.menu-card[href="codigo_tarea7_database.html"]:hover,
+.menu-card[href="codigo_tarea7_readme.html"]:hover {
+    box-shadow: 0 8px 25px rgba(168, 230, 207, 0.3);
+    text-decoration: none !important;
+    color: inherit;
 }
 
 .menu-card h3 {

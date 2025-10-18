@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código - Tarea 6: README - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <link rel="stylesheet" href="codigo_tarea6.css">
+    <script src="script.js"></script>
+    <script src="codigo_tarea6.js"></script>
+</head>
+<body>
+    <div class="container tarea6">
+        <div class="header">
+            <a href="tarea6.html" class="back-btn">← Volver a Tarea 6</a>
+            <h1>Tarea 6: Books JWT + Redis</h1>
+            <p>Código: README - Instrucciones de Despliegue</p>
+        </div>
+        
+        <div class="content">
+            <!-- Código -->
+            <div class="code-section">
+                <h3>README - Instrucciones de Despliegue</h3>
+            
+                <!-- README Principal -->
+                <button class="collapsible">1. README Principal (README.md)</button>
+                <div class="collapsible-content">
+                    <h4>Archivo: README.md</h4>
+                    <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Markdown</div>
+                    </div>
+                    <pre class="code-display"><code># Sistema de Gestión de Libros con JWT + Redis
+
+## Instalación
+
+### 1. Base de Datos
+```bash
+mysql -u root -p < init.sql
+```
+
+### 2. Dependencias
+```bash
+pip install Flask Flask-SQLAlchemy Flask-JWT-Extended Flask-CORS PyMySQL redis Werkzeug
+```
+
+### 3. Ejecutar
+```bash
+python micro.py
+```
+
+## Pruebas
+
+### Login
+```bash
+LOGIN_RESPONSE=$(curl -s -X POST http://136.115.136.5:5003/api/auth/login \
+-H "Content-Type: application/json" \
+-d '{"username":"usuario1","password":"12345"}')
+
+ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.access_token')
+```
+
+### Obtener libros
+```bash
+curl -X GET http://136.115.136.5:5003/api/books \
+-H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+### Agregar libro
+```bash
+curl -X POST http://136.115.136.5:5003/api/books \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"title":"El Quijote","author":"Miguel de Cervantes","published_year":1605}'
+```
+
+### Logout
+```bash
+curl -X POST http://136.115.136.5:5003/api/auth/logout \
+-H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+## Cliente Web
+Abrir `index.html` en el navegador.</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
