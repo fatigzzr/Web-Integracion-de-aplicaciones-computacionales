@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 10: Locust - Libreria - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio16">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 16: Buckets</h1>
+            <p>Microservicio para administrar imagenes.</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Desarrollar un microservicio simple y mínimo en Flask para la administración de imágenes almacenadas en un bucket de Google Cloud Storage (GCP). El servicio debe permitir subir imágenes, listarlas y visualizarlas, garantizando un manejo seguro y estructurado de los recursos.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Requisitos Funcionalies</h3>
+                
+                <ol>
+                    <li>
+                        <p>Subida de imágenes</p>
+                        <ul>
+                            <li>El microservicio debe aceptar imágenes mediante una solicitud POST a la ruta <code>/upload</code>.</li>
+                            <li>Solo se permiten formatos de imagen comunes: png, jpg, jpeg, gif.</li>
+                            <li>El tamaño máximo por archivo será de 16 MB.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>Listado de imágenes</p>
+                        <ul>
+                            <li>Debe existir una ruta GET <code>/images</code> que devuelva la lista de imágenes almacenadas en el bucket.</li>
+                            <li>Cada entrada debe incluir al menos: nombre del archivo, URL de acceso y fecha de subida (si está disponible).</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>Visualización de imágenes</p>
+                        <ul>
+                            <li>Las imágenes deben ser accesibles mediante URLs firmadas (válidas por 1 hora) si el bucket no es público.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>Formato de respuesta</p>
+                        <ul>
+                            <li>El microservicio debe responder en XML y JSON.</li>
+                            <li>El formato por defecto será XML.</li>
+                            <li>El cliente podrá solicitar explícitamente JSON mediante:
+                                <ul>
+                                    <li>El header <code>Accept: application/json</code>, o</li>
+                                    <li>Un parámetro de consulta <code>?format=json</code>.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>Autenticación básica</p>
+                        <ul>
+                            <li>Todas las rutas (<code>/upload</code> y <code>/images</code>) deben estar protegidas mediante un token de API.</li>
+                            <li>El token se enviará en el header <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+                            <li>El token válido será configurado mediante una variable de entorno (<code>API_TOKEN</code>).</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>Registro de metadatos en base de datos</p>
+                        <ul>
+                            <li>Cada vez que se suba una imagen, se debe registrar en una base de datos MariaDB la siguiente información:
+                                <ul>
+                                    <li>Nombre del archivo</li>
+                                    <li>Fecha y hora de subida</li>
+                                    <li>Tamaño del archivo (en bytes)</li>
+                                    <li>Tipo MIME</li>
+                                    <li>URL generada (URL firmada o pública)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <p>Se asume que existe una tabla images con la estructura adecuada (puedes incluir el script de creación como parte del entregable).</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Requisitos no funcionales</h3>
+                <ul>
+                    <li>El código debe estar bien comentado y seguir buenas prácticas de Python (PEP 8).</li>
+                    <li>Se debe incluir un archivo <code>requirements.txt</code> con las dependencias necesarias.</li>
+                    <li>El microservicio debe ser autocontenido y ejecutable con <code>app.py</code>.</li>
+                    <li>No se requiere interfaz gráfica, pero se pide utilizar Swagger para facilitar la validación.</li>
+                </ul>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Entregables esperados</h3>
+                <ol>
+                    <li>Archivo <code>app.py</code> con el microservicio implementado.</li>
+                    <li>Archivo <code>requirements.txt</code>.</li>
+                    <li>Script SQL para crear la tabla <code>images</code> en MariaDB.</li>
+                    <li>Breve documento <code>README.md</code> con:
+                        <ul>
+                            <li>Instrucciones de configuración (variables de entorno, cuenta de servicio de GCP, etc.).</li>
+                            <li>Ejemplos de uso (comandos <code>curl</code> para subir y listar imágenes con y sin autenticación).</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <p>Se recomienda usar Flask con las extensiones necesarias (google-cloud-storage, PyMySQL o mysql-connector-python, dicttoxml o xml.etree para respuestas XML).</p>
+                <p>La autenticación es obligatoria: cualquier solicitud sin token válido debe devolver 401 Unauthorized.</p>
+                <p>En caso de error (archivo inválido, bucket inaccesible, etc.), el servicio debe responder con códigos HTTP adecuados y mensajes claros en el formato solicitado (XML/JSON).</p>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+
+                <h4>Archivo principal (app.py)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code># app.py
+import os
+import time
+from datetime import datetime, timedelta
+from flask import Flask, request, jsonify, Response, abort, g
+from flask_cors import CORS
+from google.cloud import storage
+from dicttoxml import dicttoxml
+from werkzeug.utils import secure_filename
+import mimetypes
+from flasgger import Swagger
+import pymysql
+
+# ------------------ CONFIGURATION ------------------
+ALLOWED_EXT = {&#x27;png&#x27;, &#x27;jpg&#x27;, &#x27;jpeg&#x27;, &#x27;gif&#x27;}
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
+SIGNED_URL_EXPIRATION = 3600  # 1 hour
+
+# Read from environment variables
+API_TOKEN = os.getenv(&#x27;API_TOKEN&#x27;, &#x27;udem&#x27;)
+GCS_BUCKET = os.getenv(&#x27;GCS_BUCKET_NAME&#x27;, &#x27;fati_bucket&#x27;)
+GOOGLE_APPLICATION_CREDENTIALS_PATH = os.getenv(&#x27;GOOGLE_APPLICATION_CREDENTIALS&#x27;, &#x27;/home/fati/bucket/key.json&#x27;)
+
+DB_CONFIG = {
+    &quot;host&quot;: os.getenv(&#x27;MYSQL_HOST&#x27;, &#x27;localhost&#x27;),
+    &quot;port&quot;: 3306,
+    &quot;user&quot;: os.getenv(&#x27;MYSQL_USER&#x27;, &#x27;images_user&#x27;),
+    &quot;password&quot;: os.getenv(&#x27;MYSQL_PASSWORD&#x27;, &#x27;666&#x27;),
+    &quot;database&quot;: os.getenv(&#x27;MYSQL_DB&#x27;, &#x27;Images&#x27;),
+    &quot;cursorclass&quot;: pymysql.cursors.DictCursor
+}
+
+# ------------------ APP INIT ------------------
+app = Flask(__name__)
+app.config[&#x27;MAX_CONTENT_LENGTH&#x27;] = MAX_CONTENT_LENGTH
+
+# Configure CORS to allow all origins (adjust as needed for production)
+CORS(app, resources={r&quot;/*&quot;: {&quot;origins&quot;: &quot;*&quot;}})
+
+gcs_client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS_PATH)
+bucket = gcs_client.bucket(GCS_BUCKET)
+swagger = Swagger(app)
+
+# ------------------ DATABASE ------------------
+def get_db():
+    if &#x27;db&#x27; not in g:
+        g.db = pymysql.connect(**DB_CONFIG)
+    return g.db
+
+@app.teardown_appcontext
+def close_db(error=None):
+    db = g.pop(&#x27;db&#x27;, None)
+    if db is not None:
+        db.close()
+
+# ------------------ HELPERS ------------------
+def check_token():
+    auth = request.headers.get(&#x27;Authorization&#x27;, &#x27;&#x27;).strip()
+    if not auth:
+        abort(error_response(&#x27;Missing Authorization header&#x27;, 401))
+    if not auth.startswith(&#x27;Bearer &#x27;):
+        abort(error_response(&#x27;Invalid authorization scheme&#x27;, 401))
+    token = auth.split(&#x27; &#x27;, 1)[1].strip()
+    if token != API_TOKEN:
+        abort(error_response(&#x27;Invalid API token&#x27;, 401))
+
+def allowed_file(filename):
+    return &#x27;.&#x27; in filename and filename.rsplit(&#x27;.&#x27;, 1)[1].lower() in ALLOWED_EXT
+
+def to_response(data, root=&#x27;response&#x27;):
+    fmt = request.args.get(&#x27;format&#x27;, &#x27;&#x27;).lower()
+    accept = request.headers.get(&#x27;Accept&#x27;, &#x27;&#x27;).lower()
+    wants_json = fmt == &#x27;json&#x27; or &#x27;application/json&#x27; in accept
+    if wants_json:
+        return jsonify(data)
+    xml = dicttoxml(data, custom_root=root, attr_type=False)
+    return Response(xml, mimetype=&#x27;application/xml&#x27;)
+
+def error_response(message, status_code):
+    resp = to_response({&#x27;error&#x27;: message}, root=&#x27;error&#x27;)
+    resp.status_code = status_code
+    return resp
+
+def insert_metadata(name, size, mime, signed_url):
+    conn = get_db()
+    cur = conn.cursor()
+    sql = &quot;&quot;&quot;
+    INSERT INTO images (filename, uploaded_at, size_bytes, mime_type, signed_url)
+    VALUES (%s, %s, %s, %s, %s)
+    &quot;&quot;&quot;
+    now = datetime.utcnow().strftime(&#x27;%Y-%m-%d %H:%M:%S&#x27;)
+    cur.execute(sql, (name, now, size, mime, signed_url))
+    conn.commit()
+    cur.close()
+
+def generate_signed_url(blob_name, expiration=SIGNED_URL_EXPIRATION):
+    blob = bucket.blob(blob_name)
+    return blob.generate_signed_url(expiration=timedelta(seconds=expiration))
+
+# ------------------ ROUTES ------------------
+@app.route(&#x27;/upload&#x27;, methods=[&#x27;POST&#x27;])
+def upload():
+    &quot;&quot;&quot;
+    Upload an image
+    ---
+    tags:
+      - Images
+    parameters:
+      - name: file
+        in: formData
+        type: file
+        required: true
+      - name: format
+        in: query
+        type: string
+        required: false
+        description: &quot;xml (default) or json&quot;
+    responses:
+      200:
+        description: Image uploaded successfully
+      400:
+        description: Bad request
+      401:
+        description: Missing or invalid token
+      403:
+        description: Forbidden
+      413:
+        description: File too large
+    security:
+      - Bearer: []
+    &quot;&quot;&quot;
+    check_token()
+    if &#x27;file&#x27; not in request.files:
+        return to_response({&#x27;error&#x27;: &#x27;no file part&#x27;}, root=&#x27;error&#x27;), 400
+    f = request.files[&#x27;file&#x27;]
+    if f.filename == &#x27;&#x27;:
+        return to_response({&#x27;error&#x27;: &#x27;no selected file&#x27;}, root=&#x27;error&#x27;), 400
+    if not allowed_file(f.filename):
+        return to_response({&#x27;error&#x27;: &#x27;file type not allowed&#x27;}, root=&#x27;error&#x27;), 400
+
+    filename = secure_filename(f.filename)
+    blob_name = f&quot;{int(time.time())}_{filename}&quot;
+    content = f.read()
+    size = len(content)
+    if size &gt; MAX_CONTENT_LENGTH:
+        return to_response({&#x27;error&#x27;: &#x27;file too large&#x27;}, root=&#x27;error&#x27;), 413
+
+    mime = f.mimetype or mimetypes.guess_type(filename)[0] or &#x27;application/octet-stream&#x27;
+    blob = bucket.blob(blob_name)
+    blob.upload_from_string(content, content_type=mime)
+
+    signed_url = generate_signed_url(blob_name)
+    insert_metadata(blob_name, size, mime, signed_url)
+
+    resp = {
+        &#x27;filename&#x27;: blob_name,
+        &#x27;url&#x27;: signed_url,
+        &#x27;uploaded_at&#x27;: datetime.utcnow().isoformat() + &#x27;Z&#x27;,
+        &#x27;size_bytes&#x27;: size,
+        &#x27;mime_type&#x27;: mime
+    }
+    return to_response(resp)
+
+@app.route(&#x27;/images&#x27;, methods=[&#x27;GET&#x27;])
+def images():
+    &quot;&quot;&quot;
+    List all images
+    ---
+    tags:
+      - Images
+    parameters:
+      - name: format
+        in: query
+        type: string
+        required: false
+        description: &quot;xml (default) or json&quot;
+    responses:
+      200:
+        description: List of images
+      401:
+        description: Missing or invalid token
+      403:
+        description: Forbidden
+    security:
+      - Bearer: []
+    &quot;&quot;&quot;
+    check_token()
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(&quot;SELECT id, filename, uploaded_at, size_bytes, mime_type, signed_url FROM images ORDER BY uploaded_at DESC&quot;)
+    rows = cur.fetchall()
+    cur.close()
+
+    items = []
+    for r in rows:
+        filename = r[&#x27;filename&#x27;]
+        signed = generate_signed_url(filename)
+        items.append({
+            &#x27;id&#x27;: r[&#x27;id&#x27;],
+            &#x27;filename&#x27;: filename,
+            &#x27;url&#x27;: signed,
+            &#x27;uploaded_at&#x27;: r[&#x27;uploaded_at&#x27;].isoformat() if isinstance(r[&#x27;uploaded_at&#x27;], datetime) else str(r[&#x27;uploaded_at&#x27;]),
+            &#x27;size_bytes&#x27;: int(r[&#x27;size_bytes&#x27;]),
+            &#x27;mime_type&#x27;: r[&#x27;mime_type&#x27;]
+        })
+    return to_response({&#x27;images&#x27;: items}, root=&#x27;images&#x27;)
+
+# ------------------ SWAGGER ------------------
+app.config[&#x27;SWAGGER&#x27;] = {&#x27;title&#x27;: &#x27;Image Bucket API&#x27;, &#x27;uiversion&#x27;: 3}
+swagger.template = {
+    &quot;securityDefinitions&quot;: {
+        &quot;Bearer&quot;: {
+            &quot;type&quot;: &quot;apiKey&quot;,
+            &quot;name&quot;: &quot;Authorization&quot;,
+            &quot;in&quot;: &quot;header&quot;,
+            &quot;description&quot;: &quot;Bearer token required&quot;
+        }
+    }
+}
+
+if __name__ == &#x27;__main__&#x27;:
+    app.run(host=&#x27;0.0.0.0&#x27;, port=8080)</code></pre>
+                </div>
+
+                <h4>Dependencias (requirements.txt)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Text</div>
+                    </div>
+                    <pre class="code-display"><code>Flask==2.3.3
+flask-cors==4.0.0
+google-cloud-storage==2.10.0
+dicttoxml==1.7.16
+werkzeug==2.3.7
+flasgger==0.9.7.1
+PyMySQL==1.1.0
+</code></pre>
+                </div>
+
+                <h4>Esquema SQL (schema.sql)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">SQL</div>
+                    </div>
+                    <pre class="code-display"><code>/*M!999999\- enable the sandbox mode */ 
+-- MariaDB dump 10.19  Distrib 10.5.27-MariaDB, for Linux (x86_64)
+--
+-- Host: localhost    Database: Images
+-- ------------------------------------------------------
+-- Server version	10.5.27-MariaDB
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE=&#x27;+00:00&#x27; */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 
+*/;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=&#x27;NO_AUTO_VALUE_ON_ZERO&#x27; */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `images`
+--
+
+DROP TABLE IF EXISTS `images`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `images` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `filename` varchar(512) NOT NULL,
+  `uploaded_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `size_bytes` bigint(20) unsigned NOT NULL,
+  `mime_type` varchar(128) NOT NULL,
+  `signed_url` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `uploaded_at` (`uploaded_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_c
+i;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `images`
+--
+
+LOCK TABLES `images` WRITE;
+/*!40000 ALTER TABLE `images` DISABLE KEYS */;
+INSERT INTO `images` VALUES (3,&#x27;images.jpeg&#x27;,&#x27;2025-11-05 21:32:34&#x27;,11154,&#x27;image/
+jpeg&#x27;,&#x27;https://storage.googleapis.com/fati_bucket/images.jpeg?Expires=1762381954
+&amp;GoogleAccessId=715386068770-compute%40developer.gserviceaccount.com&amp;Signature=G
+ScGMm6w3uZZXh5ijQO3wpvvEP8pnuttD%2BSEe6cOaJ1VlYpT4DHdosQNIObnD%2FFSrgW09oyoYcY%2
+B4nklAXV%2BXECTtDyPho5mjBO1EtZOHycDjZfG%2FhrJ4TYjtUzxzwARdBjC0gWC%2BSNORmx68nW3g
+cCeFFWetupGy%2B8D2rJr%2BHjflAyC2DWyTvijmltUXh2zedxsYPITu6i%2F4p2omOZxYg7q%2B1vgS
+K%2B55AiSu6cUux1WfxiLW6jIi5P5vYAuM7e1%2BLtELmphwqaZMZAySIKVsLC3UXnkV7DngAyAM5QdD
+x8G%2BSD96E%2FeEthH5BCpf8rZXnvCgss4Ogp0JK8DHUZh6Q%3D%3D&#x27;);
+/*!40000 ALTER TABLE `images` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-11-19 15:59:34</code></pre>
+                </div>
+
+                <h4>Documentación (README.md)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Markdown</div>
+                    </div>
+                    <pre class="code-display"><code># Image Bucket Microservice
+
+Microservicio Flask para administrar imágenes almacenadas en un bucket de Google Cloud Storage (GCS). Expone rutas para subir archivos, listarlos y obtener URLs firmadas (1 hora). Responde en XML por defecto y puede devolver JSON vía `Accept: application/json` o `?format=json`. Todas las rutas requieren autenticación mediante token Bearer.
+
+## Requisitos previos
+
+- Python 3.10+ y `pip`
+- Cuenta de servicio de GCP con acceso de lectura/escritura al bucket y archivo JSON de credenciales
+- Instancia de MariaDB accesible desde la aplicación
+
+## Instalación
+
+```bash
+pip install -r requirements.txt
+```
+
+## Configuración
+
+Define las siguientes variables de entorno antes de ejecutar el servicio (puedes usar un archivo `.env` y `source .env`):
+
+| Variable | Descripción |
+| --- | --- |
+| `API_TOKEN` | Token aceptado por el microservicio (por defecto `udem`). |
+| `GCS_BUCKET_NAME` | Nombre del bucket en GCS. |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Ruta absoluta al JSON de la cuenta de servicio. |
+| `MYSQL_HOST` | Host de MariaDB (por defecto `localhost`). |
+| `MYSQL_USER` | Usuario con permisos de lectura/escritura. |
+| `MYSQL_PASSWORD` | Contraseña del usuario. |
+| `MYSQL_DB` | Base de datos que contiene la tabla `images`. |
+
+Ejemplo rápido (ajusta rutas/credenciales según tu entorno):
+
+```bash
+export API_TOKEN=udem
+export GCS_BUCKET_NAME=fati_bucket
+export GOOGLE_APPLICATION_CREDENTIALS=/home/fati/Microservicios/bucket/key.json
+export MYSQL_HOST=localhost
+export MYSQL_USER=images_user
+export MYSQL_PASSWORD=666
+export MYSQL_DB=Images
+export FLASK_APP=app.py
+```
+
+### Base de datos
+
+Ejecuta el script `schema.sql` en tu instancia MariaDB para crear la tabla necesaria:
+
+```sql
+SOURCE schema.sql;
+```
+
+### Ejecutar el servicio
+
+```bash
+export FLASK_APP=app.py
+flask run --host=0.0.0.0 --port=5000
+```
+
+Swagger UI está disponible en `http://localhost:5000/apidocs`.
+
+## Ejemplos de uso
+
+&gt; Nota: el backend responde en XML por defecto. Usa `-H &quot;Accept: application/json&quot;` o `?format=json` para solicitar JSON.
+
+### Subir imagen (con autenticación)
+
+```bash
+curl -X POST http://localhost:5000/upload \
+  -H &quot;Authorization: Bearer ${API_TOKEN}&quot; \
+  -H &quot;Accept: application/json&quot; \
+  -F &quot;file=@/ruta/a/imagen.png&quot;
+```
+
+### Subir imagen (sin token, 401)
+
+```bash
+curl -X POST http://localhost:5000/upload \
+  -F &quot;file=@/ruta/a/imagen.png&quot;
+```
+
+### Listar imágenes (con autenticación)
+
+```bash
+curl -X GET &quot;http://localhost:5000/images?format=json&quot; \
+  -H &quot;Authorization: Bearer ${API_TOKEN}&quot;
+```
+
+### Listar imágenes (sin token, 401)
+
+```bash
+curl -X GET http://localhost:5000/images
+```
+
+## Manejo de errores
+
+Los errores comunes (token faltante, formato inválido, archivo demasiado grande, etc.) devuelven mensajes descriptivos en XML o JSON según lo solicitado junto con el código HTTP correspondiente (401, 400, 413, etc.).</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Swagger.png" alt="Swagger UI del microservicio" onclick="openImageModal(this.src)">
+                        <p>Swagger UI documentando los endpoints protegidos</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Swagger-upload.png" alt="Endpoint upload en Swagger" onclick="openImageModal(this.src)">
+                        <p>Detalle del endpoint <code>/upload</code> en Swagger</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Swagger-images.png" alt="Endpoint images en Swagger" onclick="openImageModal(this.src)">
+                        <p>Detalle del endpoint <code>/images</code> en Swagger</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Postman-upload-xml default.png" alt="Respuesta XML en Postman para upload" onclick="openImageModal(this.src)">
+                        <p>Postman - subida de imagen con respuesta XML</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Postman-upload-json.png" alt="Respuesta JSON en Postman para upload" onclick="openImageModal(this.src)">
+                        <p>Postman - subida de imagen solicitando JSON</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Postman-images-xml default.png" alt="Listado XML de imágenes" onclick="openImageModal(this.src)">
+                        <p>Postman - listado de imágenes en XML</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/Postman-images-json.png" alt="Listado JSON de imágenes" onclick="openImageModal(this.src)">
+                        <p>Postman - listado de imágenes solicitando JSON</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado16/URL image bucket.png" alt="URL firmada abierta en navegador" onclick="openImageModal(this.src)">
+                        <p>Verificación manual de la URL firmada desde el bucket</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>En este ejercicio guiado aprendimos a implementar el uso de buckets en un microservicio. Principalmente en clase vimos cómo funcionaban los buckets en Google Cloud y toda la seguridad y autenticaciones necesarias para poder adquirir el servicio. Debido a que se necesitaban credenciales para acceder y realizar las acciones correspondientes, también aprendimos a utilizar variables de ambiente (.env), ya que por seguridad las credenciales no se colocan directamente en los archivos.</p>
+                    <p>De igual manera, con esta actividad comprendí mejor cómo se implementa una base de datos real. En clases anteriores siempre me quedaba la duda de cuál era la mejor manera de guardar imágenes, ya que son archivos muy grandes. La mayoría de personas mencionaba guardar una URL, pero como no tenía experiencia, no entendía bien a qué se referían. Sin embargo, con el uso de bucket descubrimos una manera eficiente de resolver ese problema.</p>
+                    <p>Además, esta actividad me permitió visualizar de una forma más completa cómo interactúan los diferentes componentes de un microservicio. Desde el backend que recibe las solicitudes, hasta la lógica que valida el tipo de archivo, genera la URL firmada y se comunica con Google Cloud Storage. También reforcé la importancia del manejo de errores, ya que cualquier detalle en las credenciales, permisos o configuración del bucket puede impedir que la aplicación funcione correctamente. Considero que este ejercicio me dio más confianza para trabajar con servicios en la nube y para estructurar soluciones escalables y seguras.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 10: Locust - Libreria - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio10">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 10: Locust - Libreria</h1>
+            <p>Pruebas con Locust con el microservicio de Librería + JWT + Redis</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Utilizar Locust para realizar pruebas de rendimiento al microservicio de Librería, protegido con JWT y usando Redis para la autenticación.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <ol>
+                    <li>Instalar Locust: <code>pip install locust</code></li>
+                    <li>Instalar dependencias Python: <code>pip install redis pymysql</code></li>
+                    <li>Archivo de configuración de Locust: <code>locustfile.py</code></li>
+                    <li>Ejecutar el microservicio de Librería con JWT y Redis</li>
+                    <li>Ejecutar Locust para realizar pruebas de rendimiento:
+                        <ul>
+                            <li>Ejecutar el comando: <code>locust</code></li>
+                            <li>Luego abre tu navegador en: http://localhost:8089</li>
+                        </ul>
+                    </li>
+                    <li>En la interfaz web puedes configurar:
+                        <ul>
+                            <li>Number of users: Número de usuarios simultáneos (ej: 100)</li>
+                            <li>Spawn rate: Usuarios creados por segundo (ej: 10)</li>
+                            <li>Host: <code>http://34.72.192.189:5003</code></li>
+                        </ul>
+                    </li>
+                    <li>Evaluar el microservicio con 150 usuarios simultáneos</li>
+                    <li>Después de evaluar con 150 usuarios, realizar cambios en el microservicio Python para disminuir los fallos</li>
+                    <li>Analizar los resultados de las pruebas</li>
+                </ol>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>Archivo de Configuración de Locust (locustfile.py)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code>"""
+Locust Load Testing Script para Microservicio de Libros
+Pruebas de estrés para todos los endpoints del microservicio
+"""
+
+from locust import HttpUser, task, between, events
+import random
+import json
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+import threading
+
+# Configuración del servidor
+HOST = "http://34.72.192.189:5003"
+
+# Datos de prueba
+TEST_ISBNS = [
+    "978-0-124761-28-5",
+    "978-0-14-028333-4",
+    "978-0-208629-13-7",
+    "978-0-242176-54-9",
+    "978-0-273660-38-6",
+    "978-0-308563-81-3",
+    "978-0-308704-85-3",
+    "978-0-313628-30-3",
+    "978-0-316-76948-0",
+    "978-0-316-76949-7",
+    "978-0-316-76950-3",
+    "978-0-316-76951-0",
+    "978-0-316-76952-7",
+    "978-0-316-76953-4",
+    "978-0-316-76954-1",
+    "978-0-316-76955-8",
+    "978-0-316-76956-5",
+    "978-0-316-76957-2",
+    "978-0-316-76958-9",
+    "978-0-316-76959-6",
+    "978-0-316-76960-2",
+    "978-0-359144-72-4",
+    "978-0-359666-38-1",
+    "978-0-364208-93-4",
+    "978-0-398373-98-1",
+    "978-0-421446-51-4",
+    "978-0-477235-12-3",
+    "978-0-496781-40-0",
+    "978-0-579395-87-7",
+    "978-0-618-34614-4",
+    "978-0-679-72369-5",
+    "978-0-704876-80-9",
+    "978-0-742760-28-6",
+    "978-0-7432-4722-1",
+    "978-0-7475-3269-9",
+    "978-0-7475-3274-3",
+    "978-0-7475-4624-5",
+    "978-0-857318-80-3",
+    "978-0-864544-17-8",
+    "978-0-880743-23-5",
+    "978-0-922461-44-8",
+    "978-0-928572-85-3",
+    "978-0-986378-12-6",
+    "978-0-999999-99-9"
+]
+
+TEST_FORMATS = [
+    "audiolibro",
+    "Box Set",
+    "digital",
+    "físico",
+    "Hardcover",
+    "Paperback"
+]
+TEST_GENRES = [
+    "Biografía",
+    "Ciencia Ficción",
+    "Classic",
+    "Dystopian",
+    "Fantasy",
+    "Historia",
+    "Non-fiction",
+    "Novela",
+    "Novela Clásica",
+    "Terror",
+    "Young Adult"
+]
+TEST_AUTHORS = [
+    "J.K. Rowling",
+    "J.R.R. Tolkien",
+    "F. Scott Fitzgerald",
+    "George Orwell",
+    "Harper Lee",
+    "John Green",
+    "David Levithan",
+    "Maureen Johnson",
+    "Lauren Myracle",
+    "Suzanne Collins",
+    "Stephenie Meyer",
+    "Miguel de Cervantes",
+    "Miguel de Cervantes Saavedra",
+    "Jorge Luis Borges",
+    "Gabriel García Márquez",
+    "Isabel Allende"
+]
+
+# Lista de usuarios de prueba para pruebas de carga
+# Cada usuario virtual de Locust usará un usuario diferente
+# IMPORTANTE: Estos usuarios deben existir en la base de datos antes de ejecutar las pruebas
+# Puedes crearlos manualmente o usar la tarea register_user durante las pruebas
+TEST_USERS = [
+    {"username": "desktop@gmail.com", "password": "desktop"},
+    {"username": "user1@test.com", "password": "testpass123"},
+    {"username": "user2@test.com", "password": "testpass123"},
+    {"username": "user3@test.com", "password": "testpass123"},
+    # ... más usuarios ...
+    {"username": "user50@test.com", "password": "testpass123"},
+]
+
+# Contador global para asignar usuarios de forma round-robin
+_user_counter = 0
+_user_lock = threading.Lock()
+
+def get_next_user():
+    """Obtiene el siguiente usuario de la lista de forma thread-safe"""
+    global _user_counter
+    with _user_lock:
+        user = TEST_USERS[_user_counter % len(TEST_USERS)]
+        _user_counter += 1
+        return user
+
+
+class MicroserviceUser(HttpUser):
+    """
+    Usuario simulado que realiza peticiones al microservicio
+    """
+    wait_time = between(3, 8)  # Espera entre 3 y 8 segundos entre peticiones
+    
+    def on_start(self):
+        """
+        Se ejecuta cuando un usuario inicia la sesión
+        Realiza login para obtener el token de autenticación
+        """
+        self.access_token = None
+        self.refresh_token = None
+        self.user_id = None
+        
+        # Asignar un usuario diferente a cada usuario virtual de Locust
+        user_credentials = get_next_user()
+        self.username = user_credentials["username"]
+        
+        login_data = {
+            "username": user_credentials["username"],
+            "password": user_credentials["password"]
+        }
+        
+        with self.client.post(
+            "/api/auth/login",
+            json=login_data,
+            catch_response=True,
+            name="Login (on_start)"
+        ) as response:
+            if response.status_code == 200:
+                data = response.json()
+                self.access_token = data.get("access_token")
+                self.refresh_token = data.get("refresh_token")
+                self.user_id = data.get("user_id")
+                response.success()
+            elif response.status_code == 429:
+                response.failure("Rate limit exceeded (429)")
+            elif response.status_code == 401:
+                response.failure(f"Login failed: User {user_credentials['username']} not found.")
+            else:
+                response.failure(f"Login failed: {response.status_code}")
+    
+    def get_auth_headers(self):
+        """Retorna headers con autenticación"""
+        if not self.access_token:
+            return {}
+        return {"Authorization": f"Bearer {self.access_token}"}
+    
+    @task(10)
+    def health_check(self):
+        """GET /api/health - Health check (sin autenticación)"""
+        self.client.get("/api/health", name="Health Check")
+    
+    @task(15)
+    def get_all_books(self):
+        """GET /api/books - Obtener todos los libros"""
+        if not self.access_token:
+            return
+        
+        with self.client.get(
+            "/api/books",
+            headers=self.get_auth_headers(),
+            catch_response=True,
+            name="Get All Books"
+        ) as response:
+            if response.status_code == 401:
+                self.access_token = None
+                response.failure("Token expired")
+            elif response.status_code != 200:
+                response.failure(f"Request failed: {response.status_code}")
+            else:
+                response.success()
+    
+    @task(10)
+    def get_book_by_isbn(self):
+        """GET /api/books/<isbn> - Obtener libro por ISBN"""
+        if not self.access_token:
+            return
+        
+        isbn = random.choice(TEST_ISBNS)
+        with self.client.get(
+            f"/api/books/{isbn}",
+            headers=self.get_auth_headers(),
+            catch_response=True,
+            name="Get Book by ISBN"
+        ) as response:
+            if response.status_code == 401:
+                self.access_token = None
+                response.failure("Token expired")
+            elif response.status_code != 200:
+                response.failure(f"Request failed: {response.status_code}")
+            else:
+                response.success()
+    
+    # ... más tareas para otros endpoints ...
+
+
+# Eventos para estadísticas personalizadas
+@events.test_start.add_listener
+def on_test_start(environment, **kwargs):
+    print(f"\n🚀 Iniciando pruebas de carga en: {HOST}")
+    print(f"📊 Usuarios simultáneos: {environment.runner.target_user_count if hasattr(environment.runner, 'target_user_count') else 'N/A'}")
+    print(f"📈 Tasa de spawn: {environment.runner.spawn_rate if hasattr(environment.runner, 'spawn_rate') else 'N/A'}\n")
+
+
+@events.test_stop.add_listener
+def on_test_stop(environment, **kwargs):
+    print("\n✅ Pruebas de carga completadas\n")</code></pre>
+                </div>
+
+                <h4>Microservicio Flask con JWT y Redis - Versión Mejorada (micro.py)</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code>import os
+import logging
+import json
+import hashlib
+from datetime import datetime, timedelta
+from functools import wraps
+
+from flask import Flask, request, jsonify, g, Response
+from flask_cors import CORS
+import pymysql
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt  # PyJWT
+import redis
+
+# ---------- CONFIG ----------
+app = Flask(__name__)
+CORS(app, 
+     origins=['*'],
+     allow_headers=['Content-Type', 'Authorization', 'Accept'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     supports_credentials=True)
+
+# Configuración MySQL
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'libros_user',
+    'password': '666',
+    'database': 'Libros',
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
+# JWT settings
+JWT_SECRET = 'cambia_esta_clave_secreta'
+JWT_ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRES_MINUTES = 120  # Aumentado a 120 minutos para pruebas de carga
+REFRESH_TOKEN_EXPIRES_DAYS = 30  # Aumentado a 30 días para pruebas de carga
+
+# Redis settings
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_PASSWORD = None
+
+# ---------- REDIS CONNECTION ----------
+try:
+    redis_client = redis.Redis(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        db=REDIS_DB,
+        password=REDIS_PASSWORD,
+        decode_responses=True,
+        socket_connect_timeout=5,
+        socket_timeout=5
+    )
+    redis_client.ping()
+    logger = logging.getLogger('auth_service')
+    logger.info("Redis connection established successfully")
+except Exception as e:
+    logger = logging.getLogger('auth_service')
+    logger.error(f"Failed to connect to Redis: {e}")
+    redis_client = None
+
+# ---------- LOGGING ----------
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+
+# ---------- REDIS HELPERS ----------
+def get_redis():
+    """Get Redis client with error handling"""
+    if not redis_client:
+        raise Exception("Redis not available")
+    return redis_client
+
+def redis_available():
+    """Check if Redis is available"""
+    try:
+        get_redis().ping()
+        return True
+    except:
+        return False
+
+def hash_token(token):
+    """Create a hash of the token for storage"""
+    return hashlib.sha256(token.encode()).hexdigest()
+
+# ---------- REDIS TOKEN MANAGEMENT ----------
+def add_token_to_allowlist(token, user_id, token_type, expires_at):
+    """Add token to Redis allowlist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"allowlist:{token_hash}"
+        
+        token_data = {
+            'user_id': user_id,
+            'type': token_type,
+            'created_at': datetime.utcnow().isoformat(),
+            'expires_at': expires_at.isoformat()
+        }
+        
+        ttl = int((expires_at - datetime.utcnow()).total_seconds())
+        r.setex(key, ttl, json.dumps(token_data))
+        
+        user_tokens_key = f"user_tokens:{user_id}:{token_type}"
+        r.sadd(user_tokens_key, token_hash)
+        r.expire(user_tokens_key, ttl)
+        
+        logger.info("Token added to allowlist: user_id=%s type=%s", user_id, token_type)
+        return True
+    except Exception as e:
+        logger.error("Failed to add token to allowlist: %s", e)
+        return False
+
+def add_token_to_denylist(token, user_id=None):
+    """Add token to Redis denylist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"denylist:{token_hash}"
+        
+        denylist_data = {
+            'user_id': user_id,
+            'revoked_at': datetime.utcnow().isoformat()
+        }
+        
+        r.setex(key, 86400, json.dumps(denylist_data))
+        logger.info("Token added to denylist: user_id=%s", user_id)
+        return True
+    except Exception as e:
+        logger.error("Failed to add token to denylist: %s", e)
+        return False
+
+def is_token_in_denylist(token):
+    """Check if token is in denylist"""
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f"denylist:{token_hash}"
+        return r.exists(key)
+    except Exception as e:
+        logger.error("Failed to check denylist: %s", e)
+        return False
+
+# ---------- RATE LIMITING ----------
+def check_rate_limit(user_id, endpoint, max_requests=100, window_minutes=60):
+    """Check rate limit for user/endpoint"""
+    try:
+        r = get_redis()
+        key = f"rate_limit:{user_id}:{endpoint}"
+        
+        current = r.get(key)
+        if current is None:
+            r.setex(key, window_minutes * 60, 1)
+            return True
+        elif int(current) < max_requests:
+            r.incr(key)
+            return True
+        else:
+            return False
+    except Exception as e:
+        logger.error("Rate limit check failed: %s", e)
+        return True  # Allow on error
+
+# ---------- DATABASE HELPERS ----------
+def query_db(query, args=(), one=False):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, args)
+            rv = cursor.fetchall()
+            return (rv[0] if rv else None) if one else rv
+    finally:
+        connection.close()
+
+def execute_db(query, args=()):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, args)
+            connection.commit()
+            return cursor.lastrowid
+    finally:
+        connection.close()
+
+# ---------- JWT HELPERS ----------
+def create_access_token(payload: dict):
+    exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+    token_payload = {**payload, "exp": exp, "type": "access"}
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    if redis_available():
+        add_token_to_allowlist(token, payload.get('user_id'), 'access', exp)
+    
+    logger.info("Access token created for user_id=%s exp=%s", payload.get('user_id'), exp)
+    return token
+
+def create_refresh_token(payload: dict):
+    exp = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRES_DAYS)
+    token_payload = {**payload, "exp": exp, "type": "refresh"}
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    if redis_available():
+        add_token_to_allowlist(token, payload.get('user_id'), 'refresh', exp)
+    
+    logger.info("Refresh token created for user_id=%s exp=%s", payload.get('user_id'), exp)
+    return token, exp
+
+def decode_token(token):
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        logger.info("Token decoded: user_id=%s type=%s", decoded.get('user_id'), decoded.get('type'))
+        return decoded
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token expired.")
+        raise
+    except jwt.InvalidTokenError as e:
+        logger.warning("Invalid token: %s", e)
+        raise
+
+# ---------- AUTHENTICATION DECORATOR ----------
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get('Authorization', None)
+        if not auth_header:
+            logger.warning("Authorization header missing")
+            return jsonify({"msg": "Missing Authorization Header"}), 401
+        
+        parts = auth_header.split()
+        if parts[0].lower() != 'bearer' or len(parts) != 2:
+            logger.warning("Authorization header malformed")
+            return jsonify({"msg": "Bad Authorization header"}), 401
+        
+        token = parts[1]
+        
+        try:
+            logger.info("🔍 Validating token for endpoint: %s", request.endpoint)
+            
+            if redis_available() and is_token_in_denylist(token):
+                logger.warning("Token found in denylist")
+                return jsonify({"msg": "Token has been revoked"}), 401
+            
+            data = decode_token(token)
+            logger.info("✅ Token decoded successfully: user_id=%s type=%s", data.get('user_id'), data.get('type'))
+            
+            if data.get('type') != 'access':
+                logger.warning("Token used is not access token")
+                return jsonify({"msg": "Invalid token type"}), 401
+            
+            user = query_db("SELECT id, username, email, created_at FROM users WHERE id = %s", (data['user_id'],), one=True)
+            if not user:
+                logger.warning("User id in token not found: %s", data.get('user_id'))
+                return jsonify({"msg": "User not found"}), 404
+            
+            logger.info("✅ User found: %s", user.get('username'))
+            g.current_user = user
+            return f(*args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({"msg": "Token expired"}), 401
+        except Exception as e:
+            logger.exception("Token verification failed")
+            return jsonify({"msg": "Invalid token"}), 401
+    return decorated
+
+# ---------- HEALTHCHECK ----------
+@app.route('/api/health', methods=['GET'])
+def health():
+    """Enhanced health endpoint: checks DB and Redis connectivity"""
+    db_ok = False
+    redis_ok = False
+    
+    try:
+        connection = pymysql.connect(**DB_CONFIG)
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+        connection.close()
+        db_ok = True
+        logger.info("Health check OK: DB reachable")
+    except Exception as e:
+        logger.exception("Health check failed: DB not reachable")
+        db_ok = False
+    
+    if redis_available():
+        try:
+            get_redis().ping()
+            redis_ok = True
+            logger.info("Health check OK: Redis reachable")
+        except Exception as e:
+            logger.exception("Health check failed: Redis not reachable")
+            redis_ok = False
+    else:
+        redis_ok = False
+        logger.warning("Redis not configured")
+
+    status = "ok" if (db_ok and redis_ok) else "degraded" if db_ok else "error"
+    return jsonify({
+        "status": status,
+        "db": "ok" if db_ok else "error",
+        "redis": "ok" if redis_ok else "error",
+        "time": datetime.utcnow().isoformat() + "Z"
+    }), (200 if db_ok else 500)
+
+# ---------- AUTH ENDPOINTS ----------
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, 'register', max_requests=1000, window_minutes=60):
+            return jsonify({"msg": "Registration rate limit exceeded"}), 429
+    
+    data = request.get_json() or {}
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not username or not email or not password:
+        logger.warning("Register attempt with missing fields: %s", data)
+        return jsonify({"msg": "username, email and password are required"}), 400
+
+    exists = query_db("SELECT id FROM users WHERE username = %s OR email = %s", (username, email), one=True)
+    if exists:
+        logger.info("Register failed - user exists username/email: %s/%s", username, email)
+        return jsonify({"msg": "User with that username or email already exists"}), 409
+    
+    pw_hash = generate_password_hash(password)
+    user_id = execute_db("INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
+                         (username, email, pw_hash))
+    logger.info("New user registered id=%s username=%s", user_id, username)
+    return jsonify({"msg": "User created", "user_id": user_id}), 201
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.get_json() or {}
+    identifier = data.get('username') or data.get('email')
+    password = data.get('password')
+
+    if not identifier or not password:
+        logger.warning("Login attempt missing identifier/password")
+        return jsonify({"msg": "username/email and password required"}), 400
+    
+    if redis_available():
+        rate_limit_key = f"login:{identifier}"
+        if not check_rate_limit(rate_limit_key, 'login', max_requests=1000, window_minutes=15):
+            logger.warning("Login rate limit exceeded for user: %s", identifier)
+            return jsonify({"msg": "Login rate limit exceeded. Please try again later."}), 429
+
+    user = query_db("SELECT id, username, email, password_hash FROM users WHERE username = %s OR email = %s",
+                    (identifier, identifier), one=True)
+    if not user:
+        logger.info("Login failed - user not found: %s", identifier)
+        return jsonify({"msg": "Invalid credentials"}), 401
+
+    if not check_password_hash(user['password_hash'], password):
+        logger.info("Login failed - wrong password for user_id=%s", user['id'])
+        return jsonify({"msg": "Invalid credentials"}), 401
+
+    payload = {"user_id": user['id']}
+    access_token = create_access_token(payload)
+    refresh_token, refresh_exp = create_refresh_token(payload)
+
+    if redis_available():
+        access_exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+        add_token_to_allowlist(access_token, user['id'], 'access', access_exp)
+        add_token_to_allowlist(refresh_token, user['id'], 'refresh', refresh_exp)
+        logger.info("Tokens added to allowlist for user_id=%s", user['id'])
+
+    execute_db("INSERT INTO refresh_tokens (user_id, refresh_token, expires_at) VALUES (%s, %s, %s)",
+               (user['id'], refresh_token, refresh_exp.strftime('%Y-%m-%d %H:%M:%S')))
+    
+    logger.info("Login success for user_id=%s - tokens issued", user['id'])
+
+    return jsonify({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "expires_in_minutes": ACCESS_TOKEN_EXPIRES_MINUTES
+    }), 200
+
+# ... más endpoints para libros, formatos, géneros, etc. ...
+
+# ---------- RUN ----------
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5003, debug=True)</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/charts.png" alt="Gráficas de resultados de Locust" onclick="openImageModal(this.src)">
+                        <p>Gráficas de resultados de pruebas de carga con Locust</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Request Statistics.png" alt="Estadísticas de peticiones" onclick="openImageModal(this.src)">
+                        <p>Estadísticas de peticiones</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Request Statistics cont..png" alt="Estadísticas de peticiones (continuación)" onclick="openImageModal(this.src)">
+                        <p>Estadísticas de peticiones (continuación)</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Response Time Statistics.png" alt="Estadísticas de tiempo de respuesta" onclick="openImageModal(this.src)">
+                        <p>Estadísticas de tiempo de respuesta</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Response Time Statistics cont..png" alt="Estadísticas de tiempo de respuesta (continuación)" onclick="openImageModal(this.src)">
+                        <p>Estadísticas de tiempo de respuesta (continuación)</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Failures Statistics.png" alt="Estadísticas de fallos" onclick="openImageModal(this.src)">
+                        <p>Estadísticas de fallos</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Final ratio - Total Ratio.png" alt="Ratio total final" onclick="openImageModal(this.src)">
+                        <p>Ratio total final</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado10/Final ratio - Ratio Per Class.png" alt="Ratio por clase final" onclick="openImageModal(this.src)">
+                        <p>Ratio por clase final</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>Esta actividad me ayudó a mejorar la eficiencia del microservicio de manera significativa. Al inicio de las pruebas, el porcentaje de error era superior al 40%, lo cual indicaba problemas importantes en el rendimiento y la capacidad del sistema para manejar múltiples usuarios simultáneos.</p>
+                    
+                    <p>Después de realizar varios cambios y optimizaciones en el microservicio, el porcentaje de error llegó a subir hasta el 70%, lo que me hizo reflexionar sobre la importancia de probar y validar cada modificación antes de considerarla como una mejora. Este proceso de prueba y error fue fundamental para entender cómo cada cambio afectaba el comportamiento del sistema.</p>
+                    
+                    <p>Finalmente, después de múltiples iteraciones y ajustes, logré llegar a un porcentaje final de error del 16%, lo cual representa una mejora considerable desde el inicio. Este resultado me demostró la importancia de las pruebas de carga y cómo pueden ayudar a identificar y resolver problemas de rendimiento antes de que afecten a los usuarios en producción.</p>
+                    
+                    <p>Asimismo, esta actividad me ayudó a entender mejor el funcionamiento de los tokens JWT, ya que todavía no me había quedado completamente claro cómo funcionaban en la práctica. A través de las pruebas con Locust, pude observar cómo los tokens se generaban, se validaban y se refrescaban en tiempo real, lo que me permitió comprender mejor el flujo completo de autenticación.</p>
+                    
+                    <p>Un descubrimiento importante fue que todos los errores actuales son debido a refresh token por el tiempo. Esto me hizo entender la importancia de configurar correctamente los tiempos de expiración de los tokens y cómo esto afecta el rendimiento del sistema cuando hay muchos usuarios simultáneos.</p>
+                    
+                    <p>Un hallazgo particularmente interesante fue que al usar solo un usuario para las pruebas, el porcentaje de fallos resultaba en un 70%, porque un único usuario se acababa todas las requests de refresh del token, generando rate limiting y errores. Sin embargo, al agregar más usuarios para las pruebas, el porcentaje de fallos disminuyó considerablemente hasta llegar al porcentaje actual. Esto me enseñó la importancia de distribuir la carga entre múltiples usuarios y cómo el rate limiting puede afectar de manera diferente según el número de usuarios concurrentes.</p>
+                    
+                    <p>En conclusión, esta actividad fue muy valiosa para entender tanto el funcionamiento práctico de los tokens JWT como la importancia de las pruebas de carga para optimizar el rendimiento de los microservicios. Me permitió ver de manera tangible cómo pequeños cambios pueden tener un impacto significativo en la eficiencia del sistema.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

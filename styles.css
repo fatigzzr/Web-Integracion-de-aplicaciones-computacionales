@@ -315,6 +315,46 @@ li {
     box-shadow: 0 8px 25px rgba(205, 92, 92, 0.3) !important;
 }
 
+.menu-card[href="ejercicio10.html"],
+.exercises-section .menu-card[href="ejercicio10.html"] {
+    border-color: #C19A6B !important;
+}
+
+.menu-card[href="ejercicio10.html"] h3,
+.exercises-section .menu-card[href="ejercicio10.html"] h3 {
+    color: #C19A6B !important;
+}
+
+.menu-card[href="ejercicio10.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio10.html"] .arrow {
+    color: #C19A6B !important;
+}
+
+.menu-card[href="ejercicio10.html"]:hover,
+.exercises-section .menu-card[href="ejercicio10.html"]:hover {
+    box-shadow: 0 8px 25px rgba(193, 154, 107, 0.3) !important;
+}
+
+.menu-card[href="/ejercicio16.html"],
+.exercises-section .menu-card[href="/ejercicio16.html"] {
+    border-color: #ffb347 !important;
+}
+
+.menu-card[href="/ejercicio16.html"] h3,
+.exercises-section .menu-card[href="/ejercicio16.html"] h3 {
+    color: #ffb347 !important;
+}
+
+.menu-card[href="/ejercicio16.html"] .arrow,
+.exercises-section .menu-card[href="/ejercicio16.html"] .arrow {
+    color: #ffb347 !important;
+}
+
+.menu-card[href="/ejercicio16.html"]:hover,
+.exercises-section .menu-card[href="/ejercicio16.html"]:hover {
+    box-shadow: 0 8px 25px rgba(255, 179, 71, 0.3) !important;
+}
+
 /* Colores para tareas */
 .menu-card[href="tarea1.html"] {
     border-color: #9ff4f6;
