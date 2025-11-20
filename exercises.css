@@ -1290,6 +1290,45 @@
     background: #333 !important;
 }
 
+.tarea8 .header h1 {
+    color: #a0c4ff;
+}
+
+.tarea8 .exercise-info h3,
+.tarea8 .screenshots-section h3,
+.tarea8 .file-preview h3,
+.tarea8 .reflection-section h3,
+.tarea8 .code-section h3 {
+    border-bottom: 2px solid #a0c4ff;
+    text-align: left;
+}
+
+.tarea8 .image-modal-close:hover {
+    color: #a0c4ff;
+}
+
+.tarea8 a {
+    color: #a0c4ff;
+    text-decoration: underline;
+}
+
+.tarea8 a:hover {
+    color: #7f9fd2;
+    text-decoration: underline;
+}
+
+.tarea8 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.tarea8 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
 /* Estilos para las tarjetas del grid dentro de tarea7 */
 .tarea7 .menu-grid .menu-card {
     border-color: #A8E6CF;

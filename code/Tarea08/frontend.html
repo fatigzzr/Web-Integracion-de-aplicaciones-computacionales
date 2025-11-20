@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Libros Dashboard</title>
+    <link rel="stylesheet" href="frontend.css">
+</head>
+<body>
+    <header>
+        <h1>Libros Dashboard</h1>
+        <p>Cliente web para los endpoints de libros_bucket/micro.py</p>
+    </header>
+    <main>
+        <section>
+            <h2>Configuración</h2>
+            <label>Base URL del API</label>
+            <input type="text" id="baseUrl" value="http://localhost:5003">
+            <button id="saveBaseUrl">Actualizar URL</button>
+        </section>
+
+        <section class="grid">
+            <div>
+                <h2>Registro</h2>
+                <label>Usuario</label>
+                <input type="text" id="regUsername">
+                <label>Email</label>
+                <input type="email" id="regEmail">
+                <label>Contraseña</label>
+                <input type="password" id="regPassword">
+                <button id="registerBtn">Registrar</button>
+            </div>
+            <div>
+                <h2>Login</h2>
+                <label>Usuario o Email</label>
+                <input type="text" id="loginIdentifier">
+                <label>Contraseña</label>
+                <input type="password" id="loginPassword">
+                <button id="loginBtn">Iniciar sesión</button>
+                <button id="refreshBtn" class="secondary">Refresh token</button>
+                <button id="logoutBtn" class="secondary">Logout</button>
+                <button id="revokeBtn" class="danger">Revocar todos</button>
+            </div>
+            <div>
+                <h2>Tokens actuales</h2>
+                <p id="authStatus" class="status status-offline">No autenticado</p>
+                <textarea id="tokenDisplay" rows="10" readonly></textarea>
+            </div>
+        </section>
+
+        <section>
+            <h2>Libros</h2>
+            <div class="control-row">
+                <button id="loadBooksBtn">Cargar todos</button>
+                <div>
+                    <label>ISBN</label>
+                    <input type="text" id="isbnSearch" placeholder="978...">
+                </div>
+                <button id="searchIsbnBtn">Buscar ISBN</button>
+                <div>
+                    <label>Formato</label>
+                    <select id="formatSelect">
+                        <option value="">Seleccione</option>
+                    </select>
+                </div>
+                <button id="filterFormatBtn">Filtrar formato</button>
+                <div>
+                    <label>Autor contiene</label>
+                    <input type="text" id="authorInput" placeholder="Nombre o parte">
+                </div>
+                <button id="filterAuthorBtn">Filtrar autor</button>
+            </div>
+            <div id="books-list"></div>
+            <div id="book-detail"></div>
+        </section>
+
+        <section>
+            <h2>Crear / Editar libro</h2>
+            <form id="bookForm">
+                <label>ISBN</label>
+                <input type="text" id="bookIsbn" name="isbn" required>
+
+                <label>Título</label>
+                <input type="text" id="bookTitle" name="title" required>
+
+                <label>Autores (separados por coma)</label>
+                <input type="text" id="bookAuthors" name="authors" required placeholder="Autor Uno, Autor Dos">
+
+                <label>Año publicación</label>
+                <input type="number" id="bookYear" name="year" required min="0">
+
+                <label>Género</label>
+                <select id="bookGenre" name="genre" required></select>
+
+                <label>Formato</label>
+                <select id="bookFormat" name="format" required></select>
+
+                <label>Precio</label>
+                <input type="number" id="bookPrice" name="price" step="0.01" required>
+
+                <label><input type="checkbox" id="bookStock" name="stock" value="true"> En stock</label>
+
+                <label>Acción</label>
+                <select id="bookAction">
+                    <option value="insert">Insertar / Upsert</option>
+                    <option value="update">Actualizar</option>
+                </select>
+
+                <label>Imágenes (PNG/JPG, máx 5 archivos, 5 MB c/u)</label>
+                <input type="file" id="bookImages" name="images" accept="image/png,image/jpeg" multiple>
+                <div id="preview-list"></div>
+
+                <button type="submit">Guardar (insert/update)</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Eliminar libros</h2>
+            <label>ISBNs separados por coma</label>
+            <input type="text" id="deleteIsbns" placeholder="9781234567890,9781111111111">
+            <button id="deleteBtn" class="danger">Eliminar</button>
+        </section>
+
+        <section>
+            <h2>Mensajes</h2>
+            <div id="messages"></div>
+            <div id="error"></div>
+        </section>
+    </main>
+
+    <script src="frontend.js"></script>
+</body>
+</html>
