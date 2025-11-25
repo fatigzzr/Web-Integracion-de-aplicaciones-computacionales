@@ -38,64 +38,12 @@
             <div class="exercise-info">
                 <h3>Objetivos Específicos</h3>
                 <p>A continuación, se presentan los objetivos específicos de cada tipo de prueba de rendimiento que se aplicará a los microservicios del sistema:</p>
-                <ol>
-                    <li><strong>Prueba Baseline (50 usuarios, 5 minutos)</strong>
-                        <ul>
-                            <li>Establecer un punto de referencia inicial del desempeño del sistema bajo una carga ligera y estable.</li>
-                            <li>Medir tiempos de respuesta, throughput y tasas de error en condiciones normales.</li>
-                            <li>Identificar problemas básicos de latencia o disponibilidad antes de ejecutar pruebas más intensivas.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba Smoke (1–5 usuarios)</strong>
-                        <ul>
-                            <li>Verificar rápidamente que los servicios están activos y responden adecuadamente.</li>
-                            <li>Confirmar que las rutas esenciales funcionan sin fallos.</li>
-                            <li>Detectar errores críticos de configuración, despliegue o comunicación entre microservicios.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba Read-Heavy vs Write-Heavy</strong>
-                        <ul>
-                            <li>Evaluar el comportamiento del sistema bajo diferentes patrones de uso.</li>
-                            <li>En escenarios read-heavy: analizar la eficiencia en operaciones GET, uso de caché y tiempo de consulta.</li>
-                            <li>En escenarios write-heavy: medir el impacto en operaciones POST, validaciones y escritura en la base de datos.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba Ramp-Up / Ramp-Down (LoadTestShape)</strong>
-                        <ul>
-                            <li>Analizar la respuesta del sistema ante incrementos graduales de usuarios concurrentes.</li>
-                            <li>Identificar el punto en que comienzan a aparecer degradaciones en el rendimiento.</li>
-                            <li>Evaluar la capacidad del sistema para recuperarse cuando la carga disminuye progresivamente.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba Spike (incremento abrupto, e.g., 200 → 1000 usuarios en 10 s)</strong>
-                        <ul>
-                            <li>Medir la resiliencia del sistema ante picos súbitos de tráfico.</li>
-                            <li>Identificar si alguna parte del sistema colapsa o rechaza solicitudes durante el pico.</li>
-                            <li>Analizar si la infraestructura puede absorber aumentos repentinos sin afectar al usuario final.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba Soak (≥ 30 minutos de carga moderada)</strong>
-                        <ul>
-                            <li>Verificar la estabilidad del sistema durante periodos prolongados de carga.</li>
-                            <li>Detectar degradación progresiva, memory leaks o saturación de recursos.</li>
-                            <li>Garantizar que el sistema mantiene un rendimiento constante durante toda la prueba.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba Break-Point</strong>
-                        <ul>
-                            <li>Determinar el límite máximo de usuarios concurrentes que el sistema puede soportar.</li>
-                            <li>Identificar el punto de quiebre donde el rendimiento disminuye significativamente o ocurren fallos.</li>
-                            <li>Proporcionar métricas para estimar la capacidad real y requerimientos de escalabilidad.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Prueba con CSV Feeder (users.csv)</strong>
-                        <ul>
-                            <li>Simular interacciones con usuarios distintos utilizando credenciales reales.</li>
-                            <li>Evaluar el impacto del login concurrente y el manejo de autenticación.</li>
-                            <li>Medir el comportamiento del sistema en rutas protegidas con múltiples sesiones activas.</li>
-                        </ul>
-                    </li>
-                </ol>
+                <strong>1. Prueba Baseline (50 usuarios, 5 minutos)</strong>
+                <ul>
+                    <li>Establecer un punto de referencia inicial del desempeño del sistema bajo una carga ligera y estable.</li>
+                    <li>Medir tiempos de respuesta, throughput y tasas de error en condiciones normales.</li>
+                    <li>Identificar problemas básicos de latencia o disponibilidad antes de ejecutar pruebas más intensivas.</li>
+                </ul>
             </div>
 
             <div class="exercise-info">
@@ -124,76 +72,6 @@
                                     <li>Duración promedio: 5–10 minutos</li>
                                     <li>Tasa de spawn: 5 usuarios/segundo</li>
                                     <li>Descripción: Se utilizó una carga estable de 50 usuarios concurrentes ejecutando operaciones mixtas (lectura y escritura). Esta prueba permitió establecer una línea base del rendimiento general de los microservicios bajo un nivel de carga representativo.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Smoke</strong>
-                                <ul>
-                                    <li>Usuarios: 10</li>
-                                    <li>Duración: 2 minutos</li>
-                                    <li>Tasa de spawn: 2 usuarios/segundo</li>
-                                    <li>Descripción: Esta prueba se usó como verificación preliminar del sistema para asegurar que todos los servicios respondieran correctamente antes de ejecutar escenarios más complejos.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Read-Heavy</strong>
-                                <ul>
-                                    <li>Usuarios: 100</li>
-                                    <li>Duración: 15 minutos</li>
-                                    <li>Tasa de spawn: 10 usuarios/segundo</li>
-                                    <li>Proporción: 80% GET / 20% POST</li>
-                                    <li>Descripción: Esta prueba evaluó principalmente las rutas de lectura, como extracción de información del paciente, predicciones y recomendaciones.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Write-Heavy</strong>
-                                <ul>
-                                    <li>Usuarios: 50</li>
-                                    <li>Duración: 10 minutos</li>
-                                    <li>Tasa de spawn: 5 usuarios/segundo</li>
-                                    <li>Proporción: 80% POST / 20% GET</li>
-                                    <li>Descripción: Se enfocó en endpoints que realizan escrituras o generan cambios de estado, como actualización de pacientes, estilo de vida y registros de historial clínico.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Ramp-Up</strong>
-                                <ul>
-                                    <li>Usuarios definidos por parámetro: incrementos progresivos</li>
-                                    <li>Tasa de spawn: ajustada manualmente durante ejecución</li>
-                                    <li>Descripción: Aunque el LoadTestShape estaba deshabilitado, se simuló un aumento gradual de usuarios modificando los parámetros --users y --spawn-rate, permitiendo observar degradación progresiva del rendimiento.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Ramp-Down</strong>
-                                <ul>
-                                    <li>Usuarios definidos por parámetro: reducciones progresivas</li>
-                                    <li>Descripción: Similar a la prueba anterior, pero enfocada en evaluar la recuperación del sistema cuando la carga disminuye de forma gradual.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Spike</strong>
-                                <ul>
-                                    <li>Usuarios: un incremento abrupto aplicado generalmente entre 50 y 200 usuarios</li>
-                                    <li>Tasa de spawn: muy elevada (entre 20 y 50 usuarios/segundo)</li>
-                                    <li>Descripción: Se aplicó un aumento repentino de usuarios que permitió evaluar la capacidad de los microservicios para soportar picos rápidos en el tráfico.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Soak</strong>
-                                <ul>
-                                    <li>Usuarios: 100</li>
-                                    <li>Duración: 1 hora</li>
-                                    <li>Tasa de spawn: 10 usuarios/segundo</li>
-                                    <li>Descripción: Esta prueba permitió analizar el comportamiento de los microservicios bajo carga sostenida por periodos prolongados, monitoreando degradación progresiva o problemas de memoria.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba Break-Point</strong>
-                                <ul>
-                                    <li>Usuarios: incremento continuo</li>
-                                    <li>Límite máximo observado: definido durante ejecución manual</li>
-                                    <li>Descripción: Al no usar LoadTestShape, esta prueba se realizó aumentando la carga escalonadamente hasta observar fallos, identificando así el punto de saturación del sistema.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Prueba con CSV Feeder</strong>
-                                <ul>
-                                    <li>Usuarios: 50</li>
-                                    <li>Duración: 10 minutos</li>
-                                    <li>Tasa de spawn: 10 usuarios/segundo</li>
-                                    <li>Datos: archivo users.csv con múltiples credenciales</li>
-                                    <li>Descripción: Esta prueba simuló múltiples usuarios reales realizando autenticación concurrente y operaciones autenticadas, evaluando el manejo de tokens y sesiones.</li>
                                 </ul>
                             </li>
                         </ol>
