@@ -301,22 +301,22 @@ li {
 
 .menu-card[href="ejercicio9.html"],
 .exercises-section .menu-card[href="ejercicio9.html"] {
-    border-color: #CD5C5C !important;
+    border-color: #f7b199 !important;
 }
 
 .menu-card[href="ejercicio9.html"] h3,
 .exercises-section .menu-card[href="ejercicio9.html"] h3 {
-    color: #CD5C5C !important;
+    color: #f7b199 !important;
 }
 
 .menu-card[href="ejercicio9.html"] .arrow,
 .exercises-section .menu-card[href="ejercicio9.html"] .arrow {
-    color: #CD5C5C !important;
+    color: #f7b199 !important;
 }
 
 .menu-card[href="ejercicio9.html"]:hover,
 .exercises-section .menu-card[href="ejercicio9.html"]:hover {
-    box-shadow: 0 8px 25px rgba(205, 92, 92, 0.3) !important;
+    box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
 }
 
 .menu-card[href="ejercicio10.html"],
@@ -456,6 +456,26 @@ li {
 
 .menu-card[href="ejercicio18.html"]:hover,
 .exercises-section .menu-card[href="ejercicio18.html"]:hover {
+    box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
+}
+
+.menu-card[href="ejercicio19.html"],
+.exercises-section .menu-card[href="ejercicio19.html"] {
+    border-color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio19.html"] h3,
+.exercises-section .menu-card[href="ejercicio19.html"] h3 {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio19.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio19.html"] .arrow {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio19.html"]:hover,
+.exercises-section .menu-card[href="ejercicio19.html"]:hover {
     box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
 }
 
