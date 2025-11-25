@@ -38,7 +38,8 @@
             <div class="exercise-info">
                 <h3>Objetivos Específicos</h3>
                 <p>A continuación, se presentan los objetivos específicos de cada tipo de prueba de rendimiento que se aplicará a los microservicios del sistema:</p>
-                <strong>1. Prueba Baseline (50 usuarios, 5 minutos)</strong>
+
+                <p>1. <strong>Prueba Baseline (50 usuarios, 5 minutos)</strong></p>
                 <ul>
                     <li>Establecer un punto de referencia inicial del desempeño del sistema bajo una carga ligera y estable.</li>
                     <li>Medir tiempos de respuesta, throughput y tasas de error en condiciones normales.</li>
@@ -1628,22 +1629,6 @@ user_100@hypertension-risk.com,password123
                             <li>Máximo: 10,988 ms</li>
                             <li>Mediana: 5400 ms</li>
                         </ul>
-                    </li>
-                    <li><strong>¿Dónde aparecen fugas o degradación en la prueba soak?</strong>
-                        <p>Aunque esta prueba no es un soak, el baseline permite observar tendencias:</p>
-                        <ul>
-                            <li>Los endpoints POST (/paciente, /estilo_vida, /guardar_historial) muestran mayores latencias (1.4–1.9 s promedio).</li>
-                            <li>Los endpoints GET mantienen tiempos más estables (~1.3–1.4 s).</li>
-                            <li>La operación de login es la que más se degrada incluso con carga ligera.</li>
-                        </ul>
-                    </li>
-                    <li><strong>¿Cuál es el punto de ruptura de cada servicio?</strong>
-                        <p>La prueba baseline no es una prueba de breakpoint, pero los datos indican cercanía al límite bajo carga moderada (orden de más débil a más resistente):</p>
-                        <ol>
-                            <li>Auth: al borde del límite, con latencias &gt; 5–10 s.</li>
-                            <li>POST (estilo de vida, paciente, historial): cercanos a 2.0–2.2 s en percentil 99.</li>
-                            <li>GET (paciente, predicciones, recomendaciones): estables ~2.1 s máximos.</li>
-                        </ol>
                     </li>
                     <li><strong>¿El CMS se comporta igual que los microservicios bajo carga de escritura?</strong>
                         <p>No. En condiciones de carga, el CMS tendería a comportarse como los microservicios de escritura, mostrando más latencia que los servicios de solo lectura. Basado únicamente en el baseline:</p>
