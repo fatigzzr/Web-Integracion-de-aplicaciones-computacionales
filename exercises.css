@@ -129,6 +129,47 @@
     transition: transform 0.3s ease;
 }
 
+.graph-shot img {
+    width: auto;
+    max-width: none;
+    max-height: 420px;
+    object-fit: contain;
+}
+
+.download-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.download-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #f7b199;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 1rem;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.download-buttons .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    background: #e6a48a;
+}
+
+.download-buttons .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
 .screenshot-item img:hover {
     transform: scale(1.02);
 }
@@ -1171,6 +1212,108 @@
     background: #333 !important;
 }
 
+/* Estilos específicos para ejercicio11 (#f7b199) - Soft Salmon */
+.ejercicio11 .header h1 {
+    color: #f7b199;
+}
+
+.ejercicio11 .exercise-info h3,
+.ejercicio11 .screenshots-section h3,
+.ejercicio11 .reflection-section h3,
+.ejercicio11 .code-section h3 {
+    border-bottom: 2px solid #f7b199;
+    text-align: left;
+}
+
+.ejercicio11 .image-modal-close:hover {
+    color: #f7b199;
+}
+
+.ejercicio11 a {
+    color: #f7b199;
+    text-decoration: underline;
+}
+
+.ejercicio11 a:hover {
+    color: #d98f7b;
+    text-decoration: underline;
+}
+
+.ejercicio11 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio11 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
+.architecture-diagram {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+}
+
+.architecture-diagram img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px;
+    text-align: left;
+    font-weight: 500;
+    color: #333;
+}
+
+.results-table thead {
+    background: transparent;
+    color: inherit;
+}
+
+.table-card {
+    margin: 12px 0;
+    border: 1px solid #f7b199;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.table-title {
+    padding: 8px 12px;
+    background: #f7b199;
+    color: #fff;
+    font-weight: bold;
+    margin: 0;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    background: #fff;
+    margin-top: 0;
+}
+
+.table-responsive.scrollable {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.results-table thead th {
+    background: rgba(247, 177, 153, 0.5);
+}
 /* Estilos específicos para ejercicio16 (#ffb347) */
 .ejercicio16 .header h1 {
     color: #ffb347;

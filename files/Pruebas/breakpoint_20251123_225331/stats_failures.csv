@@ -1,0 +1,6 @@
+Method,Name,Error,Occurrences
+GET,/recommendations/{id} [GET],"ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)",1
+POST,/paciente [POST],"ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)",43
+POST,/estilo_vida [POST],"ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)",2
+GET,/paciente/{id} [GET],"ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)",90
+GET,/recommendations/{id} [GET],"ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine', None, 10053, None)",1
