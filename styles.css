@@ -139,6 +139,8 @@ li {
     text-decoration: none;
     color: inherit;
     display: block;
+    max-height: 230px;
+    overflow: hidden;
 }
 
 /* Colores temáticos para tarjetas de ejercicios */
@@ -372,6 +374,46 @@ li {
 
 .menu-card[href="ejercicio12.html"]:hover,
 .exercises-section .menu-card[href="ejercicio12.html"]:hover {
+    box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
+}
+
+.menu-card[href="ejercicio14.html"],
+.exercises-section .menu-card[href="ejercicio14.html"] {
+    border-color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio14.html"] h3,
+.exercises-section .menu-card[href="ejercicio14.html"] h3 {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio14.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio14.html"] .arrow {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio14.html"]:hover,
+.exercises-section .menu-card[href="ejercicio14.html"]:hover {
+    box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
+}
+
+.menu-card[href="ejercicio13.html"],
+.exercises-section .menu-card[href="ejercicio13.html"] {
+    border-color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio13.html"] h3,
+.exercises-section .menu-card[href="ejercicio13.html"] h3 {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio13.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio13.html"] .arrow {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio13.html"]:hover,
+.exercises-section .menu-card[href="ejercicio13.html"]:hover {
     box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
 }
 

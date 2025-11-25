@@ -112,6 +112,11 @@
     margin-top: 1rem;
 }
 
+.screenshot-gallery.two-cols {
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
+}
+
 .screenshot-item {
     text-align: center;
     background: white;
@@ -134,6 +139,28 @@
     max-width: none;
     max-height: 420px;
     object-fit: contain;
+}
+
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.table-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.table-stack .table-card {
+    flex: 1;
+}
+
+.table-stack h4 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
 }
 
 .download-buttons {
@@ -1212,40 +1239,40 @@
     background: #333 !important;
 }
 
-/* Estilos específicos para ejercicio11 (#f7b199) - Soft Salmon */
-.ejercicio11 .header h1 {
+/* Estilos específicos para ejercicio12 (#f7b199) - Soft Salmon */
+.ejercicio12 .header h1 {
     color: #f7b199;
 }
 
-.ejercicio11 .exercise-info h3,
-.ejercicio11 .screenshots-section h3,
-.ejercicio11 .reflection-section h3,
-.ejercicio11 .code-section h3 {
+.ejercicio12 .exercise-info h3,
+.ejercicio12 .screenshots-section h3,
+.ejercicio12 .reflection-section h3,
+.ejercicio12 .code-section h3 {
     border-bottom: 2px solid #f7b199;
     text-align: left;
 }
 
-.ejercicio11 .image-modal-close:hover {
+.ejercicio12 .image-modal-close:hover {
     color: #f7b199;
 }
 
-.ejercicio11 a {
+.ejercicio12 a {
     color: #f7b199;
     text-decoration: underline;
 }
 
-.ejercicio11 a:hover {
+.ejercicio12 a:hover {
     color: #d98f7b;
     text-decoration: underline;
 }
 
-.ejercicio11 .back-btn {
+.ejercicio12 .back-btn {
     color: white !important;
     text-decoration: none !important;
     background: #000 !important;
 }
 
-.ejercicio11 .back-btn:hover {
+.ejercicio12 .back-btn:hover {
     color: white !important;
     text-decoration: none !important;
     background: #333 !important;
@@ -1290,6 +1317,8 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
 }
 
 .table-title {
@@ -1302,13 +1331,11 @@
 
 .table-responsive {
     overflow-x: auto;
+    overflow-y: auto;
     background: #fff;
     margin-top: 0;
-}
-
-.table-responsive.scrollable {
-    max-height: 360px;
-    overflow-y: auto;
+    max-height: 400px;
+    flex: 1;
 }
 
 .results-table thead th {

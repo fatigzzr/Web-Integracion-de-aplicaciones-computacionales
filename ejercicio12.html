@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ejercicio 12: Prueba smoke - Fatima González Romo</title>
+    <title>Ejercicio 12: Prueba baseline - Fatima González Romo</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="exercises.css">
     <script src="script.js"></script>
 </head>
 <body>
-    <div class="container ejercicio11">
+    <div class="container ejercicio12">
         <div class="header">
             <a href="index.html" class="back-btn">← Volver al Menú</a>
-            <h1>Ejercicio 12: Prueba smoke</h1>
-            <p>1–5 usuarios, verificación rápida de disponibilidad.</p>
+            <h1>Ejercicio 12: Prueba baseline</h1>
+            <p>Carga ligera constante (50 usuarios, 5 min).</p>
         </div>
         
         <div class="content">
@@ -39,11 +39,11 @@
                 <h3>Objetivos Específicos</h3>
                 <p>A continuación, se presentan los objetivos específicos de cada tipo de prueba de rendimiento que se aplicará a los microservicios del sistema:</p>
 
-                <p>2. <strong>Prueba Smoke (1–5 usuarios)</strong></p>
+                <p>1. <strong>Prueba Baseline (50 usuarios, 5 minutos)</strong></p>
                 <ul>
-                    <li>Verificar rápidamente que los servicios están activos y responden adecuadamente.</li>
-                    <li>Confirmar que las rutas esenciales funcionan sin fallos.</li>
-                    <li>Detectar errores críticos de configuración, despliegue o comunicación entre microservicios.</li>
+                    <li>Establecer un punto de referencia inicial del desempeño del sistema bajo una carga ligera y estable.</li>
+                    <li>Medir tiempos de respuesta, throughput y tasas de error en condiciones normales.</li>
+                    <li>Identificar problemas básicos de latencia o disponibilidad antes de ejecutar pruebas más intensivas.</li>
                 </ul>
             </div>
 
@@ -67,12 +67,12 @@
                     </li>
                     <li><strong>Descripción de los escenarios de carga</strong>:
                         <ul>
-                            <li><strong>Prueba Smoke</strong>
+                            <li><strong>Prueba Baseline</strong>
                                 <ul>
-                                    <li>Usuarios: 10</li>
-                                    <li>Duración: 2 minutos</li>
-                                    <li>Tasa de spawn: 2 usuarios/segundo</li>
-                                    <li>Descripción: Esta prueba se usó como verificación preliminar del sistema para asegurar que todos los servicios respondieran correctamente antes de ejecutar escenarios más complejos.</li>
+                                    <li>Usuarios: 50</li>
+                                    <li>Duración promedio: 5–10 minutos</li>
+                                    <li>Tasa de spawn: 5 usuarios/segundo</li>
+                                    <li>Descripción: Se utilizó una carga estable de 50 usuarios concurrentes ejecutando operaciones mixtas (lectura y escritura). Esta prueba permitió establecer una línea base del rendimiento general de los microservicios bajo un nivel de carga representativo.</li>
                                 </ul>
                             </li>
                         </ol>
@@ -882,28 +882,28 @@ Generate HTML report:
 </code></pre>
                 </div>
 
-                <h4>Script PowerShell para prueba Smoke (ejecución headless)</h4>
+                <h4>Script PowerShell para prueba Baseline (ejecución headless)</h4>
                 <div class="code-preview">
                     <div class="code-header-bar">
                         <div class="code-language">PowerShell</div>
                     </div>
-<pre class="code-display"><code># Smoke Test - Quick verification of all endpoints
+<pre class="code-display"><code># Baseline Test - Establish performance baseline
 param(
     [string]$OutputDir = "load_test_results"
 )
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$resultsDir = "$OutputDir/smoke_$timestamp"
+$resultsDir = "$OutputDir/baseline_$timestamp"
 New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
 
-Write-Host "Running Smoke Test..." -ForegroundColor Cyan
+Write-Host "Running Baseline Test..." -ForegroundColor Cyan
 Write-Host "Results: $resultsDir" -ForegroundColor Green
 
-locust -f testing/locustfile.py SmokeTest `
+locust -f testing/locustfile.py BaselineTest `
     --headless `
-    --users 5 `
-    --spawn-rate 5 `
-    --run-time 1m `
+    --users 30 `
+    --spawn-rate 10 `
+    --run-time 3m `
     --html "$resultsDir/report.html" `
     --csv "$resultsDir/stats"
 
@@ -1198,6 +1198,7 @@ user_100@hypertension-risk.com,password123
 
                 <ol>
                     <li><strong>Tablas comparativas de métricas clave:</strong>
+
     <div class="table-card">
         <div class="table-title">stats_exceptions.csv</div>
         <div class="table-responsive">
@@ -1207,6 +1208,7 @@ user_100@hypertension-risk.com,password123
             </table>
         </div>
     </div>
+
     <div class="table-card">
         <div class="table-title">stats_failures.csv</div>
         <div class="table-responsive">
@@ -1216,150 +1218,392 @@ user_100@hypertension-risk.com,password123
             </table>
         </div>
     </div>
+
     <div class="table-card">
         <div class="table-title">stats_stats.csv</div>
         <div class="table-responsive">
             <table class="results-table">
                 <thead><tr><th>Type</th><th>Name</th><th>Request Count</th><th>Failure Count</th><th>Median Response Time</th><th>Average Response Time</th><th>Min Response Time</th><th>Max Response Time</th><th>Average Content Size</th><th>Requests/s</th><th>Failures/s</th><th>50%</th><th>66%</th><th>75%</th><th>80%</th><th>90%</th><th>95%</th><th>98%</th><th>99%</th><th>99.9%</th><th>99.99%</th><th>100%</th></tr></thead>
                 <tbody><tr></tr>
-<tr><td>POST</td><td>/auth/login</td><td>5</td><td>0</td><td>4708.5647999774665</td><td>5123.138320003636</td><td>4708.5647999774665</td><td>6036.693000001833</td><td>856.2</td><td>0.08637106430964253</td><td>0.0</td><td>4700</td><td>5400</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td></tr>
+<tr><td>POST</td><td>/auth/login</td><td>30</td><td>0</td><td>5400.0</td><td>5907.034746666129</td><td>2644.484700052999</td><td>10988.49869996775</td><td>852.6</td><td>0.16770417541055538</td><td>0.0</td><td>5500</td><td>6700</td><td>8100</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td></tr>
 <tr></tr>
-<tr><td>GET</td><td>/auth/me</td><td>5</td><td>0</td><td>5</td><td>392.8550800308585</td><td>2.0343000069260597</td><td>1300.457900040783</td><td>178.6</td><td>0.08637106430964253</td><td>0.0</td><td>5</td><td>650</td><td>650</td><td>1300</td><td>1300</td><td>1300</td><td>1300</td><td>1300</td><td>1300</td><td>1300</td><td>1300</td></tr>
+<tr><td>GET</td><td>/auth/me</td><td>30</td><td>0</td><td>1600.0</td><td>2790.113839992167</td><td>2.7605999493971467</td><td>7885.505100013688</td><td>177.63333333333333</td><td>0.16770417541055538</td><td>0.0</td><td>1800</td><td>3500</td><td>5100</td><td>6000</td><td>7000</td><td>7800</td><td>7900</td><td>7900</td><td>7900</td><td>7900</td><td>7900</td></tr>
 <tr></tr>
-<tr><td>POST</td><td>/estilo_vida [POST]</td><td>8</td><td>0</td><td>2100.0</td><td>2384.048924985109</td><td>45.70939997211099</td><td>4266.967299976386</td><td>41.625</td><td>0.13819370289542804</td><td>0.0</td><td>2100</td><td>2200</td><td>4200</td><td>4200</td><td>4300</td><td>4300</td><td>4300</td><td>4300</td><td>4300</td><td>4300</td><td>4300</td></tr>
+<tr><td>POST</td><td>/estilo_vida [POST]</td><td>151</td><td>0</td><td>2100.0</td><td>1897.4131410625387</td><td>43.03149995394051</td><td>2268.9285000087693</td><td>41.47682119205298</td><td>0.8441110162331287</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2300</td><td>2300</td><td>2300</td></tr>
 <tr></tr>
-<tr><td>POST</td><td>/paciente [POST]</td><td>5</td><td>0</td><td>2100.0</td><td>2092.6111599896103</td><td>41.171499993652105</td><td>4150.759599986486</td><td>29.8</td><td>0.08637106430964253</td><td>0.0</td><td>2100</td><td>4100</td><td>4100</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td></tr>
+<tr><td>POST</td><td>/paciente [POST]</td><td>140</td><td>0</td><td>2100.0</td><td>1466.435607857836</td><td>39.583700010553</td><td>2217.3669999465346</td><td>29.392857142857142</td><td>0.7826194852492584</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td></tr>
 <tr></tr>
-<tr><td>GET</td><td>/paciente/{id} [GET]</td><td>10</td><td>0</td><td>2100.0</td><td>1909.385880024638</td><td>140.90180001221597</td><td>2205.178300035186</td><td>141.4</td><td>0.17274212861928506</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td></tr>
+<tr><td>GET</td><td>/paciente/{id} [GET]</td><td>308</td><td>0</td><td>2100.0</td><td>1386.2152857155625</td><td>38.387599983252585</td><td>2210.0106000434607</td><td>141.08116883116884</td><td>1.7217628675483685</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td></tr>
 <tr></tr>
-<tr><td>GET</td><td>/predict_diabetes/{id} [GET]</td><td>10</td><td>0</td><td>2200.0</td><td>2584.6191599965096</td><td>108.4517000708729</td><td>4227.5737000163645</td><td>134.6</td><td>0.17274212861928506</td><td>0.0</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td></tr>
+<tr><td>GET</td><td>/predict_diabetes/{id} [GET]</td><td>320</td><td>0</td><td>2200.0</td><td>1707.2927550038003</td><td>101.24290001112968</td><td>2907.3807999957353</td><td>134.45</td><td>1.7888445377125906</td><td>0.0</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2300</td><td>2300</td><td>2500</td><td>2900</td><td>2900</td><td>2900</td></tr>
 <tr></tr>
-<tr><td>POST</td><td>/predict_hypertension [POST]</td><td>8</td><td>0</td><td>2100.0</td><td>2133.213324996177</td><td>64.25850000232458</td><td>4176.184999989346</td><td>129.5</td><td>0.13819370289542804</td><td>0.0</td><td>2100</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td></tr>
+<tr><td>POST</td><td>/predict_hypertension [POST]</td><td>171</td><td>0</td><td>2100.0</td><td>1902.8816561402525</td><td>63.76699998509139</td><td>4200.770099996589</td><td>129.4795321637427</td><td>0.9559137998401656</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4200</td></tr>
 <tr></tr>
-<tr><td>GET</td><td>/recommendations/{id} [GET]</td><td>6</td><td>0</td><td>2100.0</td><td>2092.4792833199413</td><td>41.49109998252243</td><td>4143.758799997158</td><td>81.5</td><td>0.10364527717157103</td><td>0.0</td><td>2100</td><td>2100</td><td>4100</td><td>4100</td><td>4100</td><td>4100</td><td>4100</td><td>4100</td><td>4100</td><td>4100</td><td>4100</td></tr>
+<tr><td>GET</td><td>/recommendations/{id} [GET]</td><td>318</td><td>0</td><td>2100.0</td><td>1567.6847522010817</td><td>39.44289998617023</td><td>2218.8648000592366</td><td>951.9119496855346</td><td>1.777664259351887</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td><td>2200</td></tr>
 <tr></tr>
-<tr><td></td><td>Aggregated</td><td>57</td><td>0</td><td>2100.0</td><td>2310.1060859667004</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>174.40350877192984</td><td>0.9846301331299248</td><td>0.0</td><td>2100</td><td>2200</td><td>4100</td><td>4200</td><td>4300</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td></tr>
+<tr><td></td><td>Aggregated</td><td>1468</td><td>0</td><td>2100.0</td><td>1737.009081063914</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>308.31811989100817</td><td>8.20632431675651</td><td>0.0</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>6700</td><td>11000</td><td>11000</td><td>11000</td></tr>
 <tr></tr></tbody>
             </table>
         </div>
     </div>
+
     <div class="table-card">
         <div class="table-title">stats_stats_history.csv</div>
         <div class="table-responsive scrollable">
             <table class="results-table">
                 <thead><tr><th>Timestamp</th><th>User Count</th><th>Type</th><th>Name</th><th>Requests/s</th><th>Failures/s</th><th>50%</th><th>66%</th><th>75%</th><th>80%</th><th>90%</th><th>95%</th><th>98%</th><th>99%</th><th>99.9%</th><th>99.99%</th><th>100%</th><th>Total Request Count</th><th>Total Failure Count</th><th>Total Median Response Time</th><th>Total Average Response Time</th><th>Total Min Response Time</th><th>Total Max Response Time</th><th>Total Average Content Size</th></tr></thead>
                 <tbody><tr></tr>
-<tr><td>1763954891</td><td>0</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>1763954977</td><td>0</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
 <tr></tr>
-<tr><td>1763954892</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>1763954978</td><td>10</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
 <tr></tr>
-<tr><td>1763954893</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>1763954979</td><td>20</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
 <tr></tr>
-<tr><td>1763954894</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>1763954980</td><td>30</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>2600</td><td>2600</td><td>2700</td><td>2700</td><td>2700</td><td>2700</td><td>2700</td><td>2700</td><td>2700</td><td>2700</td><td>2700</td><td>3</td><td>0</td><td>2644.484700052999</td><td>2651.926300022751</td><td>2644.484700052999</td><td>2663.280799984932</td><td>863.6666666666666</td></tr>
 <tr></tr>
-<tr><td>1763954895</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>1763954981</td><td>30</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>2600</td><td>2700</td><td>3400</td><td>3500</td><td>3500</td><td>3500</td><td>3500</td><td>3500</td><td>3500</td><td>3500</td><td>3500</td><td>10</td><td>0</td><td>2600.0</td><td>1983.1603500060737</td><td>2.7605999493971467</td><td>3476.09780007042</td><td>587.7</td></tr>
 <tr></tr>
-<tr><td>1763954896</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>5</td><td>0</td><td>4700.0</td><td>2839.4105799961835</td><td>2.0343000069260597</td><td>4745.997300022282</td><td>580.2</td></tr>
+<tr><td>1763954982</td><td>30</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>2700</td><td>3100</td><td>3500</td><td>3500</td><td>4200</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>4700</td><td>18</td><td>0</td><td>2600.0</td><td>2274.106299996169</td><td>2.7605999493971467</td><td>4731.312399962917</td><td>592.3888888888889</td></tr>
 <tr></tr>
-<tr><td>1763954897</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>4700</td><td>4700</td><td>5400</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>7</td><td>0</td><td>4700.0</td><td>3660.0264285724343</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>661.5714285714286</td></tr>
+<tr><td>1763954983</td><td>30</td><td></td><td>Aggregated</td><td>0.750000</td><td>0.000000</td><td>2600</td><td>3400</td><td>3500</td><td>3900</td><td>4700</td><td>4900</td><td>5400</td><td>5400</td><td>5400</td><td>5400</td><td>5400</td><td>25</td><td>0</td><td>2600.0</td><td>2539.1580239962786</td><td>2.7605999493971467</td><td>5444.640100002289</td><td>546.52</td></tr>
 <tr></tr>
-<tr><td>1763954898</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>4700</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>10</td><td>0</td><td>1300.0</td><td>2757.9967000172473</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>517.4</td></tr>
+<tr><td>1763954984</td><td>30</td><td></td><td>Aggregated</td><td>3.000000</td><td>0.000000</td><td>2600</td><td>3400</td><td>3700</td><td>4200</td><td>4900</td><td>5800</td><td>6100</td><td>6100</td><td>6100</td><td>6100</td><td>6100</td><td>34</td><td>0</td><td>2200.0</td><td>2605.3215617635833</td><td>2.7605999493971467</td><td>6147.726399940439</td><td>503.3235294117647</td></tr>
 <tr></tr>
-<tr><td>1763954899</td><td>5</td><td></td><td>Aggregated</td><td>0.000000</td><td>0.000000</td><td>4700</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>10</td><td>0</td><td>1300.0</td><td>2757.9967000172473</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>517.4</td></tr>
+<tr><td>1763954985</td><td>30</td><td></td><td>Aggregated</td><td>3.000000</td><td>0.000000</td><td>2600</td><td>3500</td><td>3900</td><td>4600</td><td>5500</td><td>6100</td><td>6700</td><td>6700</td><td>6700</td><td>6700</td><td>6700</td><td>37</td><td>0</td><td>2600.0</td><td>2724.500910810044</td><td>2.7605999493971467</td><td>6663.41369994916</td><td>509.4864864864865</td></tr>
 <tr></tr>
-<tr><td>1763954900</td><td>5</td><td></td><td>Aggregated</td><td>1.428571</td><td>0.000000</td><td>4100</td><td>4700</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>13</td><td>0</td><td>4100.0</td><td>2922.2431923262775</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>425.0769230769231</td></tr>
+<tr><td>1763954986</td><td>30</td><td></td><td>Aggregated</td><td>4.285714</td><td>0.000000</td><td>2300</td><td>3500</td><td>4200</td><td>4700</td><td>5800</td><td>6400</td><td>7500</td><td>7500</td><td>7500</td><td>7500</td><td>7500</td><td>43</td><td>0</td><td>2300.0</td><td>2868.256976744052</td><td>2.7605999493971467</td><td>7531.623099930584</td><td>489.1860465116279</td></tr>
 <tr></tr>
-<tr><td>1763954901</td><td>5</td><td></td><td>Aggregated</td><td>1.428571</td><td>0.000000</td><td>4100</td><td>4700</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>13</td><td>0</td><td>4100.0</td><td>2922.2431923262775</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>425.0769230769231</td></tr>
+<tr><td>1763954987</td><td>30</td><td></td><td>Aggregated</td><td>4.375000</td><td>0.000000</td><td>2600</td><td>3700</td><td>4700</td><td>5400</td><td>6700</td><td>7500</td><td>8400</td><td>8400</td><td>8400</td><td>8400</td><td>8400</td><td>47</td><td>0</td><td>2600.0</td><td>3171.2743148945788</td><td>2.7605999493971467</td><td>8359.803500003181</td><td>502.2340425531915</td></tr>
 <tr></tr>
-<tr><td>1763954902</td><td>5</td><td></td><td>Aggregated</td><td>1.250000</td><td>0.000000</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>15</td><td>0</td><td>4200.0</td><td>3092.4751066835597</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>386.06666666666666</td></tr>
+<tr><td>1763954988</td><td>30</td><td></td><td>Aggregated</td><td>4.333333</td><td>0.000000</td><td>2300</td><td>3500</td><td>4900</td><td>5500</td><td>7500</td><td>9000</td><td>9200</td><td>10000</td><td>10000</td><td>10000</td><td>10000</td><td>56</td><td>0</td><td>2200.0</td><td>3357.783333932665</td><td>2.7605999493971467</td><td>10087.936000083573</td><td>475.82142857142856</td></tr>
 <tr></tr>
-<tr><td>1763954903</td><td>5</td><td></td><td>Aggregated</td><td>1.250000</td><td>0.000000</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>15</td><td>0</td><td>4200.0</td><td>3092.4751066835597</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>386.06666666666666</td></tr>
+<tr><td>1763954989</td><td>30</td><td></td><td>Aggregated</td><td>4.400000</td><td>0.000000</td><td>2600</td><td>4200</td><td>5400</td><td>6100</td><td>8100</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>69</td><td>0</td><td>2600.0</td><td>3632.8794463787335</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>438.7971014492754</td></tr>
 <tr></tr>
-<tr><td>1763954904</td><td>5</td><td></td><td>Aggregated</td><td>1.500000</td><td>0.000000</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>16</td><td>0</td><td>4100.0</td><td>2903.433506267902</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>370.0</td></tr>
+<tr><td>1763954990</td><td>30</td><td></td><td>Aggregated</td><td>4.900000</td><td>0.000000</td><td>2600</td><td>4200</td><td>5500</td><td>6100</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>83</td><td>0</td><td>2600.0</td><td>3660.045720479754</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>400.30120481927713</td></tr>
 <tr></tr>
-<tr><td>1763954905</td><td>5</td><td></td><td>Aggregated</td><td>1.500000</td><td>0.000000</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>16</td><td>0</td><td>4100.0</td><td>2903.433506267902</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>370.0</td></tr>
+<tr><td>1763954991</td><td>30</td><td></td><td>Aggregated</td><td>5.600000</td><td>0.000000</td><td>2600</td><td>4200</td><td>5400</td><td>6100</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>87</td><td>0</td><td>2600.0</td><td>3565.1367114931772</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>384.7241379310345</td></tr>
 <tr></tr>
-<tr><td>1763954906</td><td>5</td><td></td><td>Aggregated</td><td>1.500000</td><td>0.000000</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>18</td><td>0</td><td>4100.0</td><td>2933.5729944610243</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>343.6111111111111</td></tr>
+<tr><td>1763954992</td><td>30</td><td></td><td>Aggregated</td><td>6.900000</td><td>0.000000</td><td>2200</td><td>3400</td><td>4600</td><td>5500</td><td>7500</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>105</td><td>0</td><td>2200.0</td><td>3340.512991430504</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>335.1142857142857</td></tr>
 <tr></tr>
-<tr><td>1763954907</td><td>5</td><td></td><td>Aggregated</td><td>1.500000</td><td>0.000000</td><td>4100</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>20</td><td>0</td><td>2100.0</td><td>2849.8075050185435</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>323.35</td></tr>
+<tr><td>1763954993</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2200</td><td>3100</td><td>4300</td><td>5200</td><td>7200</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>111</td><td>0</td><td>2200.0</td><td>3219.6135972993584</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>321.85585585585585</td></tr>
 <tr></tr>
-<tr><td>1763954908</td><td>5</td><td></td><td>Aggregated</td><td>1.500000</td><td>0.000000</td><td>4100</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>20</td><td>0</td><td>2100.0</td><td>2849.8075050185435</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>323.35</td></tr>
+<tr><td>1763954994</td><td>30</td><td></td><td>Aggregated</td><td>7.600000</td><td>0.000000</td><td>2200</td><td>2800</td><td>4200</td><td>5100</td><td>7200</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>119</td><td>0</td><td>2200.0</td><td>3130.586974791392</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>307.5798319327731</td></tr>
 <tr></tr>
-<tr><td>1763954909</td><td>5</td><td></td><td>Aggregated</td><td>1.400000</td><td>0.000000</td><td>2100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>22</td><td>0</td><td>2100.0</td><td>2600.0595636538824</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>306.27272727272725</td></tr>
+<tr><td>1763954995</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2200</td><td>2700</td><td>3900</td><td>4700</td><td>7000</td><td>8400</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>126</td><td>0</td><td>2200.0</td><td>3043.073984920897</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>296.5952380952381</td></tr>
 <tr></tr>
-<tr><td>1763954910</td><td>5</td><td></td><td>Aggregated</td><td>1.400000</td><td>0.000000</td><td>2100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>22</td><td>0</td><td>2100.0</td><td>2600.0595636538824</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>306.27272727272725</td></tr>
+<tr><td>1763954996</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2600</td><td>3500</td><td>4600</td><td>6900</td><td>8400</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>135</td><td>0</td><td>2100.0</td><td>2950.4240866655623</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>335.94814814814816</td></tr>
 <tr></tr>
-<tr><td>1763954911</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>23</td><td>0</td><td>2100.0</td><td>2582.890813061765</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>299.1304347826087</td></tr>
+<tr><td>1763954997</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2300</td><td>3500</td><td>4200</td><td>6700</td><td>8100</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>144</td><td>0</td><td>2100.0</td><td>2855.7929874999295</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>321.0625</td></tr>
 <tr></tr>
-<tr><td>1763954912</td><td>5</td><td></td><td>Aggregated</td><td>1.100000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>24</td><td>0</td><td>2100.0</td><td>2647.748733351667</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>287.9166666666667</td></tr>
+<tr><td>1763954998</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2200</td><td>3100</td><td>4200</td><td>6400</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>153</td><td>0</td><td>2100.0</td><td>2774.168174509933</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>308.77777777777777</td></tr>
 <tr></tr>
-<tr><td>1763954913</td><td>5</td><td></td><td>Aggregated</td><td>1.100000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>24</td><td>0</td><td>2100.0</td><td>2647.748733351667</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>287.9166666666667</td></tr>
+<tr><td>1763954999</td><td>30</td><td></td><td>Aggregated</td><td>9.200000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2800</td><td>3700</td><td>6100</td><td>7900</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>161</td><td>0</td><td>2100.0</td><td>2676.875319253792</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>325.7701863354037</td></tr>
 <tr></tr>
-<tr><td>1763954914</td><td>5</td><td></td><td>Aggregated</td><td>1.100000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>24</td><td>0</td><td>2100.0</td><td>2647.748733351667</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>287.9166666666667</td></tr>
+<tr><td>1763955000</td><td>30</td><td></td><td>Aggregated</td><td>9.500000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2700</td><td>3500</td><td>6100</td><td>7900</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>170</td><td>0</td><td>2100.0</td><td>2624.2019629407237</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>314.2529411764706</td></tr>
 <tr></tr>
-<tr><td>1763954915</td><td>5</td><td></td><td>Aggregated</td><td>0.900000</td><td>0.000000</td><td>2100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>25</td><td>0</td><td>2100.0</td><td>2627.8259240137413</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>281.76</td></tr>
+<tr><td>1763955001</td><td>30</td><td></td><td>Aggregated</td><td>9.700000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2600</td><td>3400</td><td>6000</td><td>7800</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>181</td><td>0</td><td>2100.0</td><td>2525.381768507579</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>301.97237569060775</td></tr>
 <tr></tr>
-<tr><td>1763954916</td><td>5</td><td></td><td>Aggregated</td><td>0.900000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>26</td><td>0</td><td>2100.0</td><td>2688.9238961649917</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>276.0769230769231</td></tr>
+<tr><td>1763955002</td><td>30</td><td></td><td>Aggregated</td><td>9.200000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2600</td><td>3400</td><td>6000</td><td>7800</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>187</td><td>0</td><td>2100.0</td><td>2501.4593855609846</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.4438502673797</td></tr>
 <tr></tr>
-<tr><td>1763954917</td><td>5</td><td></td><td>Aggregated</td><td>0.800000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>27</td><td>0</td><td>2200.0</td><td>2743.3755888983055</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>267.4074074074074</td></tr>
+<tr><td>1763955003</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2300</td><td>3100</td><td>5800</td><td>7800</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>11000</td><td>200</td><td>0</td><td>2100.0</td><td>2425.4795505007496</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>283.795</td></tr>
 <tr></tr>
-<tr><td>1763954918</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>4100</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>28</td><td>0</td><td>2200.0</td><td>2796.300696437746</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>262.67857142857144</td></tr>
+<tr><td>1763955004</td><td>30</td><td></td><td>Aggregated</td><td>9.100000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2300</td><td>2800</td><td>5500</td><td>7500</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>208</td><td>0</td><td>2100.0</td><td>2395.2305105782357</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>276.8605769230769</td></tr>
 <tr></tr>
-<tr><td>1763954919</td><td>5</td><td></td><td>Aggregated</td><td>0.600000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>29</td><td>0</td><td>2200.0</td><td>2701.4527206975517</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>255.06896551724137</td></tr>
+<tr><td>1763955005</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>5400</td><td>7500</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>213</td><td>0</td><td>2100.0</td><td>2388.227344132597</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>291.90140845070425</td></tr>
 <tr></tr>
-<tr><td>1763954920</td><td>5</td><td></td><td>Aggregated</td><td>0.600000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>29</td><td>0</td><td>2200.0</td><td>2701.4527206975517</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>255.06896551724137</td></tr>
+<tr><td>1763955006</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>5400</td><td>7500</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>220</td><td>0</td><td>2100.0</td><td>2371.0690154567023</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>286.22727272727275</td></tr>
 <tr></tr>
-<tr><td>1763954921</td><td>5</td><td></td><td>Aggregated</td><td>0.800000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>31</td><td>0</td><td>2200.0</td><td>2732.4698903304975</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>241.29032258064515</td></tr>
+<tr><td>1763955007</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5100</td><td>7200</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>232</td><td>0</td><td>2100.0</td><td>2343.6748965543993</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>277.86206896551727</td></tr>
 <tr></tr>
-<tr><td>1763954922</td><td>5</td><td></td><td>Aggregated</td><td>0.800000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>31</td><td>0</td><td>2200.0</td><td>2732.4698903304975</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>241.29032258064515</td></tr>
+<tr><td>1763955009</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5100</td><td>7200</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>240</td><td>0</td><td>2100.0</td><td>2327.756163752929</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>272.025</td></tr>
 <tr></tr>
-<tr><td>1763954923</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>33</td><td>0</td><td>2200.0</td><td>2637.431242432671</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>232.0</td></tr>
+<tr><td>1763955010</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>4900</td><td>7000</td><td>9200</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>244</td><td>0</td><td>2100.0</td><td>2298.943893035939</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>269.8975409836066</td></tr>
 <tr></tr>
-<tr><td>1763954924</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>33</td><td>0</td><td>2200.0</td><td>2637.431242432671</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>232.0</td></tr>
+<tr><td>1763955011</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>252</td><td>0</td><td>2100.0</td><td>2285.303903177255</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>280.87698412698415</td></tr>
 <tr></tr>
-<tr><td>1763954925</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>33</td><td>0</td><td>2200.0</td><td>2637.431242432671</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>232.0</td></tr>
+<tr><td>1763955012</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>264</td><td>0</td><td>2100.0</td><td>2261.8574761392224</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>272.0</td></tr>
 <tr></tr>
-<tr><td>1763954926</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>33</td><td>0</td><td>2200.0</td><td>2637.431242432671</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>232.0</td></tr>
+<tr><td>1763955013</td><td>30</td><td></td><td>Aggregated</td><td>8.300000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4300</td><td>6900</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>273</td><td>0</td><td>2100.0</td><td>2242.3194842519674</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>266.53479853479854</td></tr>
 <tr></tr>
-<tr><td>1763954927</td><td>5</td><td></td><td>Aggregated</td><td>0.900000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>34</td><td>0</td><td>2200.0</td><td>2623.2872000066836</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>229.14705882352942</td></tr>
+<tr><td>1763955014</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4300</td><td>6900</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>280</td><td>0</td><td>2100.0</td><td>2202.6434560747084</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>262.425</td></tr>
 <tr></tr>
-<tr><td>1763954928</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>36</td><td>0</td><td>2200.0</td><td>2651.0035305594406</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>218.41666666666666</td></tr>
+<tr><td>1763955015</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>6700</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>291</td><td>0</td><td>2100.0</td><td>2186.1341704492042</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>257.1615120274914</td></tr>
 <tr></tr>
-<tr><td>1763954929</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>37</td><td>0</td><td>2200.0</td><td>2635.796148650902</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>213.2972972972973</td></tr>
+<tr><td>1763955016</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>6700</td><td>9000</td><td>10000</td><td>11000</td><td>11000</td><td>11000</td><td>299</td><td>0</td><td>2100.0</td><td>2177.840023079613</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>253.43478260869566</td></tr>
 <tr></tr>
-<tr><td>1763954930</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>38</td><td>0</td><td>2200.0</td><td>2675.4307894734666</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>209.81578947368422</td></tr>
+<tr><td>1763955017</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>6400</td><td>8400</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>306</td><td>0</td><td>2100.0</td><td>2143.235560459788</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>250.12091503267973</td></tr>
 <tr></tr>
-<tr><td>1763954931</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>38</td><td>0</td><td>2200.0</td><td>2675.4307894734666</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>209.81578947368422</td></tr>
+<tr><td>1763955018</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>6400</td><td>8400</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>313</td><td>0</td><td>2100.0</td><td>2139.3840869025034</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>246.92332268370606</td></tr>
 <tr></tr>
-<tr><td>1763954932</td><td>5</td><td></td><td>Aggregated</td><td>0.900000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>39</td><td>0</td><td>2200.0</td><td>2607.893874358314</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>206.51282051282053</td></tr>
+<tr><td>1763955019</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3900</td><td>6100</td><td>8400</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>322</td><td>0</td><td>2100.0</td><td>2113.15499099589</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>268.64596273291926</td></tr>
 <tr></tr>
-<tr><td>1763954933</td><td>5</td><td></td><td>Aggregated</td><td>0.900000</td><td>0.000000</td><td>2200</td><td>4200</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>41</td><td>0</td><td>2200.0</td><td>2586.06066341262</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>203.0731707317073</td></tr>
+<tr><td>1763955020</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3700</td><td>6100</td><td>8400</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>331</td><td>0</td><td>2100.0</td><td>2113.3159613310645</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>264.40785498489424</td></tr>
 <tr></tr>
-<tr><td>1763954934</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>43</td><td>0</td><td>2200.0</td><td>2564.9645558130646</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>198.65116279069767</td></tr>
+<tr><td>1763955021</td><td>30</td><td></td><td>Aggregated</td><td>8.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3700</td><td>6100</td><td>8400</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>339</td><td>0</td><td>2100.0</td><td>2102.13380088689</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>260.87905604719765</td></tr>
 <tr></tr>
-<tr><td>1763954935</td><td>5</td><td></td><td>Aggregated</td><td>0.700000</td><td>0.000000</td><td>2200</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>43</td><td>0</td><td>2200.0</td><td>2564.9645558130646</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>198.65116279069767</td></tr>
+<tr><td>1763955022</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3500</td><td>6100</td><td>8400</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>348</td><td>0</td><td>2100.0</td><td>2078.98354684083</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>256.60919540229884</td></tr>
 <tr></tr>
-<tr><td>1763954936</td><td>5</td><td></td><td>Aggregated</td><td>0.600000</td><td>0.000000</td><td>2200</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>44</td><td>0</td><td>2100.0</td><td>2507.6056227262598</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>194.8181818181818</td></tr>
+<tr><td>1763955023</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3500</td><td>6100</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>354</td><td>0</td><td>2100.0</td><td>2074.0422107358886</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>253.8728813559322</td></tr>
 <tr></tr>
-<tr><td>1763954937</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>46</td><td>0</td><td>2100.0</td><td>2444.892519563639</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>191.17391304347825</td></tr>
+<tr><td>1763955024</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3500</td><td>6000</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>362</td><td>0</td><td>2100.0</td><td>2063.5263466868596</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>270.88950276243094</td></tr>
 <tr></tr>
-<tr><td>1763954938</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>47</td><td>0</td><td>2100.0</td><td>2397.191702125673</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>189.95744680851064</td></tr>
+<tr><td>1763955025</td><td>30</td><td></td><td>Aggregated</td><td>7.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3400</td><td>6000</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>373</td><td>0</td><td>2100.0</td><td>2053.9109437007346</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>266.2252010723861</td></tr>
 <tr></tr>
-<tr><td>1763954939</td><td>5</td><td></td><td>Aggregated</td><td>1.100000</td><td>0.000000</td><td>2100</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>48</td><td>0</td><td>2100.0</td><td>2390.742049998759</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>188.95833333333334</td></tr>
+<tr><td>1763955026</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3400</td><td>6000</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>378</td><td>0</td><td>2100.0</td><td>2044.1088910065541</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>264.1878306878307</td></tr>
 <tr></tr>
-<tr><td>1763954940</td><td>5</td><td></td><td>Aggregated</td><td>1.100000</td><td>0.000000</td><td>2100</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>48</td><td>0</td><td>2100.0</td><td>2390.742049998759</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>188.95833333333334</td></tr>
+<tr><td>1763955027</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3400</td><td>5800</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>389</td><td>0</td><td>2100.0</td><td>2029.164930078043</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>270.03598971722363</td></tr>
 <tr></tr>
-<tr><td>1763954941</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>50</td><td>0</td><td>2100.0</td><td>2378.8526119990274</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>183.88</td></tr>
+<tr><td>1763955028</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>3100</td><td>5800</td><td>8100</td><td>9900</td><td>11000</td><td>11000</td><td>11000</td><td>395</td><td>0</td><td>2100.0</td><td>2025.4864389887316</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>267.10379746835446</td></tr>
 <tr></tr>
-<tr><td>1763954942</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>4100</td><td>4200</td><td>4200</td><td>4700</td><td>4700</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>50</td><td>0</td><td>2100.0</td><td>2378.8526119990274</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>183.88</td></tr>
+<tr><td>1763955029</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2900</td><td>5500</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>409</td><td>0</td><td>2100.0</td><td>2008.6596819084289</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>261.6332518337408</td></tr>
 <tr></tr>
-<tr><td>1763954943</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>2200</td><td>4200</td><td>4200</td><td>4300</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>51</td><td>0</td><td>2100.0</td><td>2373.2055764709253</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>181.07843137254903</td></tr>
+<tr><td>1763955030</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2800</td><td>5500</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>415</td><td>0</td><td>2100.0</td><td>2000.424286025206</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>259.83855421686746</td></tr>
 <tr></tr>
-<tr><td>1763954944</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>2200</td><td>4200</td><td>4200</td><td>4300</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>51</td><td>0</td><td>2100.0</td><td>2373.2055764709253</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>181.07843137254903</td></tr>
+<tr><td>1763955031</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>5400</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>424</td><td>0</td><td>2100.0</td><td>1988.728702595218</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>273.89150943396226</td></tr>
 <tr></tr>
-<tr><td>1763954945</td><td>5</td><td></td><td>Aggregated</td><td>1.200000</td><td>0.000000</td><td>2100</td><td>2200</td><td>4200</td><td>4200</td><td>4300</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>53</td><td>0</td><td>2100.0</td><td>2362.6929660380447</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>179.56603773584905</td></tr>
+<tr><td>1763955032</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>5400</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>429</td><td>0</td><td>2100.0</td><td>1976.7074027982821</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>289.24009324009324</td></tr>
 <tr></tr>
-<tr><td>1763954946</td><td>5</td><td></td><td>Aggregated</td><td>1.000000</td><td>0.000000</td><td>2100</td><td>2200</td><td>4200</td><td>4200</td><td>4300</td><td>4700</td><td>5400</td><td>6000</td><td>6000</td><td>6000</td><td>6000</td><td>55</td><td>0</td><td>2100.0</td><td>2354.6817581825467</td><td>2.0343000069260597</td><td>6036.693000001833</td><td>177.85454545454544</td></tr>
+<tr><td>1763955033</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>5200</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>443</td><td>0</td><td>2100.0</td><td>1962.7028406336462</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>283.9390519187359</td></tr>
+<tr></tr>
+<tr><td>1763955034</td><td>30</td><td></td><td>Aggregated</td><td>8.300000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>5200</td><td>7900</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>449</td><td>0</td><td>2100.0</td><td>1960.4573868620075</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>281.55902004454344</td></tr>
+<tr></tr>
+<tr><td>1763955035</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5200</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>458</td><td>0</td><td>2100.0</td><td>1936.6533510945128</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>277.9301310043668</td></tr>
+<tr></tr>
+<tr><td>1763955036</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5100</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>461</td><td>0</td><td>2100.0</td><td>1938.1298763584548</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>276.87201735357917</td></tr>
+<tr></tr>
+<tr><td>1763955037</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5100</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>473</td><td>0</td><td>2100.0</td><td>1938.3125849918267</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>272.30655391120507</td></tr>
+<tr></tr>
+<tr><td>1763955038</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5100</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>480</td><td>0</td><td>2100.0</td><td>1936.8771458355088</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>269.9916666666667</td></tr>
+<tr></tr>
+<tr><td>1763955039</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>4900</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>489</td><td>0</td><td>2100.0</td><td>1927.8278685092034</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>267.08997955010227</td></tr>
+<tr></tr>
+<tr><td>1763955040</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2500</td><td>4900</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>497</td><td>0</td><td>2100.0</td><td>1931.2289114708879</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>264.46680080482895</td></tr>
+<tr></tr>
+<tr><td>1763955041</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2500</td><td>4900</td><td>7800</td><td>9200</td><td>11000</td><td>11000</td><td>11000</td><td>500</td><td>0</td><td>2100.0</td><td>1932.7792276020627</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>263.316</td></tr>
+<tr></tr>
+<tr><td>1763955042</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7500</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>509</td><td>0</td><td>2100.0</td><td>1932.278053244038</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>260.36542239685656</td></tr>
+<tr></tr>
+<tr><td>1763955043</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7500</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>517</td><td>0</td><td>2100.0</td><td>1935.0784572559216</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>258.11605415860737</td></tr>
+<tr></tr>
+<tr><td>1763955044</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>7500</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>527</td><td>0</td><td>2100.0</td><td>1938.5154487693724</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>255.3548387096774</td></tr>
+<tr></tr>
+<tr><td>1763955045</td><td>30</td><td></td><td>Aggregated</td><td>7.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>7500</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>535</td><td>0</td><td>2100.0</td><td>1933.4746908437826</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>260.6411214953271</td></tr>
+<tr></tr>
+<tr><td>1763955046</td><td>30</td><td></td><td>Aggregated</td><td>7.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>7500</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>543</td><td>0</td><td>2100.0</td><td>1928.630629652583</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>258.31307550644567</td></tr>
+<tr></tr>
+<tr><td>1763955047</td><td>30</td><td></td><td>Aggregated</td><td>7.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>7200</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>554</td><td>0</td><td>2100.0</td><td>1917.918031409867</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>263.04873646209387</td></tr>
+<tr></tr>
+<tr><td>1763955048</td><td>30</td><td></td><td>Aggregated</td><td>7.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>7200</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>559</td><td>0</td><td>2100.0</td><td>1916.1375050105185</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>269.0912343470483</td></tr>
+<tr></tr>
+<tr><td>1763955049</td><td>30</td><td></td><td>Aggregated</td><td>7.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>7200</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>567</td><td>0</td><td>2100.0</td><td>1915.5888786612118</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>267.0405643738977</td></tr>
+<tr></tr>
+<tr><td>1763955050</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>7200</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>577</td><td>0</td><td>2100.0</td><td>1908.5633052013447</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>264.2530329289428</td></tr>
+<tr></tr>
+<tr><td>1763955051</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>7200</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>587</td><td>0</td><td>2100.0</td><td>1905.3384764925172</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>268.6013628620102</td></tr>
+<tr></tr>
+<tr><td>1763955052</td><td>30</td><td></td><td>Aggregated</td><td>7.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>7200</td><td>9000</td><td>11000</td><td>11000</td><td>11000</td><td>596</td><td>0</td><td>2100.0</td><td>1898.552512753936</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>266.0536912751678</td></tr>
+<tr></tr>
+<tr><td>1763955053</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>7000</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>606</td><td>0</td><td>2100.0</td><td>1882.075598681839</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>270.2112211221122</td></tr>
+<tr></tr>
+<tr><td>1763955054</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>7000</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>609</td><td>0</td><td>2100.0</td><td>1883.3885303798265</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>269.53530377668307</td></tr>
+<tr></tr>
+<tr><td>1763955055</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>7000</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>621</td><td>0</td><td>2100.0</td><td>1884.787858617357</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>273.1835748792271</td></tr>
+<tr></tr>
+<tr><td>1763955056</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>4200</td><td>7000</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>632</td><td>0</td><td>2100.0</td><td>1879.0223115533472</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>281.76107594936707</td></tr>
+<tr></tr>
+<tr><td>1763955057</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3900</td><td>7000</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>641</td><td>0</td><td>2100.0</td><td>1866.2751730136986</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>279.1560062402496</td></tr>
+<tr></tr>
+<tr><td>1763955058</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3900</td><td>6900</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>651</td><td>0</td><td>2100.0</td><td>1863.5996264234234</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>276.4254992319508</td></tr>
+<tr></tr>
+<tr><td>1763955059</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3900</td><td>6900</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>657</td><td>0</td><td>2100.0</td><td>1862.6003307483516</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>274.62861491628615</td></tr>
+<tr></tr>
+<tr><td>1763955060</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3700</td><td>6900</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>666</td><td>0</td><td>2100.0</td><td>1853.6687717741906</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>278.86336336336336</td></tr>
+<tr></tr>
+<tr><td>1763955061</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3700</td><td>6900</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>678</td><td>0</td><td>2100.0</td><td>1844.1990147520594</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>276.09882005899703</td></tr>
+<tr></tr>
+<tr><td>1763955062</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6900</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>684</td><td>0</td><td>2100.0</td><td>1843.7171811431956</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>285.41959064327483</td></tr>
+<tr></tr>
+<tr><td>1763955063</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6900</td><td>8400</td><td>11000</td><td>11000</td><td>11000</td><td>695</td><td>0</td><td>2100.0</td><td>1839.4265587079815</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>282.84460431654674</td></tr>
+<tr></tr>
+<tr><td>1763955064</td><td>30</td><td></td><td>Aggregated</td><td>9.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6700</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>702</td><td>0</td><td>2100.0</td><td>1836.1661524246208</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>291.2977207977208</td></tr>
+<tr></tr>
+<tr><td>1763955065</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6700</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>712</td><td>0</td><td>2100.0</td><td>1837.7710233174012</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>288.65449438202245</td></tr>
+<tr></tr>
+<tr><td>1763955066</td><td>30</td><td></td><td>Aggregated</td><td>9.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6700</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>717</td><td>0</td><td>2100.0</td><td>1834.0385050234881</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>287.05857740585776</td></tr>
+<tr></tr>
+<tr><td>1763955067</td><td>30</td><td></td><td>Aggregated</td><td>9.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6700</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>723</td><td>0</td><td>2100.0</td><td>1836.4877343040287</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>285.57814661134165</td></tr>
+<tr></tr>
+<tr><td>1763955068</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3500</td><td>6700</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>737</td><td>0</td><td>2100.0</td><td>1831.0014081438385</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>282.03663500678425</td></tr>
+<tr></tr>
+<tr><td>1763955069</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3400</td><td>6700</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>745</td><td>0</td><td>2100.0</td><td>1834.1406359759178</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>285.68859060402684</td></tr>
+<tr></tr>
+<tr><td>1763955070</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3400</td><td>6400</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>751</td><td>0</td><td>2100.0</td><td>1828.2652973399229</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>289.51930758988016</td></tr>
+<tr></tr>
+<tr><td>1763955071</td><td>30</td><td></td><td>Aggregated</td><td>8.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3400</td><td>6400</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>762</td><td>0</td><td>2100.0</td><td>1817.0415530217447</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>287.20997375328085</td></tr>
+<tr></tr>
+<tr><td>1763955072</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3400</td><td>6400</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>772</td><td>0</td><td>2100.0</td><td>1816.050263086136</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>284.86139896373055</td></tr>
+<tr></tr>
+<tr><td>1763955073</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3400</td><td>6400</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>780</td><td>0</td><td>2100.0</td><td>1808.6353582083784</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>282.98846153846154</td></tr>
+<tr></tr>
+<tr><td>1763955074</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3100</td><td>6400</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>787</td><td>0</td><td>2100.0</td><td>1806.1585641706308</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>286.6810673443456</td></tr>
+<tr></tr>
+<tr><td>1763955075</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>3100</td><td>6400</td><td>8100</td><td>11000</td><td>11000</td><td>11000</td><td>798</td><td>0</td><td>2100.0</td><td>1797.679216920586</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>284.21679197994985</td></tr>
+<tr></tr>
+<tr><td>1763955076</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2900</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>809</td><td>0</td><td>2100.0</td><td>1792.1029080378355</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>281.7849196538937</td></tr>
+<tr></tr>
+<tr><td>1763955077</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2900</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>813</td><td>0</td><td>2100.0</td><td>1791.216349080726</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>280.9840098400984</td></tr>
+<tr></tr>
+<tr><td>1763955078</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2800</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>824</td><td>0</td><td>2100.0</td><td>1793.1855986682015</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>278.7694174757282</td></tr>
+<tr></tr>
+<tr><td>1763955079</td><td>30</td><td></td><td>Aggregated</td><td>9.300000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2800</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>833</td><td>0</td><td>2100.0</td><td>1786.8973301351293</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>277.02881152460986</td></tr>
+<tr></tr>
+<tr><td>1763955080</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2800</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>840</td><td>0</td><td>2100.0</td><td>1787.342997264932</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>275.5940476190476</td></tr>
+<tr></tr>
+<tr><td>1763955081</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>848</td><td>0</td><td>2100.0</td><td>1786.443998941461</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>274.10495283018867</td></tr>
+<tr></tr>
+<tr><td>1763955082</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>854</td><td>0</td><td>2100.0</td><td>1788.9259984805108</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>282.76112412177986</td></tr>
+<tr></tr>
+<tr><td>1763955083</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>866</td><td>0</td><td>2100.0</td><td>1791.2191726354986</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>293.83487297921477</td></tr>
+<tr></tr>
+<tr><td>1763955084</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>873</td><td>0</td><td>2100.0</td><td>1791.4298920992726</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>292.15807560137455</td></tr>
+<tr></tr>
+<tr><td>1763955085</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>877</td><td>0</td><td>2100.0</td><td>1790.5067830130686</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.8403648802737</td></tr>
+<tr></tr>
+<tr><td>1763955086</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>887</td><td>0</td><td>2100.0</td><td>1789.5843267218727</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>293.74633596392334</td></tr>
+<tr></tr>
+<tr><td>1763955087</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2700</td><td>6100</td><td>7900</td><td>11000</td><td>11000</td><td>11000</td><td>899</td><td>0</td><td>2100.0</td><td>1791.6512994462928</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>291.0344827586207</td></tr>
+<tr></tr>
+<tr><td>1763955088</td><td>30</td><td></td><td>Aggregated</td><td>7.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>6000</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>903</td><td>0</td><td>2100.0</td><td>1788.8500328929395</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>290.3643410852713</td></tr>
+<tr></tr>
+<tr><td>1763955089</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>6000</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>912</td><td>0</td><td>2100.0</td><td>1785.2048753315773</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>288.44407894736844</td></tr>
+<tr></tr>
+<tr><td>1763955090</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>6000</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>919</td><td>0</td><td>2100.0</td><td>1783.1065359111658</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>286.9815016322089</td></tr>
+<tr></tr>
+<tr><td>1763955091</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>6000</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>929</td><td>0</td><td>2100.0</td><td>1780.2071403688226</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>285.19160387513455</td></tr>
+<tr></tr>
+<tr><td>1763955092</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>6000</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>938</td><td>0</td><td>2100.0</td><td>1780.3401565058841</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>283.59168443496804</td></tr>
+<tr></tr>
+<tr><td>1763955093</td><td>30</td><td></td><td>Aggregated</td><td>8.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>6000</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>944</td><td>0</td><td>2100.0</td><td>1778.6250449176898</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>282.4396186440678</td></tr>
+<tr></tr>
+<tr><td>1763955094</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>952</td><td>0</td><td>2100.0</td><td>1778.6529837210444</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>281.1397058823529</td></tr>
+<tr></tr>
+<tr><td>1763955095</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>962</td><td>0</td><td>2100.0</td><td>1780.0497428298418</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>279.1174636174636</td></tr>
+<tr></tr>
+<tr><td>1763955096</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>968</td><td>0</td><td>2100.0</td><td>1780.2259069240858</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>282.47004132231405</td></tr>
+<tr></tr>
+<tr><td>1763955097</td><td>30</td><td></td><td>Aggregated</td><td>7.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2600</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>977</td><td>0</td><td>2100.0</td><td>1783.3567712411423</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.9969293756397</td></tr>
+<tr></tr>
+<tr><td>1763955098</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2500</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>988</td><td>0</td><td>2100.0</td><td>1780.8864691324422</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>297.7925101214575</td></tr>
+<tr></tr>
+<tr><td>1763955100</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2500</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>998</td><td>0</td><td>2100.0</td><td>1779.3526953933826</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.9639278557114</td></tr>
+<tr></tr>
+<tr><td>1763955101</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2500</td><td>5800</td><td>7800</td><td>11000</td><td>11000</td><td>11000</td><td>1000</td><td>0</td><td>2100.0</td><td>1777.9574694025796</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.543</td></tr>
+<tr></tr>
+<tr><td>1763955102</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5500</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1014</td><td>0</td><td>2100.0</td><td>1773.1049418170649</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>292.67554240631165</td></tr>
+<tr></tr>
+<tr><td>1763955103</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5500</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1021</td><td>0</td><td>2100.0</td><td>1771.5103795324808</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>291.4809010773751</td></tr>
+<tr></tr>
+<tr><td>1763955104</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5500</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1027</td><td>0</td><td>2100.0</td><td>1773.785003410614</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>294.5666991236611</td></tr>
+<tr></tr>
+<tr><td>1763955105</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5500</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1032</td><td>0</td><td>2100.0</td><td>1773.398409886358</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>293.5843023255814</td></tr>
+<tr></tr>
+<tr><td>1763955106</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5500</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1042</td><td>0</td><td>2100.0</td><td>1776.8547228434045</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>291.6468330134357</td></tr>
+<tr></tr>
+<tr><td>1763955107</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1053</td><td>0</td><td>2100.0</td><td>1776.4873011424652</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>296.7739791073124</td></tr>
+<tr></tr>
+<tr><td>1763955108</td><td>30</td><td></td><td>Aggregated</td><td>7.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1058</td><td>0</td><td>2100.0</td><td>1778.1307664489689</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.79773156899813</td></tr>
+<tr></tr>
+<tr><td>1763955109</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1064</td><td>0</td><td>2100.0</td><td>1776.2837703976538</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>294.70112781954884</td></tr>
+<tr></tr>
+<tr><td>1763955110</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1071</td><td>0</td><td>2100.0</td><td>1778.5923926265828</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>293.35854341736695</td></tr>
+<tr></tr>
+<tr><td>1763955111</td><td>30</td><td></td><td>Aggregated</td><td>7.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1079</td><td>0</td><td>2100.0</td><td>1777.285640039917</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>292.00463392029656</td></tr>
+<tr></tr>
+<tr><td>1763955112</td><td>30</td><td></td><td>Aggregated</td><td>7.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1090</td><td>0</td><td>2100.0</td><td>1775.2673193607309</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>290.2137614678899</td></tr>
+<tr></tr>
+<tr><td>1763955113</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5400</td><td>7500</td><td>11000</td><td>11000</td><td>11000</td><td>1098</td><td>0</td><td>2100.0</td><td>1777.6631634818764</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>288.8624772313297</td></tr>
+<tr></tr>
+<tr><td>1763955114</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5200</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1103</td><td>0</td><td>2100.0</td><td>1777.3364838649682</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>288.07434270172257</td></tr>
+<tr></tr>
+<tr><td>1763955115</td><td>30</td><td></td><td>Aggregated</td><td>7.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5200</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1117</td><td>0</td><td>2100.0</td><td>1773.1037839776907</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>285.7170993733214</td></tr>
+<tr></tr>
+<tr><td>1763955116</td><td>30</td><td></td><td>Aggregated</td><td>7.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5200</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1122</td><td>0</td><td>2100.0</td><td>1772.8241400206139</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>284.97415329768273</td></tr>
+<tr></tr>
+<tr><td>1763955117</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5200</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1131</td><td>0</td><td>2100.0</td><td>1773.7433054846952</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>290.06719717064544</td></tr>
+<tr></tr>
+<tr><td>1763955118</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5200</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1140</td><td>0</td><td>2100.0</td><td>1772.1482577221059</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>288.590350877193</td></tr>
+<tr></tr>
+<tr><td>1763955119</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5200</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1145</td><td>0</td><td>2100.0</td><td>1773.708169085612</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>294.3624454148472</td></tr>
+<tr></tr>
+<tr><td>1763955120</td><td>30</td><td></td><td>Aggregated</td><td>8.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5100</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1153</td><td>0</td><td>2100.0</td><td>1772.5478362559413</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>292.8933217692975</td></tr>
+<tr></tr>
+<tr><td>1763955121</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5100</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1161</td><td>0</td><td>2100.0</td><td>1769.6575556442938</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>297.98105081826014</td></tr>
+<tr></tr>
+<tr><td>1763955122</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5100</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1168</td><td>0</td><td>2100.0</td><td>1771.8536571090426</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>296.5890410958904</td></tr>
+<tr></tr>
+<tr><td>1763955123</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5100</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1180</td><td>0</td><td>2100.0</td><td>1768.366666358868</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>300.72118644067797</td></tr>
+<tr></tr>
+<tr><td>1763955124</td><td>30</td><td></td><td>Aggregated</td><td>7.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5100</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1186</td><td>0</td><td>2100.0</td><td>1768.3715738647054</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>299.6585160202361</td></tr>
+<tr></tr>
+<tr><td>1763955125</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>5100</td><td>7200</td><td>11000</td><td>11000</td><td>11000</td><td>1193</td><td>0</td><td>2100.0</td><td>1768.674021796577</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>301.9253981559095</td></tr>
+<tr></tr>
+<tr><td>1763955126</td><td>30</td><td></td><td>Aggregated</td><td>8.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4900</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1201</td><td>0</td><td>2100.0</td><td>1770.9080602026286</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>300.5295587010824</td></tr>
+<tr></tr>
+<tr><td>1763955127</td><td>30</td><td></td><td>Aggregated</td><td>7.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4900</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1208</td><td>0</td><td>2100.0</td><td>1769.7296549696382</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>299.31043046357615</td></tr>
+<tr></tr>
+<tr><td>1763955128</td><td>30</td><td></td><td>Aggregated</td><td>7.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4900</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1216</td><td>0</td><td>2100.0</td><td>1770.406829854868</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>298.109375</td></tr>
+<tr></tr>
+<tr><td>1763955129</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4900</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1227</td><td>0</td><td>2100.0</td><td>1770.263314672849</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>296.4498777506112</td></tr>
+<tr></tr>
+<tr><td>1763955130</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4900</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1235</td><td>0</td><td>2100.0</td><td>1769.253242675117</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.33603238866397</td></tr>
+<tr></tr>
+<tr><td>1763955131</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4900</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1245</td><td>0</td><td>2100.0</td><td>1770.3872221716526</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>293.76305220883535</td></tr>
+<tr></tr>
+<tr><td>1763955132</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1254</td><td>0</td><td>2100.0</td><td>1767.980566111273</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>292.38038277511964</td></tr>
+<tr></tr>
+<tr><td>1763955133</td><td>30</td><td></td><td>Aggregated</td><td>8.200000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1258</td><td>0</td><td>2100.0</td><td>1767.4496339457125</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.10095389507154</td></tr>
+<tr></tr>
+<tr><td>1763955134</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1270</td><td>0</td><td>2100.0</td><td>1765.6205326800903</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>293.3543307086614</td></tr>
+<tr></tr>
+<tr><td>1763955135</td><td>30</td><td></td><td>Aggregated</td><td>7.700000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1278</td><td>0</td><td>2100.0</td><td>1761.4830936647184</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.4992175273865</td></tr>
+<tr></tr>
+<tr><td>1763955136</td><td>30</td><td></td><td>Aggregated</td><td>8.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1287</td><td>0</td><td>2100.0</td><td>1762.4125040430074</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>294.0901320901321</td></tr>
+<tr></tr>
+<tr><td>1763955137</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4700</td><td>7000</td><td>11000</td><td>11000</td><td>11000</td><td>1295</td><td>0</td><td>2100.0</td><td>1759.912943091463</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>292.988416988417</td></tr>
+<tr></tr>
+<tr><td>1763955138</td><td>30</td><td></td><td>Aggregated</td><td>8.300000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1302</td><td>0</td><td>2100.0</td><td>1761.8460664387933</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>295.3809523809524</td></tr>
+<tr></tr>
+<tr><td>1763955139</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1309</td><td>0</td><td>2100.0</td><td>1760.6317981689133</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>294.10618792971735</td></tr>
+<tr></tr>
+<tr><td>1763955140</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1317</td><td>0</td><td>2100.0</td><td>1761.2027096454776</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>298.5535307517084</td></tr>
+<tr></tr>
+<tr><td>1763955141</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1331</td><td>0</td><td>2100.0</td><td>1760.3329586044968</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>302.02329075882795</td></tr>
+<tr></tr>
+<tr><td>1763955142</td><td>30</td><td></td><td>Aggregated</td><td>8.000000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1338</td><td>0</td><td>2100.0</td><td>1759.1743378942451</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>300.9603886397608</td></tr>
+<tr></tr>
+<tr><td>1763955143</td><td>30</td><td></td><td>Aggregated</td><td>8.500000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4600</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1346</td><td>0</td><td>2100.0</td><td>1756.7243919782043</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>299.63595839524515</td></tr>
+<tr></tr>
+<tr><td>1763955144</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1357</td><td>0</td><td>2100.0</td><td>1756.142682757904</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>297.96241709653646</td></tr>
+<tr></tr>
+<tr><td>1763955145</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1365</td><td>0</td><td>2100.0</td><td>1755.1858289394997</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>296.85274725274724</td></tr>
+<tr></tr>
+<tr><td>1763955146</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1372</td><td>0</td><td>2100.0</td><td>1754.1353971590986</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>296.02915451895046</td></tr>
+<tr></tr>
+<tr><td>1763955147</td><td>30</td><td></td><td>Aggregated</td><td>8.400000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1383</td><td>0</td><td>2100.0</td><td>1749.762610052372</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>297.49891540130153</td></tr>
+<tr></tr>
+<tr><td>1763955148</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1390</td><td>0</td><td>2100.0</td><td>1750.1573569082702</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>301.68273381294966</td></tr>
+<tr></tr>
+<tr><td>1763955149</td><td>30</td><td></td><td>Aggregated</td><td>8.600000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4300</td><td>6900</td><td>11000</td><td>11000</td><td>11000</td><td>1398</td><td>0</td><td>2100.0</td><td>1748.730529472515</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>300.61087267525033</td></tr>
+<tr></tr>
+<tr><td>1763955150</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>6700</td><td>11000</td><td>11000</td><td>11000</td><td>1411</td><td>0</td><td>2100.0</td><td>1749.3195606680742</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>301.7788802267895</td></tr>
+<tr></tr>
+<tr><td>1763955151</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>6700</td><td>11000</td><td>11000</td><td>11000</td><td>1423</td><td>0</td><td>2100.0</td><td>1743.4316473664194</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>303.0948699929726</td></tr>
+<tr></tr>
+<tr><td>1763955152</td><td>30</td><td></td><td>Aggregated</td><td>8.900000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>6700</td><td>11000</td><td>11000</td><td>11000</td><td>1430</td><td>0</td><td>2100.0</td><td>1742.494910421384</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>302.13566433566433</td></tr>
+<tr></tr>
+<tr><td>1763955153</td><td>30</td><td></td><td>Aggregated</td><td>9.100000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>6700</td><td>11000</td><td>11000</td><td>11000</td><td>1437</td><td>0</td><td>2100.0</td><td>1741.4336185819725</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>301.0723729993041</td></tr>
+<tr></tr>
+<tr><td>1763955154</td><td>30</td><td></td><td>Aggregated</td><td>8.800000</td><td>0.000000</td><td>2100</td><td>2100</td><td>2100</td><td>2200</td><td>2200</td><td>2300</td><td>4200</td><td>6700</td><td>11000</td><td>11000</td><td>11000</td><td>1444</td><td>0</td><td>2100.0</td><td>1741.8691056801963</td><td>2.7605999493971467</td><td>10988.49869996775</td><td>306.0983379501385</td></tr>
 <tr></tr></tbody>
             </table>
         </div>
@@ -1369,7 +1613,7 @@ user_100@hypertension-risk.com,password123
 
                     <li><strong>Gráficas generadas por Locust</strong></li>
                     <div class="screenshot-item graph-shot">
-                        <img src="files/Pruebas/smoke_20251123_212809/graficas.png" alt="Gráficas generadas por Locust" onclick="openImageModal(this.src)">
+                        <img src="files/Pruebas/baseline_20251123_212935/graficas.png" alt="Gráficas generadas por Locust" onclick="openImageModal(this.src)">
                     </div>
                 </ol>
             </div>
@@ -1379,21 +1623,27 @@ user_100@hypertension-risk.com,password123
                 <h3>Interpretación de resultados</h3>
                 <ol>
                     <li><strong>¿Qué sistema es más sensible a picos de carga?</strong>
-                       <p>En la prueba Smoke se observa que, incluso con solo 5 usuarios, el servicio más sensible es auth, específicamente el endpoint POST /auth/login. Sus tiempos de respuesta se mantienen entre 4,700 y 6,000 ms, mientras que el resto de los servicios responde entre 2,000 y 4,200 ms. La gráfica de percentil 95 confirma que la latencia más alta pertenece al proceso de login, lo que indica que ante un pico de carga este servicio sería el primero en degradarse.</p>
+                        <p>En la prueba baseline, el servicio más sensible fue POST /auth/login:</p>
+                        <ul>
+                            <li>Promedio: 5907 ms</li>
+                            <li>Máximo: 10,988 ms</li>
+                            <li>Mediana: 5400 ms</li>
+                        </ul>
                     </li>
                     <li><strong>¿El CMS se comporta igual que los microservicios bajo carga de escritura?</strong>
-                        <p>Basado en los resultados de Smoke, las operaciones POST son las de mayor latencia, mientras que las GET son más estables. Esto significa que, bajo carga, el CMS se comportaría de manera similar a los microservicios que realizan escritura, ya que típicamente involucra envío de formularios, registro o actualización de datos, actividades que reflejan el mismo patrón que las operaciones POST evaluadas aquí.</p>
+                        <p>No. En condiciones de carga, el CMS tendería a comportarse como los microservicios de escritura, mostrando más latencia que los servicios de solo lectura. Basado únicamente en el baseline:</p>
+                        <ul>
+                            <li>Las operaciones POST son las que presentan mayor tiempo de respuesta.</li>
+                        </ul>
                     </li>
                 </ol>
             </div>
 
             <div class="reflection-section">
                 <h3>Conclusiones y recomendaciones</h3>
-                <p>Los resultados de la prueba Smoke indican que el sistema es funcional y estable bajo una carga mínima, ya que no se registraron fallas ni errores durante la ejecución. Sin embargo, los tiempos de respuesta revelan diferencias importantes entre los servicios: mientras que los endpoints GET operan con latencias relativamente bajas, el servicio de autenticación (especialmente el endpoint /auth/login) presenta tiempos elevados incluso con solo cinco usuarios.</p>
-
-                <p>Estos resultados muestran que, aunque la disponibilidad básica está garantizada, el rendimiento aún no es óptimo para un entorno real. El comportamiento lento de las operaciones POST sugiere que existen cuellos de botella relacionados con la escritura de datos o validaciones internas.</p>
-
-                <p>Finalmente, se recomienda implementar mecanismos de caching en operaciones repetitivas, mejorar el manejo de conexiones a la base de datos, y optimizar la lógica interna de validaciones.</p>
+                <p>Los resultados de la prueba Baseline muestran que, aunque los microservicios de PredictHealth funcionan correctamente, su rendimiento aún no es adecuado para un entorno de producción. El servicio de autenticación presenta latencias muy elevadas incluso con carga moderada, y varios endpoints de escritura superan consistentemente tiempos de respuesta de uno a dos segundos. Esto indica que el sistema podría experimentar saturación temprana al aumentar la concurrencia, comprometiendo la experiencia del usuario final.</p>
+                <p>Para mejorar el desempeño general, es necesario optimizar la comunicación con la base de datos, implementar caching en operaciones repetitivas, y revisar la eficiencia del servicio de autenticación.</p>
+                <p>Finalmente, el uso de Locust permitió identificar de manera clara las rutas más pesadas. Además de aprender que un sistema puede estar funcional sin presentar errores, pero aun así no ser eficiente para producción. Por lo que, Locust facilitó visualizar estos cuellos de botella y proporcionó una base sólida para futuras optimizaciones.</p>
             </div>
 
             <div class="exercise-info">
@@ -1401,7 +1651,7 @@ user_100@hypertension-risk.com,password123
                 <div class="download-buttons">
                     <a class="btn" href="code/Pruebas/users.csv" download>Descargar CSV de usuarios</a>
                     <a class="btn" href="code/Pruebas/locustfile.py" download>Descargar locustfile.py</a>
-                    <a class="btn" href="files/Pruebas/smoke_20251123_212809/">Abrir carpeta de resultados</a>
+                    <a class="btn" href="files/Pruebas/baseline_20251123_212935/">Abrir carpeta de resultados</a>
                 </div>
             </div>
         </div>
