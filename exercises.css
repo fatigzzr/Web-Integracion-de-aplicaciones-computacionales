@@ -1341,40 +1341,40 @@
 .results-table thead th {
     background: rgba(247, 177, 153, 0.5);
 }
-/* Estilos específicos para ejercicio16 (#ffb347) */
-.ejercicio16 .header h1 {
+/* Estilos específicos para ejercicio20 (#ffb347) */
+.ejercicio20 .header h1 {
     color: #ffb347;
 }
 
-.ejercicio16 .exercise-info h3,
-.ejercicio16 .screenshots-section h3,
-.ejercicio16 .reflection-section h3,
-.ejercicio16 .code-section h3 {
+.ejercicio20 .exercise-info h3,
+.ejercicio20 .screenshots-section h3,
+.ejercicio20 .reflection-section h3,
+.ejercicio20 .code-section h3 {
     border-bottom: 2px solid #ffb347;
     text-align: left;
 }
 
-.ejercicio16 .image-modal-close:hover {
+.ejercicio20 .image-modal-close:hover {
     color: #ffb347;
 }
 
-.ejercicio16 a {
+.ejercicio20 a {
     color: #ffb347;
     text-decoration: underline;
 }
 
-.ejercicio16 a:hover {
+.ejercicio20 a:hover {
     color: #e09b3d;
     text-decoration: underline;
 }
 
-.ejercicio16 .back-btn {
+.ejercicio20 .back-btn {
     color: white !important;
     text-decoration: none !important;
     background: #000 !important;
 }
 
-.ejercicio16 .back-btn:hover {
+.ejercicio20 .back-btn:hover {
     color: white !important;
     text-decoration: none !important;
     background: #333 !important;
