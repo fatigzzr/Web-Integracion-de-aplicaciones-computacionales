@@ -132,14 +132,16 @@ li {
 
 .menu-card {
     background: white;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 0;
     border: 1px solid #e9ecef;
     transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
-    display: block;
-    max-height: 230px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 300px;
     overflow: hidden;
 }
 
@@ -437,6 +439,26 @@ li {
     box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
 }
 
+.menu-card[href="ejercicio18.html"],
+.exercises-section .menu-card[href="ejercicio18.html"] {
+    border-color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio18.html"] h3,
+.exercises-section .menu-card[href="ejercicio18.html"] h3 {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio18.html"] .arrow,
+.exercises-section .menu-card[href="ejercicio18.html"] .arrow {
+    color: #f7b199 !important;
+}
+
+.menu-card[href="ejercicio18.html"]:hover,
+.exercises-section .menu-card[href="ejercicio18.html"]:hover {
+    box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
+}
+
 .menu-card[href="ejercicio14.html"],
 .exercises-section .menu-card[href="ejercicio14.html"] {
     border-color: #f7b199 !important;
@@ -722,10 +744,6 @@ li {
 
 .menu-card:hover .arrow {
     transform: translateX(5px);
-}
-
-/* Sección de Ejercicios */
-.exercises-section {
 }
 
 .exercises-section .menu-grid {
