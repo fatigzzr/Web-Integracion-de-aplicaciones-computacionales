@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 11: Swagger - Fatima González Romo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="exercises.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container ejercicio11">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Volver al Menú</a>
+            <h1>Ejercicio 11: Swagger</h1>
+            <p>Documentación con Swagger para el microservicio de Librería + JWT + Redis</p>
+        </div>
+        
+        <div class="content">
+            <!-- Información del Ejercicio -->
+            <div class="exercise-info">
+                <h3>Objetivo</h3>
+                <p>Generar y exponer documentación interactiva con Swagger (OpenAPI) para el microservicio de Librería protegido con JWT y Redis, de modo que los endpoints se describan claramente y puedan probarse desde la interfaz web.</p>
+            </div>
+
+            <div class="exercise-info">
+                <h3>Instrucciones</h3>
+                <ol>
+                    <li>Instala la dependencia de Swagger para Flask: <code>pip install flasgger</code> o <code>pip install flask-swagger-ui</code> según el paquete elegido.</li>
+                    <li>Configura la app para servir la UI de Swagger; ejemplo con Flasgger:
+                        <pre><code>from flasgger import Swagger
+swagger = Swagger(app)</code></pre>
+                    </li>
+                    <li>Documenta cada endpoint con YAML/JSON en el docstring, incluyendo:
+                        <ul>
+                            <li>Tags (por ejemplo, Autenticación, Libros)</li>
+                            <li>Parámetros de entrada (query/body/path)</li>
+                            <li>Esquemas de respuesta y códigos HTTP</li>
+                            <li>Ejemplos de request/response</li>
+                        </ul>
+                    </li>
+                    <li>Incluye seguridad JWT en la especificación (header Authorization: Bearer &lt;token&gt;).</li>
+                    <li>Levanta el microservicio y abre la UI de Swagger (por defecto en <code>/apidocs</code> o <code>/docs</code> según la config) para validar y probar.</li>
+                    <li>Verifica que todos los endpoints respondan correctamente y que las descripciones sean claras para otros desarrolladores.</li>
+                </ol>
+            </div>
+
+            <!-- Código -->
+            <div class="code-section">
+                <h3>Código</h3>
+                <h4>micro_swagger.py</h4>
+                <div class="code-preview">
+                    <div class="code-header-bar">
+                        <div class="code-language">Python</div>
+                    </div>
+                    <pre class="code-display"><code>import os
+import logging
+import json
+import hashlib
+from datetime import datetime, timedelta
+from functools import wraps
+
+from flask import Flask, request, jsonify, g, Response
+from flask_cors import CORS
+import pymysql
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt  # PyJWT
+import redis
+from flasgger import Swagger
+
+# ---------- CONFIG ----------
+app = Flask(__name__)
+CORS(app, 
+     origins=[&#x27;*&#x27;],
+     allow_headers=[&#x27;Content-Type&#x27;, &#x27;Authorization&#x27;, &#x27;Accept&#x27;],
+     methods=[&#x27;GET&#x27;, &#x27;POST&#x27;, &#x27;PUT&#x27;, &#x27;DELETE&#x27;, &#x27;OPTIONS&#x27;],
+     supports_credentials=True)
+
+swagger_template = {
+    &quot;swagger&quot;: &quot;2.0&quot;,
+    &quot;info&quot;: {
+        &quot;title&quot;: &quot;Libros API&quot;,
+        &quot;description&quot;: &quot;Servicio de autenticación y catálogo de libros con JWT y Redis.&quot;,
+        &quot;version&quot;: &quot;1.0.0&quot;
+    },
+    &quot;securityDefinitions&quot;: {
+        &quot;Bearer&quot;: {
+            &quot;type&quot;: &quot;apiKey&quot;,
+            &quot;name&quot;: &quot;Authorization&quot;,
+            &quot;in&quot;: &quot;header&quot;,
+            &quot;description&quot;: &quot;Introduce el token como: Bearer &lt;access_token&gt;&quot;
+        }
+    }
+}
+swagger = Swagger(app, template=swagger_template)
+
+# Configuración MySQL (configuración directa)
+DB_CONFIG = {
+    &#x27;host&#x27;: &#x27;localhost&#x27;,
+    &#x27;user&#x27;: &#x27;libros_user&#x27;,
+    &#x27;password&#x27;: &#x27;666&#x27;,
+    &#x27;database&#x27;: &#x27;Libros&#x27;,
+    &#x27;charset&#x27;: &#x27;utf8mb4&#x27;,
+    &#x27;cursorclass&#x27;: pymysql.cursors.DictCursor
+}
+
+# JWT settings
+JWT_SECRET = &#x27;cambia_esta_clave_secreta&#x27;
+JWT_ALGORITHM = &#x27;HS256&#x27;
+ACCESS_TOKEN_EXPIRES_MINUTES = 15
+REFRESH_TOKEN_EXPIRES_DAYS = 7
+
+# Redis settings
+REDIS_HOST = &#x27;localhost&#x27;
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_PASSWORD = None
+
+# ---------- REDIS CONNECTION ----------
+try:
+    redis_client = redis.Redis(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        db=REDIS_DB,
+        password=REDIS_PASSWORD,
+        decode_responses=True,
+        socket_connect_timeout=5,
+        socket_timeout=5
+    )
+    # Test connection
+    redis_client.ping()
+    logger = logging.getLogger(&#x27;auth_service&#x27;)
+    logger.info(&quot;Redis connection established successfully&quot;)
+except Exception as e:
+    logger = logging.getLogger(&#x27;auth_service&#x27;)
+    logger.error(f&quot;Failed to connect to Redis: {e}&quot;)
+    redis_client = None
+
+# ---------- LOGGING ----------
+logging.basicConfig(level=logging.INFO, format=&#x27;%(asctime)s [%(levelname)s] %(message)s&#x27;)
+
+# Log every incoming request (method, path, ip, body if json)
+@app.before_request
+def log_request_info():
+    try:
+        body = request.get_json(silent=True)
+    except Exception:
+        body = None
+    logger.info(&quot;Incoming request: %s %s from %s body=%s&quot;,
+                request.method, request.path, request.remote_addr, body)
+
+# ---------- REDIS HELPERS ----------
+def get_redis():
+    &quot;&quot;&quot;Get Redis client with error handling&quot;&quot;&quot;
+    if not redis_client:
+        raise Exception(&quot;Redis not available&quot;)
+    return redis_client
+
+def redis_available():
+    &quot;&quot;&quot;Check if Redis is available&quot;&quot;&quot;
+    try:
+        get_redis().ping()
+        return True
+    except:
+        return False
+
+def hash_token(token):
+    &quot;&quot;&quot;Create a hash of the token for storage&quot;&quot;&quot;
+    return hashlib.sha256(token.encode()).hexdigest()
+
+# ---------- REDIS TOKEN MANAGEMENT ----------
+def add_token_to_allowlist(token, user_id, token_type, expires_at):
+    &quot;&quot;&quot;Add token to Redis allowlist&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f&quot;allowlist:{token_hash}&quot;
+        
+        token_data = {
+            &#x27;user_id&#x27;: user_id,
+            &#x27;type&#x27;: token_type,
+            &#x27;created_at&#x27;: datetime.utcnow().isoformat(),
+            &#x27;expires_at&#x27;: expires_at.isoformat()
+        }
+        
+        # Set with expiration
+        ttl = int((expires_at - datetime.utcnow()).total_seconds())
+        r.setex(key, ttl, json.dumps(token_data))
+        
+        # Also add to user&#x27;s token set for easy cleanup
+        user_tokens_key = f&quot;user_tokens:{user_id}:{token_type}&quot;
+        r.sadd(user_tokens_key, token_hash)
+        r.expire(user_tokens_key, ttl)
+        
+        logger.info(&quot;Token added to allowlist: user_id=%s type=%s&quot;, user_id, token_type)
+        return True
+    except Exception as e:
+        logger.error(&quot;Failed to add token to allowlist: %s&quot;, e)
+        return False
+
+def add_token_to_denylist(token, user_id=None):
+    &quot;&quot;&quot;Add token to Redis denylist&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f&quot;denylist:{token_hash}&quot;
+        
+        denylist_data = {
+            &#x27;user_id&#x27;: user_id,
+            &#x27;revoked_at&#x27;: datetime.utcnow().isoformat()
+        }
+        
+        # Set with long expiration (24 hours)
+        r.setex(key, 86400, json.dumps(denylist_data))
+        
+        logger.info(&quot;Token added to denylist: user_id=%s&quot;, user_id)
+        return True
+    except Exception as e:
+        logger.error(&quot;Failed to add token to denylist: %s&quot;, e)
+        return False
+
+def is_token_in_denylist(token):
+    &quot;&quot;&quot;Check if token is in denylist&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f&quot;denylist:{token_hash}&quot;
+        return r.exists(key)
+    except Exception as e:
+        logger.error(&quot;Failed to check denylist: %s&quot;, e)
+        return False
+
+def is_token_in_allowlist(token):
+    &quot;&quot;&quot;Check if token is in allowlist&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        token_hash = hash_token(token)
+        key = f&quot;allowlist:{token_hash}&quot;
+        return r.exists(key)
+    except Exception as e:
+        logger.error(&quot;Failed to check allowlist: %s&quot;, e)
+        return False
+
+def revoke_user_tokens(user_id, token_type=None):
+    &quot;&quot;&quot;Revoke all tokens for a user&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        
+        if token_type:
+            # Revoke specific token type
+            user_tokens_key = f&quot;user_tokens:{user_id}:{token_type}&quot;
+            token_hashes = r.smembers(user_tokens_key)
+            
+            for token_hash in token_hashes:
+                # Move from allowlist to denylist
+                allowlist_key = f&quot;allowlist:{token_hash}&quot;
+                token_data = r.get(allowlist_key)
+                if token_data:
+                    r.delete(allowlist_key)
+                    denylist_key = f&quot;denylist:{token_hash}&quot;
+                    r.setex(denylist_key, 86400, token_data)
+            
+            r.delete(user_tokens_key)
+        else:
+            # Revoke all token types
+            for t_type in [&#x27;access&#x27;, &#x27;refresh&#x27;]:
+                revoke_user_tokens(user_id, t_type)
+        
+        logger.info(&quot;All tokens revoked for user_id=%s&quot;, user_id)
+        return True
+    except Exception as e:
+        logger.error(&quot;Failed to revoke user tokens: %s&quot;, e)
+        return False
+
+# ---------- RATE LIMITING ----------
+def check_rate_limit(user_id, endpoint, max_requests=100, window_minutes=60):
+    &quot;&quot;&quot;Check rate limit for user/endpoint&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        key = f&quot;rate_limit:{user_id}:{endpoint}&quot;
+        
+        # Get current count
+        current = r.get(key)
+        if current is None:
+            # First request in window
+            r.setex(key, window_minutes * 60, 1)
+            return True
+        elif int(current) &lt; max_requests:
+            # Increment counter
+            r.incr(key)
+            return True
+        else:
+            # Rate limit exceeded
+            return False
+    except Exception as e:
+        logger.error(&quot;Rate limit check failed: %s&quot;, e)
+        return True  # Allow on error
+
+def check_rate_limit_by_ip(ip, endpoint, max_requests=100, window_minutes=60):
+    &quot;&quot;&quot;Check rate limit for IP/endpoint&quot;&quot;&quot;
+    try:
+        r = get_redis()
+        key = f&quot;rate_limit_ip:{ip}:{endpoint}&quot;
+        
+        # Get current count
+        current = r.get(key)
+        if current is None:
+            # First request in window
+            r.setex(key, window_minutes * 60, 1)
+            return True
+        elif int(current) &lt; max_requests:
+            # Increment counter
+            r.incr(key)
+            return True
+        else:
+            # Rate limit exceeded
+            return False
+    except Exception as e:
+        logger.error(&quot;Rate limit check failed: %s&quot;, e)
+        return True  # Allow request if Redis is down
+
+# ---------- DATABASE HELPERS ----------
+def query_db(query, args=(), one=False):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, args)
+            rv = cursor.fetchall()
+            return (rv[0] if rv else None) if one else rv
+    finally:
+        connection.close()
+
+def execute_db(query, args=()):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, args)
+            connection.commit()
+            return cursor.lastrowid
+    finally:
+        connection.close()
+
+# ---------- JWT HELPERS ----------
+def create_access_token(payload: dict):
+    exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+    token_payload = {**payload, &quot;exp&quot;: exp, &quot;type&quot;: &quot;access&quot;}
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    # Add to Redis allowlist
+    if redis_available():
+        add_token_to_allowlist(token, payload.get(&#x27;user_id&#x27;), &#x27;access&#x27;, exp)
+    
+    logger.info(&quot;Access token created for user_id=%s exp=%s&quot;, payload.get(&#x27;user_id&#x27;), exp)
+    return token
+
+def create_refresh_token(payload: dict):
+    exp = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRES_DAYS)
+    token_payload = {**payload, &quot;exp&quot;: exp, &quot;type&quot;: &quot;refresh&quot;}
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    # Add to Redis allowlist
+    if redis_available():
+        add_token_to_allowlist(token, payload.get(&#x27;user_id&#x27;), &#x27;refresh&#x27;, exp)
+    
+    logger.info(&quot;Refresh token created for user_id=%s exp=%s&quot;, payload.get(&#x27;user_id&#x27;), exp)
+    return token, exp
+
+def decode_token(token):
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        logger.info(&quot;Token decoded: user_id=%s type=%s&quot;, decoded.get(&#x27;user_id&#x27;), decoded.get(&#x27;type&#x27;))
+        return decoded
+    except jwt.ExpiredSignatureError:
+        logger.warning(&quot;Token expired.&quot;)
+        raise
+    except jwt.InvalidTokenError as e:
+        logger.warning(&quot;Invalid token: %s&quot;, e)
+        raise
+
+# ---------- AUTHENTICATION DECORATOR ----------
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Check rate limit (using IP as identifier) - TEMPORARILY DISABLED FOR TESTING
+        # if redis_available():
+        #     client_ip = request.remote_addr
+        #     # Use IP-based rate limiting for unauthenticated requests
+        #     if not check_rate_limit_by_ip(client_ip, &#x27;auth&#x27;, max_requests=50, window_minutes=15):
+        #         logger.warning(&quot;Rate limit exceeded for IP: %s&quot;, client_ip)
+        #         return jsonify({&quot;msg&quot;: &quot;Rate limit exceeded&quot;}), 429
+        
+        auth_header = request.headers.get(&#x27;Authorization&#x27;, None)
+        if not auth_header:
+            logger.warning(&quot;Authorization header missing&quot;)
+            return jsonify({&quot;msg&quot;: &quot;Missing Authorization Header&quot;}), 401
+        
+        parts = auth_header.split()
+        if parts[0].lower() != &#x27;bearer&#x27; or len(parts) != 2:
+            logger.warning(&quot;Authorization header malformed&quot;)
+            return jsonify({&quot;msg&quot;: &quot;Bad Authorization header&quot;}), 401
+        
+        token = parts[1]
+        
+        try:
+            logger.info(&quot;🔍 Validating token for endpoint: %s&quot;, request.endpoint)
+            
+            # Check if token is in denylist (Redis)
+            if redis_available() and is_token_in_denylist(token):
+                logger.warning(&quot;Token found in denylist&quot;)
+                return jsonify({&quot;msg&quot;: &quot;Token has been revoked&quot;}), 401
+            
+            # Check if token is in allowlist (Redis) - optional extra security
+            # Note: Allowlist check is optional for backward compatibility
+            # if redis_available() and not is_token_in_allowlist(token):
+            #     logger.warning(&quot;Token not found in allowlist&quot;)
+            #     return jsonify({&quot;msg&quot;: &quot;Token not recognized&quot;}), 401
+            
+            data = decode_token(token)
+            logger.info(&quot;✅ Token decoded successfully: user_id=%s type=%s&quot;, data.get(&#x27;user_id&#x27;), data.get(&#x27;type&#x27;))
+            
+            if data.get(&#x27;type&#x27;) != &#x27;access&#x27;:
+                logger.warning(&quot;Token used is not access token&quot;)
+                return jsonify({&quot;msg&quot;: &quot;Invalid token type&quot;}), 401
+            
+            user = query_db(&quot;SELECT id, username, email, created_at FROM users WHERE id = %s&quot;, (data[&#x27;user_id&#x27;],), one=True)
+            if not user:
+                logger.warning(&quot;User id in token not found: %s&quot;, data.get(&#x27;user_id&#x27;))
+                return jsonify({&quot;msg&quot;: &quot;User not found&quot;}), 404
+            
+            logger.info(&quot;✅ User found: %s&quot;, user.get(&#x27;username&#x27;))
+            g.current_user = user
+            return f(*args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({&quot;msg&quot;: &quot;Token expired&quot;}), 401
+        except Exception as e:
+            logger.exception(&quot;Token verification failed&quot;)
+            return jsonify({&quot;msg&quot;: &quot;Invalid token&quot;}), 401
+    return decorated
+
+# ---------- CORS HANDLER ----------
+@app.before_request
+def handle_preflight():
+    if request.method == &quot;OPTIONS&quot;:
+        response = Response()
+        response.headers.add(&quot;Access-Control-Allow-Origin&quot;, &quot;*&quot;)
+        response.headers.add(&#x27;Access-Control-Allow-Headers&#x27;, &quot;Content-Type,Authorization,Accept&quot;)
+        response.headers.add(&#x27;Access-Control-Allow-Methods&#x27;, &quot;GET,PUT,POST,DELETE,OPTIONS&quot;)
+        return response
+
+# ---------- HEALTHCHECK ----------
+@app.route(&#x27;/api/health&#x27;, methods=[&#x27;GET&#x27;])
+def health():
+    &quot;&quot;&quot;Verifica estado de MySQL y Redis
+    ---
+    tags: [Health]
+    responses:
+      200:
+        description: Servicio operativo
+      500:
+        description: Falló algún componente
+    &quot;&quot;&quot;
+    db_ok = False
+    redis_ok = False
+
+    # Check MySQL
+    try:
+        connection = pymysql.connect(**DB_CONFIG)
+        with connection.cursor() as cursor:
+            cursor.execute(&#x27;SELECT 1&#x27;)
+        connection.close()
+        db_ok = True
+        logger.info(&quot;Health check OK: DB reachable&quot;)
+    except Exception:
+        logger.exception(&quot;Health check failed: DB not reachable&quot;)
+        db_ok = False
+
+    # Check Redis
+    if redis_available():
+        try:
+            get_redis().ping()
+            redis_ok = True
+            logger.info(&quot;Health check OK: Redis reachable&quot;)
+        except Exception:
+            logger.exception(&quot;Health check failed: Redis not reachable&quot;)
+            redis_ok = False
+    else:
+        redis_ok = False
+        logger.warning(&quot;Redis not configured&quot;)
+
+    status = &quot;ok&quot; if (db_ok and redis_ok) else &quot;degraded&quot; if db_ok else &quot;error&quot;
+    return jsonify({
+        &quot;status&quot;: status,
+        &quot;db&quot;: &quot;ok&quot; if db_ok else &quot;error&quot;,
+        &quot;redis&quot;: &quot;ok&quot; if redis_ok else &quot;error&quot;,
+        &quot;time&quot;: datetime.utcnow().isoformat() + &quot;Z&quot;
+    }), (200 if db_ok else 500)
+
+
+# ---------- AUTH ENDPOINTS ----------
+@app.route(&#x27;/api/auth/register&#x27;, methods=[&#x27;POST&#x27;])
+def register():
+    &quot;&quot;&quot;Registra un nuevo usuario
+    ---
+    tags: [Auth]
+    consumes: [application/json]
+    parameters:
+      - in: body
+        name: credentials
+        required: true
+        schema:
+          type: object
+          required: [username, email, password]
+          properties:
+            username:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+    responses:
+      201:
+        description: Usuario creado
+      400:
+        description: Faltan campos
+      409:
+        description: Ya existe el usuario
+    &quot;&quot;&quot;
+    # Rate limiting
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, &#x27;register&#x27;, max_requests=5, window_minutes=60):
+            return jsonify({&quot;msg&quot;: &quot;Registration rate limit exceeded&quot;}), 429
+    
+    data = request.get_json() or {}
+    username = data.get(&#x27;username&#x27;)
+    email = data.get(&#x27;email&#x27;)
+    password = data.get(&#x27;password&#x27;)
+
+    if not username or not email or not password:
+        logger.warning(&quot;Register attempt with missing fields: %s&quot;, data)
+        return jsonify({&quot;msg&quot;: &quot;username, email and password are required&quot;}), 400
+
+    exists = query_db(&quot;SELECT id FROM users WHERE username = %s OR email = %s&quot;, (username, email), one=True)
+    if exists:
+        logger.info(&quot;Register failed - user exists username/email: %s/%s&quot;, username, email)
+        return jsonify({&quot;msg&quot;: &quot;User with that username or email already exists&quot;}), 409
+    
+    pw_hash = generate_password_hash(password)
+    user_id = execute_db(&quot;INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)&quot;,
+                         (username, email, pw_hash))
+    logger.info(&quot;New user registered id=%s username=%s&quot;, user_id, username)
+    return jsonify({&quot;msg&quot;: &quot;User created&quot;, &quot;user_id&quot;: user_id}), 201
+
+@app.route(&#x27;/api/auth/login&#x27;, methods=[&#x27;POST&#x27;])
+def login():
+    &quot;&quot;&quot;Autentica y devuelve tokens JWT
+    ---
+    tags: [Auth]
+    consumes: [application/json]
+    parameters:
+      - in: body
+        name: credentials
+        required: true
+        schema:
+          type: object
+          required: [password]
+          properties:
+            username:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+    responses:
+      200:
+        description: Tokens generados
+      400:
+        description: Falta usuario o password
+      401:
+        description: Credenciales inválidas
+    &quot;&quot;&quot;
+    # Rate limiting
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, &#x27;login&#x27;, max_requests=10, window_minutes=15):
+            return jsonify({&quot;msg&quot;: &quot;Login rate limit exceeded&quot;}), 429
+    
+    data = request.get_json() or {}
+    identifier = data.get(&#x27;username&#x27;) or data.get(&#x27;email&#x27;)
+    password = data.get(&#x27;password&#x27;)
+
+    if not identifier or not password:
+        logger.warning(&quot;Login attempt missing identifier/password&quot;)
+        return jsonify({&quot;msg&quot;: &quot;username/email and password required&quot;}), 400
+
+    user = query_db(&quot;SELECT id, username, email, password_hash FROM users WHERE username = %s OR email = %s&quot;,
+                    (identifier, identifier), one=True)
+    if not user:
+        logger.info(&quot;Login failed - user not found: %s&quot;, identifier)
+        return jsonify({&quot;msg&quot;: &quot;Invalid credentials&quot;}), 401
+
+    if not check_password_hash(user[&#x27;password_hash&#x27;], password):
+        logger.info(&quot;Login failed - wrong password for user_id=%s&quot;, user[&#x27;id&#x27;])
+        return jsonify({&quot;msg&quot;: &quot;Invalid credentials&quot;}), 401
+
+    # Revoke any existing tokens for this user
+    if redis_available():
+        revoke_user_tokens(user[&#x27;id&#x27;])
+
+    payload = {&quot;user_id&quot;: user[&#x27;id&#x27;]}
+    access_token = create_access_token(payload)
+    refresh_token, refresh_exp = create_refresh_token(payload)
+
+    # Add tokens to Redis allowlist
+    if redis_available():
+        access_exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+        add_token_to_allowlist(access_token, user[&#x27;id&#x27;], &#x27;access&#x27;, access_exp)
+        add_token_to_allowlist(refresh_token, user[&#x27;id&#x27;], &#x27;refresh&#x27;, refresh_exp)
+        logger.info(&quot;Tokens added to allowlist for user_id=%s&quot;, user[&#x27;id&#x27;])
+
+    # Store refresh token in MySQL (for backward compatibility)
+    execute_db(&quot;INSERT INTO refresh_tokens (user_id, refresh_token, expires_at) VALUES (%s, %s, %s)&quot;,
+               (user[&#x27;id&#x27;], refresh_token, refresh_exp.strftime(&#x27;%Y-%m-%d %H:%M:%S&#x27;)))
+    
+    logger.info(&quot;Login success for user_id=%s - tokens issued&quot;, user[&#x27;id&#x27;])
+
+    return jsonify({
+        &quot;access_token&quot;: access_token,
+        &quot;refresh_token&quot;: refresh_token,
+        &quot;token_type&quot;: &quot;bearer&quot;,
+        &quot;expires_in_minutes&quot;: ACCESS_TOKEN_EXPIRES_MINUTES
+    }), 200
+
+@app.route(&#x27;/api/auth/refresh&#x27;, methods=[&#x27;POST&#x27;])
+def refresh():
+    &quot;&quot;&quot;Genera un nuevo access token usando un refresh token
+    ---
+    tags: [Auth]
+    consumes: [application/json]
+    parameters:
+      - in: body
+        name: token
+        required: true
+        schema:
+          type: object
+          properties:
+            refresh_token:
+              type: string
+    responses:
+      200:
+        description: Nuevo access token
+      400:
+        description: No se envió refresh_token
+      401:
+        description: Refresh token inválido o expirado
+    &quot;&quot;&quot;
+    # Rate limiting
+    if redis_available():
+        client_ip = request.remote_addr
+        if not check_rate_limit(client_ip, &#x27;refresh&#x27;, max_requests=20, window_minutes=15):
+            return jsonify({&quot;msg&quot;: &quot;Refresh rate limit exceeded&quot;}), 429
+    
+    data = request.get_json() or {}
+    refresh_token = data.get(&#x27;refresh_token&#x27;)
+    if not refresh_token:
+        auth_header = request.headers.get(&#x27;Authorization&#x27;, &#x27;&#x27;)
+        parts = auth_header.split()
+        if len(parts) == 2 and parts[0].lower() == &#x27;bearer&#x27;:
+            refresh_token = parts[1]
+
+    if not refresh_token:
+        logger.warning(&quot;Refresh attempted without refresh_token&quot;)
+        return jsonify({&quot;msg&quot;: &quot;refresh_token is required&quot;}), 400
+
+    try:
+        # Check if refresh token is in denylist
+        if redis_available() and is_token_in_denylist(refresh_token):
+            logger.warning(&quot;Refresh token found in denylist&quot;)
+            return jsonify({&quot;msg&quot;: &quot;Refresh token has been revoked&quot;}), 401
+        
+        decoded = decode_token(refresh_token)
+        if decoded.get(&#x27;type&#x27;) != &#x27;refresh&#x27;:
+            logger.warning(&quot;Provided token to refresh is not refresh type&quot;)
+            return jsonify({&quot;msg&quot;: &quot;Invalid token type&quot;}), 401
+        
+        user_id = decoded[&#x27;user_id&#x27;]
+        
+        # Check in MySQL for backward compatibility
+        row = query_db(&quot;SELECT id, revoked, expires_at FROM refresh_tokens WHERE user_id = %s AND refresh_token = %s&quot;,
+                       (user_id, refresh_token), one=True)
+        if not row:
+            logger.warning(&quot;Refresh token not found in DB for user_id=%s&quot;, user_id)
+            return jsonify({&quot;msg&quot;: &quot;Refresh token not recognized&quot;}), 401
+        if row[&#x27;revoked&#x27;]:
+            logger.warning(&quot;Attempt to use revoked refresh token id=%s&quot;, row[&#x27;id&#x27;])
+            return jsonify({&quot;msg&quot;: &quot;Refresh token revoked&quot;}), 401
+
+        # Create new access token
+        access_token = create_access_token({&quot;user_id&quot;: user_id})
+        
+        # Add new access token to Redis allowlist
+        if redis_available():
+            access_exp = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES)
+            add_token_to_allowlist(access_token, user_id, &#x27;access&#x27;, access_exp)
+            logger.info(&quot;New access token added to allowlist for user_id=%s&quot;, user_id)
+        
+        logger.info(&quot;Access token refreshed for user_id=%s&quot;, user_id)
+        return jsonify({&quot;access_token&quot;: access_token, &quot;token_type&quot;: &quot;bearer&quot;, &quot;expires_in_minutes&quot;: ACCESS_TOKEN_EXPIRES_MINUTES}), 200
+    except jwt.ExpiredSignatureError:
+        logger.warning(&quot;Refresh token expired&quot;)
+        return jsonify({&quot;msg&quot;: &quot;Refresh token expired&quot;}), 401
+    except Exception as e:
+        logger.exception(&quot;Error processing refresh token&quot;)
+        return jsonify({&quot;msg&quot;: &quot;Invalid refresh token&quot;}), 401
+
+@app.route(&#x27;/api/auth/logout&#x27;, methods=[&#x27;POST&#x27;])
+def logout():
+    &quot;&quot;&quot;Revoca tokens de acceso y/o refresco
+    ---
+    tags: [Auth]
+    consumes: [application/json]
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: tokens
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+    responses:
+      200:
+        description: Tokens revocados
+      400:
+        description: No se enviaron tokens
+    &quot;&quot;&quot;
+    data = request.get_json() or {}
+    refresh_token = data.get(&#x27;refresh_token&#x27;)
+    access_token = data.get(&#x27;access_token&#x27;)
+    
+    if not refresh_token and not access_token:
+        return jsonify({&quot;msg&quot;: &quot;refresh_token or access_token required&quot;}), 400
+
+    try:
+        # Add tokens to denylist
+        if redis_available():
+            if access_token:
+                # Decode to get user_id
+                try:
+                    decoded = decode_token(access_token)
+                    user_id = decoded.get(&#x27;user_id&#x27;)
+                    add_token_to_denylist(access_token, user_id)
+                except:
+                    pass  # Token might be invalid, but we still want to denylist it
+            
+            if refresh_token:
+                # Try to get user_id from refresh token
+                try:
+                    decoded = decode_token(refresh_token)
+                    user_id = decoded.get(&#x27;user_id&#x27;)
+                    add_token_to_denylist(refresh_token, user_id)
+                except:
+                    pass
+        
+        # Also revoke in MySQL for backward compatibility
+        if refresh_token:
+            execute_db(&quot;UPDATE refresh_tokens SET revoked = 1 WHERE refresh_token = %s&quot;, (refresh_token,))
+        
+        logger.info(&quot;Logout requested - tokens revoked&quot;)
+        return jsonify({&quot;msg&quot;: &quot;Tokens revoked successfully&quot;}), 200
+    except Exception as e:
+        logger.exception(&quot;Error during logout&quot;)
+        return jsonify({&quot;msg&quot;: &quot;Logout failed&quot;}), 500
+
+@app.route(&#x27;/api/auth/revoke-all&#x27;, methods=[&#x27;POST&#x27;])
+@login_required
+def revoke_all_tokens():
+    &quot;&quot;&quot;Revoca todos los tokens del usuario autenticado
+    ---
+    tags: [Auth]
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Tokens revocados
+      401:
+        description: Token inválido o expirado
+    &quot;&quot;&quot;
+    user = g.current_user
+    
+    try:
+        if redis_available():
+            revoke_user_tokens(user[&#x27;id&#x27;])
+        
+        # Also revoke in MySQL
+        execute_db(&quot;UPDATE refresh_tokens SET revoked = 1 WHERE user_id = %s&quot;, (user[&#x27;id&#x27;],))
+        
+        logger.info(&quot;All tokens revoked for user_id=%s&quot;, user[&#x27;id&#x27;])
+        return jsonify({&quot;msg&quot;: &quot;All tokens revoked successfully&quot;}), 200
+    except Exception as e:
+        logger.exception(&quot;Error revoking all tokens&quot;)
+        return jsonify({&quot;msg&quot;: &quot;Failed to revoke tokens&quot;}), 500
+
+# ---------- PROTECTED API ENDPOINTS (BOOKS) ----------
+import xml.etree.ElementTree as ET
+
+def dict_to_xml_book(row):
+    book = ET.Element(&quot;book&quot;, isbn=row[&#x27;isbn&#x27;])
+    ET.SubElement(book, &quot;title&quot;).text = row[&#x27;title&#x27;]
+    ET.SubElement(book, &quot;author&quot;).text = row[&#x27;author_names&#x27;]
+    ET.SubElement(book, &quot;publication_year&quot;).text = str(row[&#x27;publication_year&#x27;])
+    ET.SubElement(book, &quot;genre&quot;).text = row[&#x27;genre&#x27;]
+    ET.SubElement(book, &quot;price&quot;).text = str(row[&#x27;price&#x27;])
+    ET.SubElement(book, &quot;stock&quot;).text = str(row[&#x27;stock&#x27;]).lower()
+    ET.SubElement(book, &quot;format&quot;).text = row[&#x27;format&#x27;]
+    return book
+
+def query_books(sql, params=None):
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params or ())
+            rows = cursor.fetchall()
+            return rows
+    finally:
+        connection.close()
+
+def books_to_xml(books):
+    library = ET.Element(&quot;library&quot;)
+    for b in books:
+        library.append(dict_to_xml_book(b))
+    return ET.tostring(library, encoding=&quot;utf-8&quot;, xml_declaration=True)
+
+@app.route(&quot;/api/books&quot;, methods=[&quot;GET&quot;])
+@login_required
+def get_all_books():
+    &quot;&quot;&quot;Lista todos los libros (XML)
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: XML con todos los libros
+    &quot;&quot;&quot;
+    sql = &quot;&quot;&quot;
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR &#x27;, &#x27;) AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        GROUP BY b.book_id
+    &quot;&quot;&quot;
+    books = query_books(sql)
+    return Response(books_to_xml(books), mimetype=&quot;application/xml&quot;)
+
+@app.route(&quot;/api/books/&lt;isbn&gt;&quot;, methods=[&quot;GET&quot;])
+@login_required
+def get_book_by_isbn(isbn):
+    &quot;&quot;&quot;Obtiene un libro por ISBN (XML)
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: isbn
+        type: string
+        required: true
+    responses:
+      200:
+        description: XML del libro
+      404:
+        description: Libro no encontrado
+    &quot;&quot;&quot;
+    sql = &quot;&quot;&quot;
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR &#x27;, &#x27;) AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        WHERE b.isbn=%s
+        GROUP BY b.book_id
+    &quot;&quot;&quot;
+    books = query_books(sql, (isbn,))
+    return Response(books_to_xml(books), mimetype=&quot;application/xml&quot;)
+
+@app.route(&quot;/api/books/format/&lt;format_name&gt;&quot;, methods=[&quot;GET&quot;])
+@login_required
+def get_books_by_format(format_name):
+    &quot;&quot;&quot;Filtra libros por formato (XML)
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: format_name
+        type: string
+        required: true
+    responses:
+      200:
+        description: XML con libros en el formato indicado
+    &quot;&quot;&quot;
+    sql = &quot;&quot;&quot;
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR &#x27;, &#x27;) AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        WHERE f.name=%s
+        GROUP BY b.book_id
+    &quot;&quot;&quot;
+    books = query_books(sql, (format_name,))
+    return Response(books_to_xml(books), mimetype=&quot;application/xml&quot;)
+
+@app.route(&quot;/api/books/author/&lt;author_name&gt;&quot;, methods=[&quot;GET&quot;])
+@login_required
+def get_books_by_author(author_name):
+    &quot;&quot;&quot;Filtra libros por autor (XML)
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: author_name
+        type: string
+        required: true
+    responses:
+      200:
+        description: XML con libros del autor
+    &quot;&quot;&quot;
+    sql = &quot;&quot;&quot;
+        SELECT b.*, g.name AS genre, f.name AS format,
+        GROUP_CONCAT(a.name SEPARATOR &#x27;, &#x27;) AS author_names
+        FROM Book b
+        LEFT JOIN Genre g ON b.genre_id = g.genre_id
+        LEFT JOIN Format f ON b.format_id = f.format_id
+        LEFT JOIN BookAuthor ba ON b.book_id = ba.book_id
+        LEFT JOIN Author a ON ba.author_id = a.author_id
+        WHERE a.name LIKE %s
+        GROUP BY b.book_id
+    &quot;&quot;&quot;
+    books = query_books(sql, (&quot;%&quot; + author_name + &quot;%&quot;,))
+    return Response(books_to_xml(books), mimetype=&quot;application/xml&quot;)
+
+@app.route(&quot;/api/books/insert&quot;, methods=[&quot;PUT&quot;])
+@login_required
+def insert_book():
+    &quot;&quot;&quot;Inserta o actualiza un libro (XML)
+    ---
+    tags: [Books]
+    consumes:
+      - application/xml
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Libro insertado/actualizado
+      400:
+        description: Error de validación
+      500:
+        description: Error en base de datos
+    &quot;&quot;&quot;
+    logger.info(&quot;📚 Insert book endpoint called - Headers: %s&quot;, dict(request.headers))
+    
+    # Get user from decorator validation
+    user = g.current_user
+    logger.info(&quot;✅ User authenticated: %s&quot;, user.get(&#x27;username&#x27;))
+    
+    # Now process the XML data
+    data = request.data
+    root = ET.fromstring(data)
+    
+    isbn = root.attrib[&#x27;isbn&#x27;]
+    title = root.find(&quot;title&quot;).text
+    authors = [a.strip() for a in root.find(&quot;author&quot;).text.split(&quot;,&quot;)]
+    pub_year = int(root.find(&quot;publication_year&quot;).text)
+    genre = root.find(&quot;genre&quot;).text
+    price = float(root.find(&quot;price&quot;).text)
+    stock = root.find(&quot;stock&quot;).text.lower() == &quot;true&quot;
+    fmt = root.find(&quot;format&quot;).text
+    
+    logger.info(&quot;📚 Processing book: ISBN=%s, Title=%s, Genre=%s, Format=%s&quot;, isbn, title, genre, fmt)
+    
+    connection = pymysql.connect(**DB_CONFIG)
+    try:
+        with connection.cursor() as cursor:
+            # Insert Genre
+            logger.info(&quot;🔍 Inserting genre: %s&quot;, genre)
+            cursor.execute(&quot;INSERT INTO Genre(name) VALUES(%s) ON DUPLICATE KEY UPDATE name=name&quot;, (genre,))
+            cursor.execute(&quot;SELECT genre_id FROM Genre WHERE name=%s&quot;, (genre,))
+            genre_result = cursor.fetchone()
+            logger.info(&quot;🔍 Genre result: %s&quot;, genre_result)
+            if not genre_result:
+                raise ValueError(f&quot;Failed to create or find genre &#x27;{genre}&#x27;&quot;)
+            genre_id = genre_result[&#x27;genre_id&#x27;]
+            logger.info(&quot;✅ Genre ID: %s&quot;, genre_id)
+            
+            # Insert Format
+            cursor.execute(&quot;INSERT INTO Format(name) VALUES(%s) ON DUPLICATE KEY UPDATE name=name&quot;, (fmt,))
+            cursor.execute(&quot;SELECT format_id FROM Format WHERE name=%s&quot;, (fmt,))
+            format_result = cursor.fetchone()
+            if not format_result:
+                raise ValueError(f&quot;Failed to create or find format &#x27;{fmt}&#x27;&quot;)
+            format_id = format_result[&#x27;format_id&#x27;]
+            
+            # Insert Book
+            cursor.execute(&quot;&quot;&quot;
+                INSERT INTO Book(isbn, title, publication_year, price, stock, genre_id, format_id)
+                VALUES(%s,%s,%s,%s,%s,%s,%s)
+                ON DUPLICATE KEY UPDATE title=VALUES(title), publication_year=VALUES(publication_year),
+                price=VALUES(price), stock=VALUES(stock), genre_id=VALUES(genre_id), format_id=VALUES(format_id)
+            &quot;&quot;&quot;, (isbn, title, pub_year, price, stock, genre_id, format_id))
+            
+            # Book ID
+            cursor.execute(&quot;SELECT book_id FROM Book WHERE isbn=%s&quot;, (isbn,))
+            book_result = cursor.fetchone()
+            if not book_result:
+                raise ValueError(f&quot;Failed to create or find book with ISBN &#x27;{isbn}&#x27;&quot;)
+            book_id = book_result[&#x27;book_id&#x27;]
+            
+            # Insert Authors
+            for a in authors:
+                cursor.execute(&quot;INSERT INTO Author(name) VALUES(%s) ON DUPLICATE KEY UPDATE name=name&quot;, (a,))
+                cursor.execute(&quot;SELECT author_id FROM Author WHERE name=%s&quot;, (a,))
+                author_result = cursor.fetchone()
+                if not author_result:
+                    raise ValueError(f&quot;Failed to create or find author &#x27;{a}&#x27;&quot;)
+                author_id = author_result[&#x27;author_id&#x27;]
+                # Insert into BookAuthor
+                cursor.execute(&quot;INSERT IGNORE INTO BookAuthor(book_id, author_id) VALUES(%s,%s)&quot;, (book_id, author_id))
+            
+            connection.commit()
+    except ValueError as e:
+        logger.warning(&quot;Validation error inserting book: %s&quot;, str(e))
+        response = ET.Element(&quot;response&quot;)
+        ET.SubElement(response, &quot;status&quot;).text = &quot;error&quot;
+        ET.SubElement(response, &quot;message&quot;).text = str(e)
+        return Response(ET.tostring(response, encoding=&quot;utf-8&quot;, xml_declaration=True), mimetype=&quot;application/xml&quot;), 400
+    except Exception as e:
+        logger.exception(&quot;Unexpected error inserting book: %s&quot;, str(e))
+        response = ET.Element(&quot;response&quot;)
+        ET.SubElement(response, &quot;status&quot;).text = &quot;error&quot;
+        ET.SubElement(response, &quot;message&quot;).text = f&quot;Database error: {str(e)}&quot;
+        return Response(ET.tostring(response, encoding=&quot;utf-8&quot;, xml_declaration=True), mimetype=&quot;application/xml&quot;), 500
+    finally:
+        connection.close()
+    
+    response = ET.Element(&quot;response&quot;)
+    ET.SubElement(response, &quot;status&quot;).text = &quot;success&quot;
+    return Response(ET.tostring(response, encoding=&quot;utf-8&quot;, xml_declaration=True), mimetype=&quot;application/xml&quot;)
+
+@app.route(&quot;/api/books/update&quot;, methods=[&quot;PUT&quot;])
+@login_required
+def update_book():
+    &quot;&quot;&quot;Actualiza un libro (alias de insert)
+    ---
+    tags: [Books]
+    consumes:
+      - application/xml
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Libro actualizado
+    &quot;&quot;&quot;
+    return insert_book()  # misma lógica de insert ya maneja ON DUPLICATE KEY UPDATE
+
+@app.route(&quot;/api/books/delete/&lt;isbn&gt;&quot;, methods=[&quot;DELETE&quot;])
+@login_required
+def delete_book(isbn):
+    &quot;&quot;&quot;Elimina un libro por ISBN
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: isbn
+        type: string
+        required: true
+        description: ISBN del libro a eliminar
+    responses:
+      200:
+        description: Libro eliminado
+      404:
+        description: Libro no encontrado
+    &quot;&quot;&quot;
+    user = g.current_user
+    logger.info(&quot;✅ User authenticated for delete: %s&quot;, user.get(&#x27;username&#x27;))
+
+    connection = pymysql.connect(**DB_CONFIG)
+    deleted = False
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(&quot;SELECT book_id FROM Book WHERE isbn=%s&quot;, (isbn,))
+            res = cursor.fetchone()
+            if res:
+                book_id = res[&#x27;book_id&#x27;]
+                cursor.execute(&quot;DELETE FROM BookAuthor WHERE book_id=%s&quot;, (book_id,))
+                cursor.execute(&quot;DELETE FROM Book WHERE book_id=%s&quot;, (book_id,))
+                deleted = True
+            connection.commit()
+    finally:
+        connection.close()
+
+    response = ET.Element(&quot;response&quot;)
+    ET.SubElement(response, &quot;status&quot;).text = &quot;deleted&quot; if deleted else &quot;not_found&quot;
+    status_code = 200 if deleted else 404
+    return Response(ET.tostring(response, encoding=&quot;utf-8&quot;, xml_declaration=True), mimetype=&quot;application/xml&quot;), status_code
+
+@app.route(&quot;/api/formats&quot;, methods=[&quot;GET&quot;])
+@login_required
+def get_formats():
+    &quot;&quot;&quot;Lista formatos disponibles (XML)
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: XML con formatos
+    &quot;&quot;&quot;
+    sql = &quot;SELECT format_id, name FROM Format&quot;
+    formats = query_books(sql)
+    root = ET.Element(&quot;formats&quot;)
+    for f in formats:
+        f_el = ET.SubElement(root, &quot;format&quot;)
+        ET.SubElement(f_el, &quot;id&quot;).text = str(f[&quot;format_id&quot;])
+        ET.SubElement(f_el, &quot;name&quot;).text = f[&quot;name&quot;]
+    return Response(ET.tostring(root), mimetype=&quot;application/xml&quot;)
+
+@app.route(&quot;/api/genres&quot;, methods=[&quot;GET&quot;])
+@login_required
+def get_genres():
+    &quot;&quot;&quot;Lista géneros disponibles (XML)
+    ---
+    tags: [Books]
+    produces:
+      - application/xml
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: XML con géneros
+    &quot;&quot;&quot;
+    sql = &quot;SELECT genre_id, name FROM Genre&quot;
+    genres = query_books(sql)
+    root = ET.Element(&quot;genres&quot;)
+    for g in genres:
+        g_el = ET.SubElement(root, &quot;genre&quot;)
+        ET.SubElement(g_el, &quot;id&quot;).text = str(g[&quot;genre_id&quot;])
+        ET.SubElement(g_el, &quot;name&quot;).text = g[&quot;name&quot;]
+    return Response(ET.tostring(root), mimetype=&quot;application/xml&quot;)
+
+# ---------- ADMIN ENDPOINTS ----------
+@app.route(&#x27;/api/admin/redis-status&#x27;, methods=[&#x27;GET&#x27;])
+@login_required
+def redis_status():
+    &quot;&quot;&quot;Estado de Redis
+    ---
+    tags: [Admin]
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Información de Redis
+      403:
+        description: Requiere admin
+    &quot;&quot;&quot;
+    user = g.current_user
+    
+    # Simple admin check (you might want to implement proper admin roles)
+    if user[&#x27;id&#x27;] != 1:  # Assuming user_id 1 is admin
+        return jsonify({&quot;msg&quot;: &quot;Admin access required&quot;}), 403
+    
+    try:
+        r = get_redis()
+        info = r.info()
+        
+        return jsonify({
+            &quot;redis_connected&quot;: True,
+            &quot;redis_version&quot;: info.get(&#x27;redis_version&#x27;),
+            &quot;used_memory&quot;: info.get(&#x27;used_memory_human&#x27;),
+            &quot;connected_clients&quot;: info.get(&#x27;connected_clients&#x27;),
+            &quot;total_commands_processed&quot;: info.get(&#x27;total_commands_processed&#x27;)
+        }), 200
+    except Exception as e:
+        return jsonify({
+            &quot;redis_connected&quot;: False,
+            &quot;error&quot;: str(e)
+        }), 500
+
+@app.route(&#x27;/api/admin/clear-rate-limits&#x27;, methods=[&#x27;POST&#x27;])
+def clear_rate_limits():
+    &quot;&quot;&quot;Limpia llaves de rate limit en Redis
+    ---
+    tags: [Admin]
+    responses:
+      200:
+        description: Llaves eliminadas
+      503:
+        description: Redis no disponible
+    &quot;&quot;&quot;
+    if not redis_available():
+        return jsonify({&quot;msg&quot;: &quot;Redis not available&quot;}), 503
+    
+    try:
+        r = get_redis()
+        # Clear all rate limit keys
+        keys = r.keys(&quot;rate_limit*&quot;)
+        if keys:
+            r.delete(*keys)
+            return jsonify({&quot;msg&quot;: f&quot;Cleared {len(keys)} rate limit keys&quot;})
+        else:
+            return jsonify({&quot;msg&quot;: &quot;No rate limit keys found&quot;})
+    except Exception as e:
+        return jsonify({&quot;msg&quot;: f&quot;Error clearing rate limits: {str(e)}&quot;}), 500
+
+# ---------- RUN ----------
+if __name__ == &#x27;__main__&#x27;:
+    app.run(host=&#x27;0.0.0.0&#x27;, port=5003, debug=True)
+</code></pre>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="screenshots-section">
+                <h3>Screenshots</h3>
+                <div class="screenshot-gallery">
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado11/apidocs.png" alt="Vista general de Swagger UI" onclick="openImageModal(this.src)">
+                        <p>Swagger UI /apidocs</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado11/register.png" alt="Endpoint de registro documentado" onclick="openImageModal(this.src)">
+                        <p>Registro documentado</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado11/login.png" alt="Endpoint de login documentado" onclick="openImageModal(this.src)">
+                        <p>Login documentado</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado11/get books.png" alt="Endpoint GET libros documentado" onclick="openImageModal(this.src)">
+                        <p>GET libros</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado11/get books by author.png" alt="Endpoint GET libros por autor documentado" onclick="openImageModal(this.src)">
+                        <p>GET libros por autor</p>
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="images/EjercicioGuiado11/delete by isbn.png" alt="Endpoint DELETE por ISBN documentado" onclick="openImageModal(this.src)">
+                        <p>DELETE por ISBN</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexión -->
+            <div class="reflection-section">
+                <h3>Reflexión</h3>
+                <div class="reflection-content">
+                    <p>Incorporar Swagger al microservicio de librería me recordó la importancia de contar con documentación que no solo explique, sino que también permita interactuar de manera directa con los endpoints. Antes de integrarlo, las pruebas requerían memorizar rutas, parámetros, payloads y detalles específicos como los encabezados con JWT. Esto hacía que validar cada operación fuera más tardado y propenso a errores. Con la interfaz visual de Swagger, probar los endpoints se volvió mucho más intuitivo, ya que presenta de forma clara dónde debe colocarse el token en el header Authorization con el prefijo Bearer, además de mostrar el significado de cada código de respuesta, como el 200, 400 o 401.</p>
+                    
+                    <p>Algo que también me resultó muy útil fue la sección donde se muestran ejemplos de respuesta, incluyendo el formato XML para los libros. Pasaron varios días sin trabajar en ese microservicio y ya no recordaba exactamente cómo funcionaba la estructura del request o la respuesta esperada, pero Swagger me permitió retomarlo sin tener que revisar todo el código desde cero.</p>
+
+                    <p>Asimismo, la herramienta me ayudó a identificar errores que habían pasado desapercibidos durante ejercicios anteriores. Un ejemplo fue el endpoint de eliminación de libros, que no estaba solicitando el ISBN necesario para borrar un elemento específico. Al visualizarlo en Swagger, se volvió evidente el problema y pude corregirlo. En general, esta experiencia reforzó la importancia de documentar bien los servicios para facilitar tanto el desarrollo como el mantenimiento.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imágenes -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+</body>
+</html>

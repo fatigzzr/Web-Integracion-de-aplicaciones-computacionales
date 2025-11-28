@@ -341,22 +341,22 @@ li {
 
 .menu-card[href="ejercicio11.html"],
 .exercises-section .menu-card[href="ejercicio11.html"] {
-    border-color: #f7b199 !important;
+    border-color: #f7c1c9 !important;
 }
 
 .menu-card[href="ejercicio11.html"] h3,
 .exercises-section .menu-card[href="ejercicio11.html"] h3 {
-    color: #f7b199 !important;
+    color: #e36a78 !important;
 }
 
 .menu-card[href="ejercicio11.html"] .arrow,
 .exercises-section .menu-card[href="ejercicio11.html"] .arrow {
-    color: #f7b199 !important;
+    color: #e36a78 !important;
 }
 
 .menu-card[href="ejercicio11.html"]:hover,
 .exercises-section .menu-card[href="ejercicio11.html"]:hover {
-    box-shadow: 0 8px 25px rgba(247, 177, 153, 0.3) !important;
+    box-shadow: 0 8px 25px rgba(227, 106, 120, 0.25) !important;
 }
 
 .menu-card[href="ejercicio12.html"],

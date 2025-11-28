@@ -1239,6 +1239,45 @@
     background: #333 !important;
 }
 
+/* Estilos específicos para ejercicio11 (#e36a78) - Pastel Rojo Rosado */
+.ejercicio11 .header h1 {
+    color: #e36a78;
+}
+
+.ejercicio11 .exercise-info h3,
+.ejercicio11 .screenshots-section h3,
+.ejercicio11 .reflection-section h3,
+.ejercicio11 .code-section h3 {
+    border-bottom: 2px solid #e36a78;
+    text-align: left;
+}
+
+.ejercicio11 .image-modal-close:hover {
+    color: #e36a78;
+}
+
+.ejercicio11 a {
+    color: #e36a78;
+    text-decoration: underline;
+}
+
+.ejercicio11 a:hover {
+    color: #c25763;
+    text-decoration: underline;
+}
+
+.ejercicio11 .back-btn {
+    color: white !important;
+    text-decoration: none !important;
+    background: #000 !important;
+}
+
+.ejercicio11 .back-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
+    background: #333 !important;
+}
+
 /* Estilos específicos para ejercicio12 (#f7b199) - Soft Salmon */
 .ejercicio12 .header h1 {
     color: #f7b199;
